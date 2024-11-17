@@ -3,7 +3,7 @@
 ## MAJOR
 ---
 ### Web
-- [ ] Use a Framework to build the backend. (Django)
+- [x] Use a Framework to build the backend. (Django)
 - [ ] Store the score of a tournament in the Blockchain. (Opsiyonel)
 ### User Manegement
 - [ ] Standard user management, authentication, users across tournaments.
