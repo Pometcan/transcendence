@@ -1,0 +1,85 @@
+services:
+  frontend:
+    build:
+      context: ./srcs/frontend/
+    container_name: svelte
+    env_file: .env
+    volumes:
+      - frontend_vol:/frontend
+    ports:
+      - "5173:5173"
+    command: npm run dev -- --host 0.0.0.0 --port 5173
+    #command: vite dev --host 0.0.0.0 --port 5173
+    depends_on:
+      - backend
+    networks:
+      - trans_network
+
+  backend:
+    build:
+      context: ./srcs/backend
+    container_name: django
+    command: python manage.py runserver 0.0.0.0:8000
+    env_file: .env
+    environment:
+      - POSTGRES_DB=${POSTGRES_DB}
+      - POSTGRES_USER=${POSTGRES_USER}
+      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
+      - DB_HOST=${DB_HOST}
+      - DB_PORT=${DB_PORT}
+    volumes:
+      - backend_vol:/app/backend
+    depends_on:
+      - postgresql
+    networks:
+      - trans_network
+  nginx:
+    build:
+      context: ./srcs/nginx
+    container_name: nginx
+    ports:
+      - "80:80"
+    depends_on:
+      - frontend
+      - backend
+    volumes:
+      - ./srcs/nginx:/etc/nginx/conf.d
+      - ./srcs/backend/static:/static
+    networks:
+      - trans_network
+
+  postgresql:
+    image: postgres:17.0
+    container_name: postgres
+    env_file: .env
+    environment:
+      - POSTGRES_DB=${POSTGRES_DB}
+      - POSTGRES_USER=${POSTGRES_USER}
+      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    ports:
+      - '5432:5432'
+    networks:
+      - trans_network
+
+volumes:
+  frontend_vol:
+    driver: local
+    driver_opts:
+      type: none
+      o: bind
+      device: ./srcs/frontend/
+  backend_vol:
+    driver: local
+    driver_opts:
+      type: none
+      o: bind
+      device: ./srcs/backend/
+  pgdata:
+    driver: local
+
+networks:
+  trans_network:
+    driver: bridge
+
