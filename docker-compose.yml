@@ -6,12 +6,14 @@ services:
     env_file: .env
     volumes:
       - frontend_vol:/frontend
+      - /frontend/node_modules
     command: npm run dev -- --host 0.0.0.0 --port 5173
     #command: vite dev --host 0.0.0.0 --port 5173
     depends_on:
       - backend
     networks:
       - trans_network
+    restart: always
 
   backend:
     build:
@@ -31,6 +33,7 @@ services:
       - postgresql
     networks:
       - trans_network
+    restart: always
 
   nginx:
     build:
@@ -46,6 +49,7 @@ services:
       - ./srcs/backend/static:/static
     networks:
       - trans_network
+    restart: always
 
   postgresql:
     image: postgres:17.0
@@ -61,6 +65,7 @@ services:
       - '5432:5432'
     networks:
       - trans_network
+    restart: always
 
 volumes:
   frontend_vol:
