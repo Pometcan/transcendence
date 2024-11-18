@@ -30,7 +30,6 @@ services:
     volumes:
       - backend_vol:/backend
       - /backend/static
-      - /backend/media
     depends_on:
       - postgresql
     networks:
@@ -48,7 +47,7 @@ services:
       - backend
     volumes:
       - ./srcs/nginx:/etc/nginx/conf.d
-      - ./srcs/backend/static:/static
+      - ./srcs/backend/static:/usr/share/nginx/html/static
     networks:
       - trans_network
     restart: always

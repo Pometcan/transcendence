@@ -66,7 +66,7 @@ logs:
 	@$(COMPOSE) logs -f
 
 shell_nginx:
-	@$(COMPOSE) exec nginx /bin/bash
+	@$(COMPOSE) exec nginx /bin/sh
 
 shell_backend:
 	@$(COMPOSE) exec backend /bin/bash
@@ -75,13 +75,13 @@ shell_frontend:
 	@$(COMPOSE) exec frontend /bin/bash
 
 dbshell:
-	@$(COMPOSE) exec postgres_db psql -U $$POSTGRES_USER -d $$POSTGRES_DB
+	@$(COMPOSE) exec postgresql psql -U ${POSTGRES_USER} -d ${POSTGRES_DB}
 
 migrate:
-	@$(COMPOSE) exec django python manage.py migrate
+	@$(COMPOSE) exec backend python manage.py migrate
 
 createsuperuser:
-	@$(COMPOSE) exec django python manage.py createsuperuser
+	@$(COMPOSE) exec backend python manage.py createsuperuser
 
 remove_images:
 	@docker rmi -f $$(docker images -a -q) || echo "No images to remove"
