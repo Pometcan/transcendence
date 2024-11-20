@@ -10,37 +10,27 @@
         CircleChevronLeft,
     } from "lucide-svelte";
     import { onMount } from "svelte";
-    import Auth from "$lib/components/Auth.svelte";
-    import Hub from "$lib/components/Hub.svelte";
-    import GameHub from "$lib/components/GameHub.svelte";
-
+    let { children } = $props();
     let showLanguages = $state(false);
-    let navPage = $state(Auth);
 
     const topButtons = [
         {
             id: "single",
             icon: User,
             label: "Play Single",
-            click: () => {
-                navPage = GameHub;
-            },
+            href: "/gamehub",
         },
         {
             id: "multiplayer",
             icon: Users,
             label: "Play Multiplayer",
-            click: () => {
-                navPage = GameHub;
-            },
+            href: "/gamehub",
         },
         {
             id: "tournament",
             icon: Trophy,
             label: "Play in Tournament",
-            click: () => {
-                navPage = GameHub;
-            },
+            href: "/gamehub",
         },
     ];
     let hoveredButton = $state("");
@@ -55,14 +45,14 @@
         hoveredButton = "";
     }
     let isInGame = $state(false);
-    let isMobile = $state(false);
     let isMenuOpen = $state(false);
+
+    let isMobile = $state(false);
     const checkMobile = () => {
         if (typeof window !== "undefined") {
             isMobile = window.innerWidth <= 768;
         }
     };
-
     onMount(() => {
         checkMobile();
         window.addEventListener("resize", checkMobile);
@@ -95,24 +85,30 @@
         style="display: flex; flex-direction: column; height: 100vh;
         justify-content: {isMobile ? 'flex-start' : 'space-between'};"
     >
-        <div class="d-flex flex-column align-items-center w-100">
+        <div class="d-flex flex-column align-items-center">
             <div class="mt-3">
-                <button
+                <a
                     onmouseenter={() => setHoveredButton("Profile")}
                     onmouseleave={clearHoveredButton}
-                    onkeydown={(e) => {
-                        if (e.key === "Enter" || e.key === " ") {
-                            navPage = Hub;
-                            toggleMenu();
-                        }
-                    }}
                     type="button"
                     draggable="false"
                     onclick={() => {
-                        navPage = Hub;
                         toggleMenu();
                     }}
-                    class="btn"
+                    href="/profile"
+                    style="
+                        background-color: transparent;
+                        border: none;
+                        display: flex;
+                        flex-direction: column;
+                        align-items: center;
+                        justify-content: center;
+                        padding: 0;
+                        cursor: pointer;
+                        transition: all 0.3s ease;
+                        width: 100%;
+                        height: 100%;
+                        color: var(--text)"
                 >
                     <img
                         src="https://github.com/shadcn.png"
@@ -127,17 +123,17 @@
                             Profile
                         </span>
                     {/if}
-                </button>
+                </a>
             </div>
             {#each topButtons as button}
-                <button
+                <a
                     class="nav-button"
                     onmouseenter={() => setHoveredButton(button.id)}
                     onmouseleave={clearHoveredButton}
                     style=" text-align: center;"
                     type="button"
+                    href={button.href}
                     onclick={() => {
-                        button.click();
                         toggleMenu();
                     }}
                 >
@@ -152,7 +148,7 @@
                             {button.label}
                         </span>
                     {/if}
-                </button>
+                </a>
             {/each}
         </div>
         <div class="d-flex flex-column align-items-center mb-3 w-100">
@@ -232,12 +228,13 @@
                     </button>
                 {/if}
             </div>
-            <button
+            <a
                 class="nav-button"
                 onmouseenter={() => setHoveredButton("Settings")}
                 onmouseleave={clearHoveredButton}
                 onclick={() => toggleMenu()}
                 type="button"
+                href="/settings"
             >
                 <Settings />
                 {#if hoveredButton === "Settings"}
@@ -248,7 +245,7 @@
                         Settings
                     </span>
                 {/if}
-            </button>
+            </a>
             {#if isMobile}
                 <button class="nav-button" onclick={() => toggleMenu()}>
                     <CircleChevronLeft />
@@ -261,7 +258,7 @@
     </div>
 </nav>
 
-{@render navPage()}
+{@render children()}
 
 <style>
     .profile-image {
