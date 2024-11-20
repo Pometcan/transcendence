@@ -24,7 +24,8 @@
 ## MINOR
 ---
 ### web
-- [ ] Use a database for the backend. (Posgresql)
+- [x] Use a framework or a toolkit to build the frontend
+- [x] Use a database for the backend. (Posgresql)
 ### Gameplay and user experience
 - [ ] Game Customization Options.
 ### AI-Algo

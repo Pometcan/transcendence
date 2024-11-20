@@ -1,20 +1,4 @@
 services:
-  frontend:
-    build:
-      context: ./srcs/frontend/
-    container_name: svelte
-    env_file: .env
-    volumes:
-      - frontend_vol:/frontend
-      - /frontend/node_modules
-    command: npm run dev -- --host 0.0.0.0 --port 5173
-    #command: vite dev --host 0.0.0.0 --port 5173
-    depends_on:
-      - backend
-    networks:
-      - trans_network
-    restart: always
-
   backend:
     build:
       context: ./srcs/backend
@@ -63,7 +47,7 @@ services:
     volumes:
       - pgdata:/var/lib/postgresql/data
     ports:
-      - '5432:5432'
+      - "5432:5432"
     networks:
       - trans_network
     restart: always
@@ -87,4 +71,3 @@ volumes:
 networks:
   trans_network:
     driver: bridge
-
