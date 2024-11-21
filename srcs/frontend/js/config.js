@@ -1,34 +1,29 @@
 export class Config {
-  //static basePath = "/usr/share/nginx/html/";
   static configs = {
     development: {
-      basePath: "/home/dev/project/frontend/",
+      basePath: "/home/pomet/project/web/trans/srcs/frontend/",
       apiUrl: "http://localhost:8000",
     },
     production: {
-      basePath: "/usr/share/nginx/html/",
-      apiUrl: "http://localhost:8000",
+      //basePath: "/usr/share/nginx/html/",
+      basePath: "http://tr.kirit00.com/",
+      apiUrl: "http://api.kirit00.com/",
     },
   };
-  basePath =
-    Config.configs[Config.env.isDevelopment ? "development" : "production"]
-      .basePath;
-  apiUrl =
-    Config.configs[Config.env.isDevelopment ? "development" : "production"]
-      .apiUrl;
 
   static get paths() {
+    const { basePath } = this.configs.production;
     return {
-      css: `${this.basePath}css/`,
-      html: `${this.basePath}html/`,
-      js: `${this.basePath}js/`,
-      component: `${this.basePath}js/component/`,
-      lib: `${this.basePath}js/lib/`,
-      page: `${this.basePath}js/page/`,
-      static: `${this.basePath}static/`,
-      img: `${this.basePath}static/img/`,
-      fonts: `${this.basePath}static/fonts/`,
-      mainHTML: `${this.basePath}index.html`,
+      css: `${basePath}css/`,
+      js: `${basePath}js/`,
+      component: `${basePath}js/component/`,
+      lib: `${basePath}js/lib/`,
+      page: `${basePath}page/`,
+      utils: `${basePath}js/utils/`,
+      static: `${basePath}static/`,
+      img: `${basePath}static/img/`,
+      fonts: `${basePath}static/fonts/`,
+      mainHTML: `${basePath}index.html`,
     };
   }
 
@@ -61,14 +56,6 @@ export class Config {
       return {};
     }
   }
-
-  static env = {
-    isDevelopment: window.location.hostname === "localhost",
-    apiBaseUrl:
-      window.location.hostname === "localhost"
-        ? "http://localhost:8000/api"
-        : "/api",
-  };
 
   static features = {
     enableLogging: true,

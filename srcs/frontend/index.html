@@ -17,31 +17,10 @@
             integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz"
             crossorigin="anonymous"
         ></script>
+        <script type="module" src="/js/main.js"></script>
     </head>
     <body>
-        <script>
-            function getData(url) {
-                fetch(url)
-                    .then((response) => {
-                        if (!response.ok) {
-                            throw new Error("Network response was not ok");
-                        }
-                        return response.json();
-                    })
-                    .then((data) => {
-                        console.log(data); // Veriyi konsola yazdır
-                    })
-                    .catch((error) => {
-                        console.error(
-                            "There has been a problem with your fetch operation:",
-                            error,
-                        );
-                    });
-            }
-            getData("http://api.kirit00.com/auth/");
-        </script>
-
         <div id="nav"></div>
-        <div id="page"></div>
+        <div id="app"></div>
     </body>
 </html>

@@ -1,27 +1,23 @@
-// js/template.js
-class Template {
+// js/utils/temp.js
+export class Template {
   static render(template, data) {
     return template.replace(
       /\{(#if|#each|#\/if|#\/each|[^}]+)\}/g,
       (match, p1) => {
-        // If condition
         if (p1.startsWith("if ")) {
           const condition = p1.slice(3).trim();
           return this.evaluateIf(condition, data);
         }
 
-        // Each loop
         if (p1.startsWith("each ")) {
           const [arrayExpr, itemName, indexName] = this.parseEachExpression(p1);
           return this.evaluateEach(arrayExpr, itemName, indexName, data);
         }
 
-        // Closing tags
         if (p1 === "/if" || p1 === "/each") {
           return "";
         }
 
-        // Variable interpolation
         return this.interpolateVariable(p1, data);
       },
     );
@@ -34,7 +30,6 @@ class Template {
   }
 
   static evaluateIf(condition, data) {
-    // Create a function with data as context to evaluate the condition
     const fn = new Function(...Object.keys(data), `return ${condition}`);
     try {
       return fn(...Object.values(data)) ? "" : "REMOVE";
@@ -49,7 +44,6 @@ class Template {
 
     return array
       .map((item, index) => {
-        // Create a new context with the current item and index
         const loopContext = {
           ...data,
           [itemName]: item,
@@ -74,18 +68,11 @@ class Template {
   }
 
   static processTemplate(template, data) {
-    // First pass - handle conditionals and loops
     let processed = this.render(template, data);
-
-    // Process nested loops and conditionals
     while (processed.includes("START_LOOP") || processed.includes("{#")) {
       processed = this.render(processed, data);
     }
-
-    // Remove conditionally removed content
     processed = processed.replace(/REMOVE/g, "");
-
-    // Process loop results
     processed = processed.replace(
       /START_LOOP(.*?)END_LOOP/g,
       (match, jsonContext) => {
@@ -93,19 +80,15 @@ class Template {
         return this.render(template, loopContext);
       },
     );
-
-    // Final variable interpolation
     processed = this.render(processed, data);
 
     return processed;
   }
 }
 
-// Usage example
-function renderTemplate(templateString, data) {
+// Separate function for rendering template
+export function renderTemplate(templateString, data) {
   const div = document.createElement("div");
   div.innerHTML = Template.processTemplate(templateString, data);
   return div;
 }
-
-export { renderTemplate };
