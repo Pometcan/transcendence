@@ -1,6 +1,21 @@
 export class Config {
   //static basePath = "/usr/share/nginx/html/";
-  static basePath = "/home/pomet/project/web/trans/srcs/frontend/";
+  static configs = {
+    development: {
+      basePath: "/home/dev/project/frontend/",
+      apiUrl: "http://localhost:8000",
+    },
+    production: {
+      basePath: "/usr/share/nginx/html/",
+      apiUrl: "http://localhost:8000",
+    },
+  };
+  basePath =
+    Config.configs[Config.env.isDevelopment ? "development" : "production"]
+      .basePath;
+  apiUrl =
+    Config.configs[Config.env.isDevelopment ? "development" : "production"]
+      .apiUrl;
 
   static get paths() {
     return {

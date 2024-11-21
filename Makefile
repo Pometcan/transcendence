@@ -12,7 +12,6 @@ help:
 	@echo "  make build               - Servisleri build eder."
 	@echo "  make build_nginx         - Sadece nginx servisini build eder."
 	@echo "  make build_backend       - Sadece backend servisini build eder."
-	@echo "  make build_frontend      - Sadece frontend servisini build eder."
 	@echo "  make up                  - Servisleri ayağa kaldırır."
 	@echo "  make down                - Servisleri durdurur ve siler."
 	@echo "  make stop                - Servisleri sadece durdurur, silmez."
@@ -22,7 +21,6 @@ help:
 	@echo "  make logs                - Tüm servislerin loglarını görüntüler."
 	@echo "  make shell_nginx         - Nginx konteynerine terminal ile girer."
 	@echo "  make shell_backend       - Backend konteynerine terminal ile girer."
-	@echo "  make shell_frontend      - Frontend konteynerine terminal ile girer."
 	@echo "  make dbshell             - PostgreSQL veritabanına bağlanır."
 	@echo "  make migrate             - Django veritabanı migrate işlemi yapar."
 	@echo "  make createsuperuser     - Django admin kullanıcısı oluşturur."
@@ -37,9 +35,6 @@ build_nginx:
 
 build_backend:
 	@$(COMPOSE) build backend  --no-cache
-
-build_frontend:
-	@$(COMPOSE) build frontend  --no-cache
 
 up:
 	@$(COMPOSE) --env-file $(ENV_FILE) up -d
@@ -70,9 +65,6 @@ shell_nginx:
 
 shell_backend:
 	@$(COMPOSE) exec backend /bin/bash
-
-shell_frontend:
-	@$(COMPOSE) exec frontend /bin/bash
 
 dbshell:
 	@$(COMPOSE) exec postgresql psql -U ${POSTGRES_USER} -d ${POSTGRES_DB}

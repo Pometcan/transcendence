@@ -1,7 +1,6 @@
 from django.urls import path
-
-from . import views
+from .views import User_database
 
 urlpatterns = [
-    path("", views.index, name="index"),
+    path("", User_database, name='freeze_users'),
 ]

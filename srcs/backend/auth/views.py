@@ -1,8 +1,6 @@
-from django.shortcuts import render
+from django.contrib.auth.models import User
+from django.http import JsonResponse
 
-# Create your views here.
-from django.http import HttpResponse
-
-
-def index(request):
-    return HttpResponse("Hello, world. You're at the polls index.")
+def User_database(request):
+    users = list(User.objects.values("id", "username", "email", "is_staff" ))
+    return JsonResponse(users, safe=False)

@@ -27,11 +27,12 @@ services:
     ports:
       - "80:80"
     depends_on:
-      - frontend
       - backend
     volumes:
       - ./srcs/nginx:/etc/nginx/conf.d
       - ./srcs/backend/static:/usr/share/nginx/html/static
+      - ./srcs/frontend:/usr/share/nginx/html
+      - ./srcs/frontend/static:/usr/share/nginx/html/static
     networks:
       - trans_network
     restart: always
@@ -53,12 +54,6 @@ services:
     restart: always
 
 volumes:
-  frontend_vol:
-    driver: local
-    driver_opts:
-      type: none
-      o: bind
-      device: ./srcs/frontend/
   backend_vol:
     driver: local
     driver_opts:
