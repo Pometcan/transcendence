@@ -1,10 +1,10 @@
 import { Config } from "./config.js";
 import { Router } from "./utils/router.js";
-import Auth from "./components/auth.js";
+import App from "./components/Apps.js";
 
 const router = new Router({
   "/": {
-    component: () => new Auth(),
+    component: () => new App(),
   },
   404: {
     component: () => {
