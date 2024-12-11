@@ -12,6 +12,8 @@ help:
 	@echo "  make build               - Servisleri build eder."
 	@echo "  make build_nginx         - Sadece nginx servisini build eder."
 	@echo "  make build_backend       - Sadece backend servisini build eder."
+	@echo "  make build_redis         - Sadece redis servisini build eder."
+	@echo "  make build_grafana       - Sadece grafana servisini build eder."
 	@echo "  make up                  - Servisleri ayağa kaldırır."
 	@echo "  make down                - Servisleri durdurur ve siler."
 	@echo "  make stop                - Servisleri sadece durdurur, silmez."
@@ -35,6 +37,13 @@ build_nginx:
 
 build_backend:
 	@$(COMPOSE) build backend  --no-cache
+
+build_redis:
+	@$(COMPOSE) build redis  --no-cache
+
+build_grafana:
+	@$(COMPOSE) build grafana  --no-cache
+
 
 up:
 	@$(COMPOSE) --env-file $(ENV_FILE) up -d
@@ -65,6 +74,12 @@ shell_nginx:
 
 shell_backend:
 	@$(COMPOSE) exec backend /bin/bash
+
+shell_redis:
+	@$(COMPOSE) exec redis /bin/sh
+
+shell_grafana:
+	@$(COMPOSE) exec grafana /bin/sh
 
 dbshell:
 	@$(COMPOSE) exec postgresql psql -U ${POSTGRES_USER} -d ${POSTGRES_DB}
