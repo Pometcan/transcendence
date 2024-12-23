@@ -1,3 +1,5 @@
+from os import getenv
+from pickle import GET
 """
 Django settings for backend project.
 
@@ -82,8 +84,8 @@ TEMPLATES = [
 WSGI_APPLICATION = 'backend.wsgi.application'
 
 # CORS Ayarları
-CORS_ALLOW_ALL_ORIGINS = True  # Her şey için izin
-CORS_ALLOW_CREDENTIALS = True  # Kimlik doğrulama çerezlerini kabul et
+CORS_ALLOW_ALL_ORIGINS = True
+CORS_ALLOW_CREDENTIALS = True
 CORS_ALLOW_METHODS = [
     'GET',
     'POST',
@@ -106,9 +108,9 @@ CORS_ALLOW_HEADERS = [
 ]
 # CSRF Güvenilir Kaynaklar
 CSRF_TRUSTED_ORIGINS = [
-    "https://pometcan.com",
-    "https://api.pometcan.com",
-    "https://gra.pometcan.com",
+    f"https://{os.getenv('FRONTEND_DOMAIN')}",
+    f"https://{os.getenv('BACKEND_DOMAIN')}",
+    f"https://{os.getenv('GRAFANA_DOMAIN')}",
     "http://localhost:80",
     "http://localhost:8000",
 ]
@@ -130,7 +132,7 @@ DATABASES = {
 CACHES = {
     'default': {
         'BACKEND': 'django_redis.cache.RedisCache',
-        'LOCATION': "redis://redis:6379/1",
+        'LOCATION': f"redis://redis:{os.getenv('REDIS_PORT')}/1",
         'OPTIONS': {
             'CLIENT_CLASS': 'django_redis.client.DefaultClient',
             'PASSWORD': os.getenv('REDIS_PASSWORD', None),
