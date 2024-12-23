@@ -81,14 +81,9 @@ TEMPLATES = [
 
 WSGI_APPLICATION = 'backend.wsgi.application'
 
-CORS_ALLOW_ORIGINS = [
-   #"https://tr.kirit00.com"
-   os.getenv('FRONTEND_DOMAIN', 'http://localhost:80')
-]
-CORS_ALLOW_ALL_ORIGINS = True
-
-CORS_ALLOW_CREDENTIALS = True
-
+# CORS Ayarları
+CORS_ALLOW_ALL_ORIGINS = True  # Her şey için izin
+CORS_ALLOW_CREDENTIALS = True  # Kimlik doğrulama çerezlerini kabul et
 CORS_ALLOW_METHODS = [
     'GET',
     'POST',
@@ -97,11 +92,25 @@ CORS_ALLOW_METHODS = [
     'DELETE',
     'OPTIONS',
 ]
-
 CORS_ALLOW_HEADERS = [
-    'content-type',
+    'accept',
+    'accept-encoding',
     'authorization',
+    'content-type',
+    'dnt',
+    'origin',
+    'user-agent',
+    'x-csrftoken',
+    'x-requested-with',
     'x-custom-header',
+]
+# CSRF Güvenilir Kaynaklar
+CSRF_TRUSTED_ORIGINS = [
+    "https://pometcan.com",
+    "https://api.pometcan.com",
+    "https://gra.pometcan.com",
+    "http://localhost:80",
+    "http://localhost:8000",
 ]
 
 # Database
@@ -118,17 +127,17 @@ DATABASES = {
     }
 }
 
-# redis
 CACHES = {
-    "default": {
-        "BACKEND": "django_redis.cache.RedisCache",
-        "LOCATION": "redis:/redis:6379/1",
-        "OPTIONS": {
-            "CLIENT_CLASS": "django_redis.client.DefaultClient",
-            "PASSWORD" : os.getenv('REDIS_PASSWORD'),
+    'default': {
+        'BACKEND': 'django_redis.cache.RedisCache',
+        'LOCATION': "redis://redis:6379/1",
+        'OPTIONS': {
+            'CLIENT_CLASS': 'django_redis.client.DefaultClient',
+            'PASSWORD': os.getenv('REDIS_PASSWORD', None),
         }
     }
 }
+
 
 SESSION_ENGINE = 'django.contrib.sessions.backends.cache'
 SESSION_CACHE_ALIAS = 'default'
