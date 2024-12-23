@@ -41,8 +41,8 @@ build_backend:
 build_redis:
 	@$(COMPOSE) build redis  --no-cache
 
-build_grafana:
-	@$(COMPOSE) build grafana  --no-cache
+#build_grafana:
+#	@$(COMPOSE) build grafana  --no-cache
 
 
 up:

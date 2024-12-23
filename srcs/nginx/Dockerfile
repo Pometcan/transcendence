@@ -10,6 +10,7 @@ RUN mkdir -p /etc/nginx/ssl && \
 
 COPY ./nginx.conf.template /etc/nginx/nginx.conf.template
 
-CMD envsubst '${FRONTEND_DOMAIN} ${BACKEND_DOMAIN} ${GRAFANA_DOMAIN}' < /etc/nginx/nginx.conf.template > /etc/nginx/nginx.conf && nginx -g 'daemon off;'
+CMD envsubst '${FRONTEND_DOMAIN} ${BACKEND_DOMAIN} ${GRAFANA_DOMAIN} ${NGINX_PORT} ${NGINX_PORT_SSL}' \
+    < /etc/nginx/nginx.conf.template > /etc/nginx/nginx.conf && nginx -g 'daemon off;'
 
-EXPOSE 80 443
+EXPOSE ${NGINX_PORT} ${NGINX_PORT_SSL}
