@@ -1,4 +1,4 @@
-COMPOSE=docker compose
+COMPOSE=docker-compose
 DOCKER=docker
 ENV_FILE=.env
 
