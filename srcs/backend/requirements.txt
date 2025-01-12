@@ -6,3 +6,5 @@ django-filter==24.3
 Pygments==2.18.0
 django-cors-headers==4.6.0
 django-redis==5.4.0
+requests==2.25.1
+drf-spectacular==0.28.0

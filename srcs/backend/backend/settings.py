@@ -27,10 +27,13 @@ load_dotenv()
 SECRET_KEY = os.getenv('SECRET_KEY', 'Agla Kudur')
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = os.getenv('DEBUG', 'True')
+DEBUG = os.getenv('DEBUG', 'False')
 
 ALLOWED_HOSTS = ['*']
 
+######################################################################################################################################---ÖNEMLİ
+CSRF_COOKIE_PATH = '/'
+#################################################################################################################
 
 # Application definition
 
@@ -43,13 +46,20 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     'rest_framework',
     "corsheaders",
-    'user.apps.UserConfig'
+    'user.apps.UserConfig',
+    'requests',
+    'drf_spectacular',
 ]
+
+
+
+AUTH_USER_MODEL = 'user.User'
 
 REST_FRAMEWORK = {
     'DEFAULT_PERMISSION_CLASSES': [
         'rest_framework.permissions.DjangoModelPermissionsOrAnonReadOnly'
-    ]
+    ],
+    'DEFAULT_SCHEMA_CLASS': 'drf_spectacular.openapi.AutoSchema',
 }
 
 MIDDLEWARE = [
@@ -160,6 +170,9 @@ AUTH_PASSWORD_VALIDATORS = [
     },
     {
         'NAME': 'django.contrib.auth.password_validation.NumericPasswordValidator',
+    },
+    {
+        'NAME': 'user.validators.custom_password_validator',
     },
 ]
 
