@@ -14,18 +14,18 @@ http {
         listen [::]:${NGINX_PORT};
         server_name _;
         return 301 https://$host$request_uri;
-    #}
+    }
 
     # HTTPS server - Ana sunucu
-    #server {
-        #listen ${NGINX_PORT_SSL} ssl;
-        #listen [::]:${NGINX_PORT_SSL} ssl;
-    #    server_name ${FRONTEND_DOMAIN};
+    server {
+        listen ${NGINX_PORT_SSL} ssl;
+        listen [::]:${NGINX_PORT_SSL} ssl;
+        server_name ${FRONTEND_DOMAIN};
 
         # SSL Sertifikaları
-    #    ssl_certificate /etc/nginx/ssl/inception.crt;
-    #    ssl_certificate_key /etc/nginx/ssl/inception.key;
-    #    ssl_protocols TLSv1.2 TLSv1.3;
+        ssl_certificate /etc/nginx/ssl/inception.crt;
+        ssl_certificate_key /etc/nginx/ssl/inception.key;
+        ssl_protocols TLSv1.2 TLSv1.3;
 
         location / {
             root /usr/share/nginx/html;
@@ -69,16 +69,16 @@ http {
 
     # Backend API server
     server {
-    #    listen ${NGINX_PORT_SSL} ssl;
-    #    listen [::]:${NGINX_PORT_SSL} ssl;
+        listen ${NGINX_PORT_SSL} ssl;
+        listen [::]:${NGINX_PORT_SSL} ssl;
         
         listen [::]:${NGINX_PORT};
         server_name ${BACKEND_DOMAIN};
 
         # SSL Sertifikaları
-    #    ssl_certificate /etc/nginx/ssl/inception.crt;
-    #    ssl_certificate_key /etc/nginx/ssl/inception.key;
-    #    ssl_protocols TLSv1.2 TLSv1.3;
+        ssl_certificate /etc/nginx/ssl/inception.crt;
+        ssl_certificate_key /etc/nginx/ssl/inception.key;
+        ssl_protocols TLSv1.2 TLSv1.3;
 
         # API proxy
         location / {

@@ -22,13 +22,23 @@ from rest_framework import permissions
 from drf_spectacular.views import SpectacularAPIView, SpectacularSwaggerView
 
 
-
 urlpatterns = [
     path('admin/', admin.site.urls),
-    path("user/", include("user.urls")),
+    path("users/", include("users.urls")),
+    path("tests/", include("testapp.urls")),
+
+    #authentication için
+    path('api-auth', include('rest_framework.urls')),
+    path('api/rest-auth/', include('dj_rest_auth.urls')),
+    #registration için
+    path('api/rest-auth/registration/', include('dj_rest_auth.registration.urls')),
+
+    #SENEM: swagger için
     path('schema/', SpectacularAPIView.as_view(), name='schema'),  # OpenAPI schema
     path('swagger/', SpectacularSwaggerView.as_view(url_name='schema'), name='swagger-ui'),
 ]
 
 urlpatterns += static(settings.STATIC_URL, document_root=settings.STATIC_ROOT)
-urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
+
+if settings.DEBUG == True:
+    urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
