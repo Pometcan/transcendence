@@ -1,4 +1,5 @@
 from django.db import models
+from django.db.models import Q
 from django.contrib.auth.models import AbstractUser
 from .managers import FriendshipRequestManager
 from PIL import Image
@@ -20,8 +21,18 @@ class User(AbstractUser):
 
 
     def save(self, *args, **kwargs):
-        #Avatar image resize
+        
+        # #eğer user pasif olursa friends ve blocked users tablolarında temizlenir.
+        # if not self.is_active:
+        #     self.friends.clear()
+        #     self.friend_of.clear()
+        #     self.blocked_users.clear()
+        #     self.blocked_by.clear()
+            
+
         super().save(*args, **kwargs)
+        
+        #Avatar image resize
         if self.avatar:
             img = Image.open(self.avatar.path)
             if img.height > 600 or img.width > 600:
@@ -48,11 +59,19 @@ class FriendshipRequest(models.Model):
     created_date = models.DateTimeField(auto_now_add=True)
     updated_date = models.DateTimeField(auto_now=True)
 
+    class Meta:
+        constraints = [
+            models.UniqueConstraint(
+                fields=['sender', 'receiver'],
+                condition=Q(is_active=True,status='P'),  # Sadece is_active=True olduğunda kontrol edilir
+                name='unique_active_friendship_request'
+            )
+        ]
 
     objects = FriendshipRequestManager()
 
     def clean(self):
-        self.__class__.objects.create_friendship_request(self.sender, self.receiver, self.status)
+        self.__class__.objects.create_friendship_request_validation(self.sender, self.receiver, self.status)
 
     def save(self, *args, **kwargs):
         existing_request = FriendshipRequest.objects.filter(

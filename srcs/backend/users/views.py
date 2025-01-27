@@ -49,6 +49,8 @@ class ReceivedFriendshipRequestViewSet(
                                         .exclude(sender__in=user.blocked_by.all()) \
                                         .exclude(sender__in=user.blocked_users.all())
     
+
+    
 class SentFriendshipRequestViewSet(
                 mixins.CreateModelMixin,
                 mixins.RetrieveModelMixin,
@@ -67,9 +69,7 @@ class SentFriendshipRequestViewSet(
                                         .exclude(receiver__in=user.blocked_by.all()) \
                                         .exclude(receiver__in=user.blocked_users.all())
     
-    def perform_create(self, serializer):
-        sender = self.request.user
-        serializer.save(sender=sender)
-
 
     
+class BlockedUserViewSet():
+    pass
