@@ -31,6 +31,9 @@ DEBUG = os.getenv('DEBUG', 'True')
 
 ALLOWED_HOSTS = ['*']
 
+######################################################################################################################################---ÖNEMLİ
+CSRF_COOKIE_PATH = '/'
+#################################################################################################################
 
 # Application definition
 
@@ -41,15 +44,56 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+    'django.contrib.sites', #SENEM: social login için gerekli
+    
     'rest_framework',
+    
+    #authentication için
+    'rest_framework.authtoken', 
+    #registraton için
+    'allauth',
+    'allauth.account',
+    'allauth.socialaccount', #SENEM: 42 intra ile bağlamak için kullanılabilir- social login
+    'dj_rest_auth',
+    'dj_rest_auth.registration',
+
     "corsheaders",
+    'requests',
+    'users.apps.UsersConfig',
+    'drf_spectacular', #SENEM: swagger içindi sanırım
+
+
 ]
+
+
+
+AUTH_USER_MODEL = 'users.User'
 
 REST_FRAMEWORK = {
     'DEFAULT_PERMISSION_CLASSES': [
         'rest_framework.permissions.DjangoModelPermissionsOrAnonReadOnly'
-    ]
+    ],
+
+    'DEFAULT_SCHEMA_CLASS': 'drf_spectacular.openapi.AutoSchema', #SENEM: swagger için
+    
+    'DEFAULT_AUTHENTICATION_CLASSES': [
+        'rest_framework.authentication.SessionAuthentication',  # CSRF için 
+        'rest_framework.authentication.TokenAuthentication',
+    ],
 }
+
+AUTHENTICATION_BACKENDS = (
+    'allauth.account.auth_backends.AuthenticationBackend',
+)
+
+SITE_ID = 1
+ACCOUNT_EMAIL_VERIFICATION = 'none' #SENEM: 2fa için değiştirmek gerekebilir??
+# SENEM: ACCOUNT_EMAIL_VERIFICATION = 'mandatory'  # E-posta doğrulaması zorunlu
+ACCOUNT_EMAIL_REQUIRED = True #SENEM: Kayıt esnasında email adresi verilmeli mi?
+ACCOUNT_UNIQUE_EMAIL = True
+#SENEM: ACCOUNT_AUTHENTICATED_REDIRECT_URL = '/'  # Başarılı giriş sonrası yönlendirilecek URL
+
+
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
@@ -61,6 +105,7 @@ MIDDLEWARE = [
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
     "corsheaders.middleware.CorsMiddleware",
     "django.middleware.common.CommonMiddleware",
+    "allauth.account.middleware.AccountMiddleware",
 ]
 
 ROOT_URLCONF = 'backend.urls'
@@ -113,7 +158,11 @@ CSRF_TRUSTED_ORIGINS = [
     f"https://{os.getenv('GRAFANA_DOMAIN')}",
     "http://localhost:80",
     "http://localhost:8000",
+    "http://127.0.0.1:8000", #swagger için
 ]
+
+CSRF_COOKIE_SECURE = False  # SENEM: Geliştirme aşamasında, productionda True yapmalıyız.
+CSRF_COOKIE_HTTPONLY = True  # SENEM: CSRF token yalnızca HTTP başlıklarında mevcut olacak??
 
 # Database
 # https://docs.djangoproject.com/en/5.1/ref/settings/#databases
@@ -160,6 +209,9 @@ AUTH_PASSWORD_VALIDATORS = [
     {
         'NAME': 'django.contrib.auth.password_validation.NumericPasswordValidator',
     },
+    # {
+    #     'NAME': 'user.validators.custom_password_validator',
+    # },
 ]
 
 
@@ -178,6 +230,10 @@ USE_TZ = True
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/5.1/howto/static-files/
 STATIC_URL = '/usr/share/nginx/html/backstatic/'
+
+MEDIA_URL = '/media/'
+MEDIA_ROOT = 'uploads'
+
 STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
 STATICFILES_DIRS = [
     os.path.join(BASE_DIR, '/backend/static'),

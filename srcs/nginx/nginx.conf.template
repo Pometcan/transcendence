@@ -71,6 +71,8 @@ http {
     server {
         listen ${NGINX_PORT_SSL} ssl;
         listen [::]:${NGINX_PORT_SSL} ssl;
+        
+        listen [::]:${NGINX_PORT};
         server_name ${BACKEND_DOMAIN};
 
         # SSL Sertifikaları
