@@ -1,7 +1,7 @@
 from django.db import models
 from django.db.models import Q
 from django.contrib.auth.models import AbstractUser
-from .managers import FriendshipRequestManager
+from .managers import FriendshipRequestManager, UserManager
 from PIL import Image
 
 
@@ -16,9 +16,7 @@ class User(AbstractUser):
     friends = models.ManyToManyField('self', symmetrical=False, related_name='friend_of', blank=True)
     blocked_users = models.ManyToManyField('self',symmetrical=False, related_name='blocked_by', blank=True)
 
-    def __str__(self):
-        return self.username
-
+    objects = UserManager()
 
     def save(self, *args, **kwargs):
         
@@ -28,10 +26,7 @@ class User(AbstractUser):
         #     self.friend_of.clear()
         #     self.blocked_users.clear()
         #     self.blocked_by.clear()
-            
-
         super().save(*args, **kwargs)
-        
         #Avatar image resize
         if self.avatar:
             img = Image.open(self.avatar.path)
@@ -40,6 +35,9 @@ class User(AbstractUser):
                 img.thumbnail(output_size)
                 img.save(self.avatar.path)
                 #SENEM: kullanıcı yeni avatar eklediğinde eski avatarı silmek için koda ekleme yapmalısın!!
+    
+    def __str__(self):
+        return self.username
 
 
 
@@ -63,7 +61,7 @@ class FriendshipRequest(models.Model):
         constraints = [
             models.UniqueConstraint(
                 fields=['sender', 'receiver'],
-                condition=Q(is_active=True,status='P'),  # Sadece is_active=True olduğunda kontrol edilir
+                condition=Q(is_active=True, status='P'),
                 name='unique_active_friendship_request'
             )
         ]
