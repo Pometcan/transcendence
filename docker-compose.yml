@@ -35,6 +35,7 @@ services:
       - redis
       - postgresql
     volumes:
+      - ./srcs/nginx/ssl:/etc/nginx/ssl
       - ./srcs/nginx:/etc/nginx/conf.d
       - ./srcs/backend/static:/usr/share/nginx/html/static
       - ./srcs/frontend:/usr/share/nginx/html

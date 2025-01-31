@@ -12,5 +12,4 @@ router.register(r'sent-friendship-request', SentFriendshipRequestViewSet, basena
 urlpatterns = [
     path("", index, name="index"),
     path('', include(router.urls)),
-
 ]
