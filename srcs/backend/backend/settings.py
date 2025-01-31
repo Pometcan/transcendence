@@ -141,6 +141,7 @@ CHANNEL_LAYERS = {
     },
 }
 # CORS Ayarları
+CORS_ORIGIN_ALLOW_ALL = True
 CORS_ALLOW_ALL_ORIGINS = True
 CORS_ALLOW_CREDENTIALS = True
 CORS_ALLOW_METHODS = [
@@ -178,8 +179,10 @@ CSRF_TRUSTED_ORIGINS = [
     "http://localhost:8000",
     "http://127.0.0.1:8000", #swagger için
 ]
-# Add explicit CORS origins
-CORS_ALLOWED_ORIGINS = [
+
+
+# Ensure CSRF_TRUSTED_ORIGINS has correct formatting
+CSRF_TRUSTED_ORIGINS = [
     "https://pometcan.com",
     "https://api.pometcan.com",
     "http://localhost:80",

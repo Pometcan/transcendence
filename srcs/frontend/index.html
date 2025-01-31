@@ -145,8 +145,7 @@
 
         // WebSocket bağlantısını kur
         function connectWebSocket(path) {
-            const websocketUrl = `wss://api.pometcan.com/${path}`;
-            websocket = new WebSocket(websocketUrl, 'echo-protocol');
+
             websocket = new WebSocket(
                 "wss://api." + window.location.host + path,
                 'echo-protocol'
