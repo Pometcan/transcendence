@@ -27,7 +27,7 @@ load_dotenv()
 SECRET_KEY = os.getenv('SECRET_KEY', 'Agla Kudur')
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = os.getenv('DEBUG', 'True')
+DEBUG = os.getenv('DEBUG', 'true')
 
 ALLOWED_HOSTS = ['*']
 
@@ -45,11 +45,11 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'django.contrib.sites', #SENEM: social login için gerekli
-    
+
     'rest_framework',
-    
+
     #authentication için
-    'rest_framework.authtoken', 
+    'rest_framework.authtoken',
     #registraton için
     'allauth',
     'allauth.account',
@@ -62,7 +62,9 @@ INSTALLED_APPS = [
     'users.apps.UsersConfig',
     'drf_spectacular', #SENEM: swagger içindi sanırım
 
-
+    #MELIH
+    'channels',
+    'game',
 ]
 
 
@@ -75,9 +77,9 @@ REST_FRAMEWORK = {
     ],
 
     'DEFAULT_SCHEMA_CLASS': 'drf_spectacular.openapi.AutoSchema', #SENEM: swagger için
-    
+
     'DEFAULT_AUTHENTICATION_CLASSES': [
-        'rest_framework.authentication.SessionAuthentication',  # CSRF için 
+        'rest_framework.authentication.SessionAuthentication',  # CSRF için
         'rest_framework.authentication.TokenAuthentication',
     ],
 }
@@ -127,8 +129,19 @@ TEMPLATES = [
 ]
 
 WSGI_APPLICATION = 'backend.wsgi.application'
+ASGI_APPLICATION = 'backend.asgi.application'
 
+CHANNEL_LAYERS = {
+    'default': {
+        'BACKEND': 'channels_redis.core.RedisChannelLayer',
+        'CONFIG': {
+            "hosts": [('redis', 6379)],
+            "password": os.getenv('REDIS_PASSWORD', None),
+        },
+    },
+}
 # CORS Ayarları
+CORS_ORIGIN_ALLOW_ALL = True
 CORS_ALLOW_ALL_ORIGINS = True
 CORS_ALLOW_CREDENTIALS = True
 CORS_ALLOW_METHODS = [
@@ -153,16 +166,32 @@ CORS_ALLOW_HEADERS = [
 ]
 # CSRF Güvenilir Kaynaklar
 CSRF_TRUSTED_ORIGINS = [
+    "https://pometcan.com",
+    "https://api.pometcan.com",
+    "http://localhost:80",
+    "http://localhost:8000",
     f"https://{os.getenv('FRONTEND_DOMAIN')}",
     f"https://{os.getenv('BACKEND_DOMAIN')}",
     f"https://{os.getenv('GRAFANA_DOMAIN')}",
+    "https://api.pometcan.com"
+    "https://localhost:80",
     "http://localhost:80",
     "http://localhost:8000",
     "http://127.0.0.1:8000", #swagger için
 ]
 
-CSRF_COOKIE_SECURE = False  # SENEM: Geliştirme aşamasında, productionda True yapmalıyız.
-CSRF_COOKIE_HTTPONLY = True  # SENEM: CSRF token yalnızca HTTP başlıklarında mevcut olacak??
+
+# Ensure CSRF_TRUSTED_ORIGINS has correct formatting
+CSRF_TRUSTED_ORIGINS = [
+    "https://pometcan.com",
+    "https://api.pometcan.com",
+    "http://localhost:80",
+    "http://localhost:8000",
+]
+
+CSRF_COOKIE_SECURE = True  # SENEM: Geliştirme aşamasında, productionda True yapmalıyız.
+SESSION_COOKIE_SECURE = True
+CSRF_COOKIE_HTTPONLY = False  # SENEM: CSRF token yalnızca HTTP başlıklarında mevcut olacak??
 
 # Database
 # https://docs.djangoproject.com/en/5.1/ref/settings/#databases
