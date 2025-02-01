@@ -2,20 +2,60 @@ from django.db.models import Q
 from rest_framework import serializers
 from .models import User, FriendshipRequest
 from django.core.exceptions import ValidationError
+import os
+from django.conf import settings
 
+
+#USER SERIALIZERS
 class UserBasicInfoSerializer(serializers.ModelSerializer):
     class Meta:
         model = User
         fields = ['id', 'username', 'avatar', 'rank']
         read_only_fields = ['id','avatar', 'rank']
 
-
 class GetUserSerializer(serializers.ModelSerializer):
     class Meta:
         model = User
         fields = ['id', 'username', 'email', 'avatar', 'is_active']
+        read_only_fields = ['id', 'avatar']
 
 
+class AvatarSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = User
+        fields = ['avatar']
+    
+    @staticmethod
+    def delete_old_avatar(instance, old_avatar):
+        old_avatar_path = os.path.abspath(old_avatar.path)
+        default_avatar_path = os.path.abspath(os.path.join(settings.MEDIA_ROOT, instance._meta.get_field('avatar').get_default()))
+
+        if old_avatar_path != default_avatar_path and os.path.exists(old_avatar_path):
+            os.remove(old_avatar_path)
+
+    def update(self, instance, validated_data):
+        new_avatar = validated_data.get('avatar')
+        if new_avatar is not None:
+            old_avatar = instance.avatar
+            instance.avatar = new_avatar
+            instance.save()
+            if old_avatar:
+                self.delete_old_avatar(instance, old_avatar)
+        return instance
+    
+    def delete(self, instance):
+        old_avatar = instance.avatar
+        instance.avatar = instance._meta.get_field('avatar').get_default()
+        instance.save()
+        if old_avatar:
+            self.delete_old_avatar(instance, old_avatar)
+        return instance
+        
+    
+
+
+
+#FRIENDSHIP REQUEST SERIALIZERS
 class ReceivedFriendshipRequestSerializer(serializers.ModelSerializer):
     class Meta:
         model = FriendshipRequest
@@ -81,6 +121,39 @@ class SentFriendshipRequestSerializer(serializers.ModelSerializer):
 
 
 
+#FRIENDS SERIALIZER      
+class FriendsSerializer(serializers.ModelSerializer):
+    friend_id = serializers.IntegerField(write_only=True)
+    friend = serializers.SerializerMethodField()
+
+    class Meta:
+        model = User
+        fields = ['friend_id', 'friend']
+    
+    def get_friend(self, obj):
+        return UserBasicInfoSerializer(obj).data
+    
+    def validate_friend_id(self, value):
+        request = self.context.get('request')
+        try:
+            friend = User.objects.get(id=value)
+        except User.DoesNotExist:
+            raise serializers.ValidationError("Kullanıcı bulunamadı.")
+        try:
+            User.objects.get_friend_validation(request.user, friend)
+        except ValueError as e:
+            raise serializers.ValidationError(str(e))
+        self.context['friend'] = friend
+        return value
+    
+    def delete(self, validated_data):
+        request_user = self.context['request'].user
+        friend = self.context['friend']
+        request_user.friends.remove(friend)
+        return friend
+    
+
+#BLOCKED_USER SERIALIZER
 class BlockUserSerializer(serializers.ModelSerializer):
     blocked_user_id = serializers.IntegerField(write_only=True)
     blocked_user = serializers.SerializerMethodField()
@@ -129,4 +202,3 @@ class BlockUserSerializer(serializers.ModelSerializer):
         blocked_user = self.context['blocked_user']
         request_user.blocked_users.remove(blocked_user)
         return blocked_user
-        
