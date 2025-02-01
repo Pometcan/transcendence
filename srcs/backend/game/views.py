@@ -6,6 +6,7 @@ from datetime import datetime
 from django.views.decorators.csrf import csrf_exempt
 from django.utils import timezone
 import logging
+import random
 
 logger = logging.getLogger(__name__)
 
@@ -21,7 +22,7 @@ def host_game(request):
         try:
             data = json.loads(request.body)
             xuser_id = data["user_id"]
-            xroom_id = data["room_id"]
+            xroom_id = f"ft{random.randint(10000000, 99999999)}"
         except json.JSONDecodeError:
             logger.error("Invalid JSON data")
             response = {"status": "error", "message": "Invalid JSON data"}
@@ -31,20 +32,23 @@ def host_game(request):
             response = {"status": "error", "message": f"Missing key: {e}"}
             return JsonResponse(response, status=400)
 
-        # Kullanıcının zaten bir oyunda olup olmadığını kontrol et (player1 veya player2 olarak)
+        # Kullanicinin zaten bir oyunda olup olmadiğini kontrol et (player1 veya player2 olarak)
         existing_game = (
             TMPGameDB.objects.filter(player1_id=xuser_id).first()
             or TMPGameDB.objects.filter(player2_id=xuser_id).first()
         )
         if existing_game:
-            logger.error(f"{xuser_id} Zaten oyunda room_id: {existing_game.room_id}")
+            logger.error(
+                f"{xuser_id} Oyuna tekrar katiliyor room_id: {existing_game.room_id}"
+            )
             response = {
-                "status": "error",
-                "message": f"{xuser_id} Zaten oyunda room_id: {existing_game.room_id}",
+                "status": "success",
+                "message": f"{xuser_id} Oyuna tekrar katiliyor",
+                "room_id": existing_game.room_id,
             }
-            return JsonResponse(response, status=400)
+            return JsonResponse(response)
 
-        # Yeni oda oluştur
+        # Yeni oda olustur
         now = timezone.now()
         date_string = now.strftime("%Y-%m-%d %H:%M:%S")
 
@@ -52,10 +56,11 @@ def host_game(request):
             room_id=xroom_id, player1_id=xuser_id, create_date=date_string
         )
 
-        logger.error(f"{xuser_id} oda oluşturdu room_id: {xroom_id}")
+        logger.error(f"{xuser_id} oda olusturdu room_id: {xroom_id}")
         response = {
             "status": "success",
-            "message": f"Oda oluşturuldu {xroom_id}",
+            "message": f"Oda olusturuldu {xroom_id}",
+            "room_id": xroom_id,
         }
         return JsonResponse(response)
 
@@ -74,54 +79,64 @@ def join_game(request):
                 xuser_id = data["user_id"]
                 xroom_id = data["room_id"]
 
-                # Kullanıcının zaten oyunda olup olmadığını kontrol et (player1 olarak)
+                # Kullanicinin zaten oyunda olup olmadiğini kontrol et (player1 olarak)
                 game_as_player1 = TMPGameDB.objects.filter(player1_id=xuser_id).first()
                 if game_as_player1:
                     logger.error(
-                        f"{xuser_id} Zaten oyunda (player1) room_id: {game_as_player1.room_id}"
+                        f"{xuser_id} Devam etmekte olan oyuna yeniden katiliyor"
                     )
                     response = {
-                        "status": "error",
-                        "message": f"{xuser_id} Zaten oyunda (player1) room_id: {game_as_player1.room_id}",
+                        "status": "success",
+                        "message": f"{xuser_id} Devam etmekte olan oyuna yeniden katiliyor",
+                        "room_id": game_as_player1.room_id,
                     }
-                    return JsonResponse(response, status=400)
+                    return JsonResponse(response)
 
-                # Kullanıcının zaten oyunda olup olmadığını kontrol et (player2 olarak)
+                # Kullanicinin zaten oyunda olup olmadiğini kontrol et (player2 olarak)
                 game_as_player2 = TMPGameDB.objects.filter(player2_id=xuser_id).first()
                 if game_as_player2:
                     logger.error(
-                        f"{xuser_id} Zaten oyunda (player2) room_id: {game_as_player2.room_id}"
+                        f"{xuser_id} Devam etmekte olan oyuna yeniden katiliyor"
                     )
                     response = {
-                        "status": "error",
-                        "message": f"{xuser_id} Zaten oyunda (player2) room_id: {game_as_player2.room_id}",
+                        "status": "success",
+                        "message": f"{xuser_id} Devam etmekte olan oyuna yeniden katiliyor",
+                        "room_id": game_as_player2.room_id,
                     }
-                    return JsonResponse(response, status=400)
+                    return JsonResponse(response)
 
-                # Odaya katılma işlemi
+                # Odaya katilma islemi
                 room = TMPGameDB.objects.filter(room_id=xroom_id).first()
                 if room:
-                    if not room.player2_id:  # Eğer player2 boşsa odaya katıl
+                    if not room.player2_id:  # Eğer player2 bossa odaya katil
                         room.player2_id = xuser_id
                         room.save()
                         logger.error(f"Odaya katilindi {xroom_id}")
                         response = {
                             "status": "success",
                             "message": f"Odaya katilindi {xroom_id}",
+                            "room_id": room.room_id,
+                        }
+                        return JsonResponse(response)
+                    elif room.player2_id == xuser_id:
+                        response = {
+                            "status": "success",
+                            "message": "devam etmekte olan oyuna yeniden katilindi",
+                            "room_id": room.room_id,
                         }
                         return JsonResponse(response)
                     else:
-                        logger.error(f"Oda dolu: {xroom_id}")
+                        logger.error(f"Oda dolu: {room.room_id}")
                         response = {
                             "status": "error",
-                            "message": f"Oda dolu: {xroom_id}",
+                            "message": f"Oda dolu: {room.room_id}",
                         }
                         return JsonResponse(response, status=400)
                 else:
-                    logger.error(f"Oda bulunamadı: {xroom_id}")
+                    logger.error(f"Oda bulunamadi: {xroom_id}")
                     response = {
                         "status": "error",
-                        "message": f"Oda bulunamadı: {xroom_id}",
+                        "message": f"Oda bulunamadi: {xroom_id}",
                     }
                     return JsonResponse(response, status=404)
 
@@ -137,3 +152,32 @@ def join_game(request):
         logger.error(f"Unknown Error Type: {e}")
         response = {"status": "error", "message": f"Unknown Error Type: {e}"}
         return JsonResponse(response, status=403)
+
+
+# for debug
+def reset_db(request):
+    try:
+        if request.method == "GET":
+            gameobjs = GameDB.objects.all()
+            tmpgameobjs = TMPGameDB.objects.all()
+
+            gameobjs_count = gameobjs.count()
+            tmpgameobjs_count = tmpgameobjs.count()
+            gameobjs.delete()
+            tmpgameobjs.delete()
+            ret = {
+                "status": "success",
+                "message": f"Game Databases are deleted. Delete counts, GameDB = {gameobjs_count} TMPGameDB= {tmpgameobjs_count}",
+            }
+            logger.error(
+                f"Game Databases are deleted. GameDB = {gameobjs_count} TMPGameDB= {tmpgameobjs_count}"
+            )
+            return JsonResponse(ret)
+        else:
+            return JsonResponse(
+                {"status": "error", "message": "only GET method allowed"}, status=400
+            )
+    except Exception as e:
+        logger.error(f"reset_db Error: {e}")
+        return JsonResponse({"status": "error", "message": f"{e}"}, status=400)
+    return JsonResponse({"status": "error", "message": "Unknown Error"}, status=400)

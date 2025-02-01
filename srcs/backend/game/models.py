@@ -2,6 +2,7 @@ from django.db import models
 
 # Create your models here.
 
+
 class GameDB(models.Model):
     room_id = models.CharField(max_length=1000)
     player1_id = models.CharField(max_length=1000)

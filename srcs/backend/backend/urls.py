@@ -29,6 +29,7 @@ urlpatterns = [
     #authentication için
     path('api-auth', include('rest_framework.urls')),
     path('api/rest-auth/', include('dj_rest_auth.urls')),
+
     #registration için
     path('api/rest-auth/registration/', include('dj_rest_auth.registration.urls')),
 

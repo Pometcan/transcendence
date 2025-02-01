@@ -111,181 +111,304 @@
                 get at
             </button>
         </div>
-
-        <div class="form-container">
-            <input
-                type="text"
-                id="userIdInput"
-                placeholder="Kullanıcı ID'nizi girin"
-            />
-            <div class="button-container">
-                <button id="hostBtn">Host</button>
-                <button id="joinBtn">Join</button>
-            </div>
-        </div>
-        <button id="pingBtn" class="hidden">Ping</button>
         <div id="status"></div>
-    </body>
-    <script>
-        const hostBtn = document.getElementById("hostBtn");
-        const joinBtn = document.getElementById("joinBtn");
-        const pingBtn = document.getElementById("pingBtn");
-        const statusDiv = document.getElementById("status");
-        const userIdInput = document.getElementById("userIdInput");
-        let websocket;
-        let roomID;
-        let userID;
+           <div id="scores">P1: 0 | P2: 0</div>
 
-        // Rastgele room_id oluştur
-        function generateRoomID() {
-            return (
-                "ft" + Math.floor(100000 + Math.random() * 900000).toString()
-            );
-        }
+           <div class="form-container">
+               <input type="text" id="userIdInput" placeholder="Kullanıcı ID'nizi girin">
+               <div class="button-container">
+                   <button id="hostBtn">Host</button>
+                   <button id="joinBtn">Join</button>
+               </div>
+           </div>
 
-        // WebSocket bağlantısını kur
-        function connectWebSocket(path) {
+           <div id="gameContainer">
+               <canvas id="gameCanvas" width="1280" height="720"></canvas>
+           </div>
 
-            websocket = new WebSocket(
-                "wss://api." + window.location.host + path,
-                'echo-protocol'
-            );
 
-            websocket.onopen = () => {
-                console.log("WebSocket bağlantısı açıldı:", path);
-                pingBtn.classList.remove("hidden"); // Ping butonunu göster
-                statusDiv.textContent = "Bağlandı";
-            };
+           <script>
+               class PongGame {
+                       constructor(canvas) {
+                           this.canvas = canvas;
+                           this.ctx = canvas.getContext('2d');
+                           this.paddleWidth = 30;
+                           this.paddleHeight = 100;
+                           this.p1_y = 50;
+                           this.p2_y = 50;
+                           this.ball_x = 50;
+                           this.ball_y = 50;
+                           this.p1_score = 0;
+                           this.p2_score = 0;
+                           this.ball_speed = 2;
+                           this.draw();
+                       }
 
-            websocket.onmessage = (event) => {
-                console.log("Gelen mesaj:", event.data);
-            };
+                       updatePaddles(p1, p2) {
+                           if(p1 !== undefined) this.p1_y = p1;
+                           if(p2 !== undefined) this.p2_y = p2;
+                           this.draw();
+                       }
 
-            websocket.onerror = (error) => {
-                console.error("WebSocket hatası:", error);
-                pingBtn.classList.add("hidden"); // Ping butonunu gizle
-                statusDiv.textContent = "WebSocket hatası: " + error.message;
-            };
+                       updateBall(ball_x, ball_y, p1_score, p2_score, ball_speed) {
+                           this.ball_x = ball_x;
+                           this.ball_y = ball_y;
+                           this.p1_score = p1_score;
+                           this.p2_score = p2_score;
+                           this.ball_speed = ball_speed;
+                           this.updateScoreDisplay();
+                           this.draw();
+                       }
 
-            websocket.onclose = () => {
-                console.log("WebSocket bağlantısı kapandı.");
-                pingBtn.classList.add("hidden"); // Ping butonunu gizle
-                statusDiv.textContent = "Bağlantı kapandı.";
-            };
-        }
+                       updateScoreDisplay(){
+                           document.getElementById('scores').textContent = `P1: ${this.p1_score} | P2: ${this.p2_score}`;
+                       }
 
-        // POST isteği gönder
-        async function sendPostRequest(url, data) {
-            try {
-                const response = await fetch(url, {
-                    method: "POST",
-                    headers: {
-                        "Content-Type": "application/json",
-                    },
-                    body: JSON.stringify(data),
-                });
-                const result = await response.json();
-                return result;
-            } catch (error) {
-                console.error("POST isteği hatası:", error);
-                return {
-                    status: "error",
-                    message: "İstek gönderilirken bir hata oluştu.",
-                };
-            }
-        }
+                       draw() {
+                           this.ctx.fillStyle = '#1a1a1a';
+                           this.ctx.fillRect(0, 0, this.canvas.width, this.canvas.height);
 
-        // Host butonu işlevi
-        hostBtn.addEventListener("click", async () => {
-            userID = userIdInput.value.trim();
-            if (!userID) {
-                alert("Lütfen bir Kullanıcı ID girin.");
-                return;
-            }
+                           this.ctx.fillStyle = 'magenta';
+                           const p1Y = (this.canvas.height - this.paddleHeight) * (this.p1_y / 100);
+                           this.ctx.fillRect(
+                               20,
+                               p1Y,
+                               this.paddleWidth,
+                               this.paddleHeight
+                           );
 
-            roomID = generateRoomID();
-            const response = await sendPostRequest(
-                `https://api.${window.location.host}/game/host/`,
-                { user_id: userID, room_id: roomID },
-            );
+                            this.ctx.fillStyle = 'cyan';
+                           const p2Y = (this.canvas.height - this.paddleHeight) * (this.p2_y / 100);
+                           this.ctx.fillRect(
+                               this.canvas.width - 20 - this.paddleWidth,
+                               p2Y,
+                               this.paddleWidth,
+                               this.paddleHeight
+                           );
 
-            if (response.status === "success") {
-                alert("Oda ID'niz: " + roomID);
-                document
-                    .querySelector(".form-container")
-                    .classList.add("hidden"); // Formu gizle
-                connectWebSocket("/ws/pong/" + roomID + "/" + userID);
-            } else if (response.status === "error") {
-                statusDiv.textContent =
-                    "Hata: " + (response.message || "Bilinmeyen hata");
-            } else {
-                statusDiv.textContent = "Hata: Geçersiz yanıt formatı.";
-            }
-        });
+                           this.ctx.beginPath();
+                           const ballX = this.canvas.width * (this.ball_x / 100);
+                           const ballY = this.canvas.height * (this.ball_y / 100);
+                           this.ctx.arc(ballX, ballY, 10, 0, Math.PI * 2);
+                           this.ctx.fillStyle = 'white';
+                           this.ctx.fill();
+                           this.ctx.closePath();
+                       }
+                   }
 
-        // Join butonu işlevi
-        joinBtn.addEventListener("click", async () => {
-            userID = userIdInput.value.trim();
-            if (!userID) {
-                alert("Lütfen bir Kullanıcı ID girin.");
-                return;
-            }
+                   let game = null;
+                   let isHost = false;
+                   const hostBtn = document.getElementById('hostBtn');
+                   const joinBtn = document.getElementById('joinBtn');
+                   const statusDiv = document.getElementById('status');
+                   const userIdInput = document.getElementById('userIdInput');
+                   const gameContainer = document.getElementById('gameContainer');
+                   const scoreDisplay = document.getElementById('scores');
 
-            roomID = prompt("Oda ID'sini girin:");
-            if (!roomID) {
-                alert("Lütfen bir Oda ID girin.");
-                return;
-            }
+                   let websocket;
+                   let roomID;
+                   let userID;
 
-            const response = await sendPostRequest(
-                `https://api.${window.location.host}/game/join/`,
-                { user_id: userID, room_id: roomID },
-            );
+                   function connectWebSocket(path) {
+                       websocket = new WebSocket('ws://api.' + window.location.host + path);
 
-            if (response.status === "success") {
-                document
-                    .querySelector(".form-container")
-                    .classList.add("hidden"); // Formu gizle
-                connectWebSocket("/ws/pong/" + roomID + "/" + userID);
-            } else if (response.status === "error") {
-                statusDiv.textContent =
-                    "Hata: " + (response.message || "Bilinmeyen hata");
-            } else {
-                statusDiv.textContent = "Hata: Geçersiz yanıt formatı.";
-            }
-        });
+                       websocket.onopen = () => {
+                           console.log("WebSocket bağlantısı açıldı:", path);
+                           gameContainer.style.display = 'block';
+                           document.querySelector('.form-container').style.display = 'none';
+                           statusDiv.textContent = "Bağlandı - Oda: " + roomID;
+                           scoreDisplay.style.display = 'block';
 
-        // Ping butonu işlevi
-        pingBtn.addEventListener("click", () => {
-            if (websocket && websocket.readyState === WebSocket.OPEN) {
-                websocket.send(JSON.stringify({ send: "ping" }));
-                console.log(
-                    "Ping mesajı gönderildi: Oda ID -",
-                    roomID,
-                    "Kullanıcı ID -",
-                    userID,
-                );
-            } else {
-                console.error(
-                    "WebSocket bağlantısı açık değil veya tanımlı değil.",
-                );
-            }
-        });
+                           const canvas = document.getElementById('gameCanvas');
+                           game = new PongGame(canvas);
+                           setupKeyListeners();
+                           setupScrollListener();
+                       };
+
+                       websocket.onmessage = (event) => {
+                           const data = JSON.parse(event.data);
+                           console.log("Gelen mesaj:", data);
+
+                           if(data.type === 'move') {
+                               if(game) {
+                                   game.updatePaddles(data.p1_y, data.p2_y);
+                               }
+                           } else if (data.type === 'update_ball') {
+                               if(game) {
+                                   game.updateBall(data.ball_x, data.ball_y, data.p1_score, data.p2_score, data.ball_speed);
+                               }
+                           } else if(data.type === 'disconnect') {
+                               gameContainer.style.display = 'none';
+                               document.querySelector('.form-container').style.display = 'flex';
+                               game = null;
+                               websocket.close();
+                               statusDiv.textContent = `Oyun sonlandı! Kazanan: ${data.Winner}`;
+                               scoreDisplay.style.display = 'none';
+
+                           }
+                       };
+
+                       websocket.onerror = (error) => {
+                           console.error("WebSocket hatası:", error);
+                           gameContainer.style.display = 'none';
+                           document.querySelector('.form-container').style.display = 'flex';
+                           statusDiv.textContent = "Hata: " + error.message;
+                           removeKeyListeners();
+                           removeScrollListener();
+                           scoreDisplay.style.display = 'none';
+                       };
+
+                       websocket.onclose = () => {
+                           console.log("WebSocket bağlantısı kapandı.");
+                           gameContainer.style.display = 'none';
+                           document.querySelector('.form-container').style.display = 'flex';
+                            if (!statusDiv.textContent.startsWith("Oyun sonlandı! Kazanan:"))
+                            {
+                               statusDiv.textContent = "Bağlantı kapandı.";
+                            }
+                           removeKeyListeners();
+                           removeScrollListener();
+                           scoreDisplay.style.display = 'none';
+
+                       };
+                   }
+
+                   async function sendPostRequest(url, data) {
+                       try {
+                           const response = await fetch(url, {
+                               method: 'POST',
+                               headers: {
+                                   'Content-Type': 'application/json',
+                               },
+                               body: JSON.stringify(data),
+                           });
+                           return await response.json();
+                       } catch (error) {
+                           console.error("POST isteği hatası:", error);
+                           return { status: "error", message: "İstek gönderilirken bir hata oluştu." };
+                       }
+                   }
+
+                   hostBtn.addEventListener('click', async () => {
+                       userID = userIdInput.value.trim();
+                       if (!userID) {
+                           alert("Lütfen bir Kullanıcı ID girin.");
+                           return;
+                       }
+
+                       const response = await sendPostRequest(`https://${window.location.host}/game/host/`, { user_id: userID });
+
+                       if (response.status === "success") {
+                           roomID = response.room_id;
+                           isHost = true;
+                            connectWebSocket('/ws/pong/' + roomID + '/' + userID);
+                       } else {
+                           statusDiv.textContent = "Hata: " + (response.message || "Bilinmeyen hata");
+                       }
+                   });
+
+                   joinBtn.addEventListener('click', async () => {
+                       userID = userIdInput.value.trim();
+                       if (!userID) {
+                           alert("Lütfen bir Kullanıcı ID girin.");
+                           return;
+                       }
+
+                       const joinRoomID = prompt("Oda ID'sini girin:");
+                       if (!joinRoomID) {
+                           alert("Lütfen bir Oda ID girin.");
+                           return;
+                       }
+
+                       const response = await sendPostRequest(`https://${window.location.host}/game/join/`, {
+                           user_id: userID,
+                           room_id: joinRoomID
+                       });
+
+                       if (response.status === "success") {
+
+                           isHost = false;
+                           if (response.room_id != null)
+                           {
+                               roomID =response.room_id;
+                           }
+                           connectWebSocket('/ws/pong/' + roomID + '/' + userID);
+
+                       } else {
+                           statusDiv.textContent = "Hata: " + (response.message || "Bilinmeyen hata");
+                       }
+                   });
+
+                   function setupKeyListeners() {
+                       document.addEventListener('keydown', handleKeyPress);
+                   }
+
+                   function removeKeyListeners() {
+                       document.removeEventListener('keydown', handleKeyPress);
+                   }
+
+                   function setupScrollListener() {
+                       document.addEventListener('wheel', handleScroll);
+                   }
+
+                   function removeScrollListener() {
+                       document.removeEventListener('wheel', handleScroll);
+                   }
+
+                   function handleKeyPress(event) {
+                       if (websocket?.readyState === WebSocket.OPEN) {
+                           let direction;
+                           if (event.key === 'ArrowUp' || event.key.toLowerCase() === 'w') {
+                               direction = 'up';
+                           } else if (event.key === 'ArrowDown' || event.key.toLowerCase() === 's') {
+                               direction = 'down';
+                           }
+
+                           if (direction) {
+                               for (let i = 0; i < 10; i++) {
+                                    websocket.send(JSON.stringify({
+                                        type: 'move',
+                                        direction: direction,
+                                    }));
+                                }
+                           }
+                       }
+                   }
+                      function handleScroll(event) {
+                       if (websocket?.readyState === WebSocket.OPEN) {
+                           let direction;
+                           if (event.deltaY < 0) {
+                               direction = 'up';
+                           } else if (event.deltaY > 0) {
+                               direction = 'down';
+                           }
+
+                           if (direction) {
+                              for (let i = 0; i < 10; i++) {
+                                   websocket.send(JSON.stringify({
+                                        type: 'move',
+                                        direction: direction,
+                                   }));
+                               }
+                           }
+                       }
+                   }
 
         function postTest() {
+          console.log(getCookie('csrftoken'))
             fetch("https://api.pometcan.com/api/rest-auth/login/", {
                 method: "POST",
                 credentials: "include", // Tarayıcıdan çerez (cookie) göndermesi için gerekli!
                 headers: {
                     Accept: "application/json",
                     "Content-Type": "application/json",
-                    "X-CSRFTOKEN":
-                        "vQKYVu8Eup2yFl7Hc06flOkL5n1V1kXPOHHTSh56nYaSPYEgBJI4PXh1278OrOhc",
+                    'X-CSRFToken': getCookie('csrftoken')
                 },
                 body: JSON.stringify({
                     username: "pomet",
                     email: "po@po.com",
                     password: "123",
+
                 }),
             })
                 .then((response) => response.json())
@@ -294,7 +417,8 @@
         }
 
         function getTest() {
-            fetch("https://api.pometcan.com/api/rest-auth/user/", {
+          console.log('fuckyo')
+            fetch("https://api.pometcan.com/users/csrf/", {
                 method: "GET",
                 credentials: "include", // Çerezleri backend'e göndermek için gerekli
                 headers: {
@@ -302,8 +426,35 @@
                 },
             })
                 .then((response) => response.json())
-                .then((data) => console.log(data))
+                .then((data) => {
+                  console.log(data)
+                  setCookie('csrftoken', data.csrfToken, 1);
+                })
                 .catch((error) => console.error("Error:", error));
         }
+
+        function setCookie(name,value,days) {
+            var expires = "";
+            if (days) {
+                var date = new Date();
+                date.setTime(date.getTime() + (days*24*60*60*1000));
+                expires = "; expires=" + date.toUTCString();
+            }
+            document.cookie = name + "=" + (value || "")  + expires + "; path=/";
+        }
+        function getCookie(name) {
+            var nameEQ = name + "=";
+            var ca = document.cookie.split(';');
+            for(var i=0;i < ca.length;i++) {
+                var c = ca[i];
+                while (c.charAt(0)==' ') c = c.substring(1,c.length);
+                if (c.indexOf(nameEQ) == 0) return c.substring(nameEQ.length,c.length);
+            }
+            return null;
+        }
+        function eraseCookie(name) {
+            document.cookie = name +'=; Path=/; Expires=Thu, 01 Jan 1970 00:00:01 GMT;';
+        }
+
     </script>
 </html>

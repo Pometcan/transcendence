@@ -135,8 +135,7 @@ CHANNEL_LAYERS = {
     'default': {
         'BACKEND': 'channels_redis.core.RedisChannelLayer',
         'CONFIG': {
-            "hosts": [('redis', 6379)],
-            "password": os.getenv('REDIS_PASSWORD', None),
+            "hosts": [('redis', 6379)]
         },
     },
 }
@@ -166,13 +165,10 @@ CORS_ALLOW_HEADERS = [
 ]
 # CSRF Güvenilir Kaynaklar
 CSRF_TRUSTED_ORIGINS = [
-    "https://pometcan.com",
-    "https://api.pometcan.com",
-    "http://localhost:80",
-    "http://localhost:8000",
     f"https://{os.getenv('FRONTEND_DOMAIN')}",
     f"https://{os.getenv('BACKEND_DOMAIN')}",
     f"https://{os.getenv('GRAFANA_DOMAIN')}",
+    "https://pometcan.com"
     "https://api.pometcan.com"
     "https://localhost:80",
     "http://localhost:80",
@@ -183,6 +179,9 @@ CSRF_TRUSTED_ORIGINS = [
 
 # Ensure CSRF_TRUSTED_ORIGINS has correct formatting
 CSRF_TRUSTED_ORIGINS = [
+    f"https://{os.getenv('FRONTEND_DOMAIN')}",
+    f"https://{os.getenv('BACKEND_DOMAIN')}",
+    f"https://{os.getenv('GRAFANA_DOMAIN')}",
     "https://pometcan.com",
     "https://api.pometcan.com",
     "http://localhost:80",
@@ -212,8 +211,7 @@ CACHES = {
         'BACKEND': 'django_redis.cache.RedisCache',
         'LOCATION': f"redis://redis:{os.getenv('REDIS_PORT')}/1",
         'OPTIONS': {
-            'CLIENT_CLASS': 'django_redis.client.DefaultClient',
-            'PASSWORD': os.getenv('REDIS_PASSWORD', None),
+            'CLIENT_CLASS': 'django_redis.client.DefaultClient'
         }
     }
 }
