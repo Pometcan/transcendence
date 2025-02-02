@@ -1,6 +1,6 @@
 from django.urls import path, include
 
-from .views import index, GetUserViewSet, AvatarViewSet, ReceivedFriendshipRequestViewSet, SentFriendshipRequestViewSet, BlockUserViewSet, FriendsViewSet 
+from .views import index, IntraOAuthView, GetUserViewSet, AvatarViewSet, ReceivedFriendshipRequestViewSet, SentFriendshipRequestViewSet, BlockUserViewSet, FriendsViewSet 
 from rest_framework.routers import DefaultRouter
 
 router=DefaultRouter()
@@ -16,4 +16,6 @@ urlpatterns = [
     path("", index, name="index"),
     path('', include(router.urls)),
     path('avatar/', AvatarViewSet.as_view({'get': 'retrieve', 'put': 'update', 'patch': 'partial_update', 'delete': 'destroy'}), name='avatar'), 
+    path("api/auth/intra/<str:action>/", IntraOAuthView.as_view(), name="intra_oauth"),
+    path("42-auth/", IntraOAuthView.as_view(), name='42-auth')
 ]
