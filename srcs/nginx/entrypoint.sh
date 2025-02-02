@@ -22,5 +22,5 @@ openssl x509 -req -days 3650 \
 cat /etc/nginx/ssl/server.crt /etc/nginx/ssl/ca.crt > /etc/nginx/ssl/fullchain.crt
 
 # Generate nginx config
-envsubst '${FRONTEND_DOMAIN} ${BACKEND_DOMAIN} ${GRAFANA_DOMAIN} ${NGINX_PORT} ${NGINX_PORT_SSL}' \
+envsubst '${DOMAIN} ${NGINX_PORT} ${NGINX_PORT_SSL}' \
     < /etc/nginx/nginx.conf.template > /etc/nginx/nginx.conf && nginx -g 'daemon off;'

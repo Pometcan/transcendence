@@ -20,7 +20,7 @@ http {
     server {
         listen ${NGINX_PORT_SSL} ssl;
         listen [::]:${NGINX_PORT_SSL} ssl;
-        server_name ${FRONTEND_DOMAIN};
+        server_name ${DOMAIN};
 
         # SSL Sertifikaları
         ssl_certificate /etc/nginx/ssl/fullchain.crt;
@@ -28,7 +28,6 @@ http {
         ssl_protocols TLSv1.2 TLSv1.3;
 
         location / {
-            # proxy_pass http://frontend:5173/;
             root /usr/share/nginx/html;
             index index.html;
             try_files $uri $uri/ /index.html;
@@ -53,27 +52,14 @@ http {
             alias /usr/share/nginx/html/assets/;
             autoindex off;
         }
-    }
-
-    # Backend API server
-    server {
-        listen ${NGINX_PORT_SSL} ssl;
-        listen [::]:${NGINX_PORT_SSL} ssl;
-        #listen [::]:${NGINX_PORT};
-        server_name ${BACKEND_DOMAIN};
-
-        set $cors_origin https://${FRONTEND_DOMAIN};
-        # SSL Sertifikaları
-        ssl_certificate /etc/nginx/ssl/fullchain.crt;
-        ssl_certificate_key /etc/nginx/ssl/server.key;
-        ssl_protocols TLSv1.2 TLSv1.3;
+        set $cors_origin https://${DOMAIN};
 
         # API proxy
-        location / {
+        location /api/ {
             proxy_pass http://django:8000;
             proxy_http_version 1.1;
             proxy_set_header Upgrade $http_upgrade;
-            proxy_set_header Connection $connection_upgrade;
+            #proxy_set_header Connection $connection_upgrade;
             proxy_set_header Host $host;
             proxy_set_header X-Real-IP $remote_addr;
             proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
@@ -82,13 +68,13 @@ http {
         }
 
         # API'nin statik dosyaları
-        location /static/ {
-            alias /usr/share/nginx/html/bstatic/;
+        location /api/static/ {
+            alias /usr/share/nginx/html/static/;
             autoindex off;
         }
 
         location /media/ {
-            alias /usr/share/nginx/html/media;
+            alias /usr/share/nginx/html/media/;
             autoindex off;
         }
     }

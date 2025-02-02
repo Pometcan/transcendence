@@ -165,11 +165,6 @@ CORS_ALLOW_HEADERS = [
 ]
 # CSRF Güvenilir Kaynaklar
 CSRF_TRUSTED_ORIGINS = [
-    f"https://{os.getenv('FRONTEND_DOMAIN')}",
-    f"https://{os.getenv('BACKEND_DOMAIN')}",
-    f"https://{os.getenv('GRAFANA_DOMAIN')}",
-    "https://pometcan.com"
-    "https://api.pometcan.com"
     "https://localhost:80",
     "http://localhost:80",
     "http://localhost:8000",
@@ -179,11 +174,6 @@ CSRF_TRUSTED_ORIGINS = [
 
 # Ensure CSRF_TRUSTED_ORIGINS has correct formatting
 CSRF_TRUSTED_ORIGINS = [
-    f"https://{os.getenv('FRONTEND_DOMAIN')}",
-    f"https://{os.getenv('BACKEND_DOMAIN')}",
-    f"https://{os.getenv('GRAFANA_DOMAIN')}",
-    "https://pometcan.com",
-    "https://api.pometcan.com",
     "http://localhost:80",
     "http://localhost:8000",
 ]
@@ -254,17 +244,20 @@ USE_I18N = True
 USE_TZ = True
 
 
-# Static files (CSS, JavaScript, Images)
-# https://docs.djangoproject.com/en/5.1/howto/static-files/
-STATIC_URL = '/usr/share/nginx/html/backstatic/'
+
 
 MEDIA_URL = '/media/'
 MEDIA_ROOT = 'uploads'
 
+# Static files (CSS, JavaScript, Images)
+# https://docs.djangoproject.com/en/5.1/howto/static-files/
+STATIC_URL = '/api/static/'
 STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
 STATICFILES_DIRS = [
-    os.path.join(BASE_DIR, '/backend/static'),
+    os.path.join(BASE_DIR, 'static'),
 ]
+
+
 
 # Default primary key field type
 # https://docs.djangoproject.com/en/5.1/ref/settings/#default-auto-field

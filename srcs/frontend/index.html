@@ -210,7 +210,7 @@
                    let userID;
 
                    function connectWebSocket(path) {
-                       websocket = new WebSocket('ws://api.' + window.location.host + path);
+                       websocket = new WebSocket('wss://api.' + window.location.host + path);
 
                        websocket.onopen = () => {
                            console.log("WebSocket bağlantısı açıldı:", path);
@@ -279,6 +279,8 @@
                                method: 'POST',
                                headers: {
                                    'Content-Type': 'application/json',
+                                   "Content-Type": "application/json",
+                                   'X-CSRFToken': getCookie('csrftoken')
                                },
                                body: JSON.stringify(data),
                            });
@@ -296,7 +298,7 @@
                            return;
                        }
 
-                       const response = await sendPostRequest(`https://${window.location.host}/game/host/`, { user_id: userID });
+                       const response = await sendPostRequest(`https://${window.location.host}/api/game/host/`, { user_id: userID });
 
                        if (response.status === "success") {
                            roomID = response.room_id;
@@ -417,7 +419,6 @@
         }
 
         function getTest() {
-          console.log('fuckyo')
             fetch("https://api.pometcan.com/users/csrf/", {
                 method: "GET",
                 credentials: "include", // Çerezleri backend'e göndermek için gerekli
