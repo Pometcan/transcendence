@@ -60,8 +60,6 @@ class AvatarViewSet(mixins.UpdateModelMixin,
                 status=status.HTTP_400_BAD_REQUEST
             )
 
-
-
 class ReceivedFriendshipRequestViewSet(
                 mixins.ListModelMixin,
                 mixins.RetrieveModelMixin,
@@ -103,7 +101,6 @@ class FriendsViewSet(
                 mixins.ListModelMixin,
                 mixins.DestroyModelMixin,
                 GenericViewSet): #yalnızca request userın arkadaşlarına ulaşılır / bir userın arkadaşlarını görmke için ekleme yapılmalı ??
-
     serializer_class = FriendsSerializer
     permission_classes = [IsAuthenticated]
     gueryset = User.objects.none()
