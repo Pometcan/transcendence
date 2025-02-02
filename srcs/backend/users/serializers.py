@@ -13,6 +13,13 @@ class UserBasicInfoSerializer(serializers.ModelSerializer):
         fields = ['id', 'username', 'avatar', 'rank']
         read_only_fields = ['id','avatar', 'rank']
 
+class UserBasicInfoSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = User
+        fields = ['id', 'username', 'avatar', 'rank']
+        read_only_fields = ['id','avatar', 'rank']
+
+
 class GetUserSerializer(serializers.ModelSerializer):
     class Meta:
         model = User
@@ -50,9 +57,6 @@ class AvatarSerializer(serializers.ModelSerializer):
         if old_avatar:
             self.delete_old_avatar(instance, old_avatar)
         return instance
-        
-    
-
 
 
 #FRIENDSHIP REQUEST SERIALIZERS
@@ -62,6 +66,11 @@ class ReceivedFriendshipRequestSerializer(serializers.ModelSerializer):
         fields = ['id', 'sender', 'receiver', 'status', 'is_active', 'created_date']
         read_only_fields = ['id', 'sender', 'receiver', 'is_active', 'created_date']
     
+    def to_representation(self, instance):
+        representation = super().to_representation(instance)
+        representation['sender'] = UserBasicInfoSerializer(instance.sender).data
+        return representation
+
     def to_representation(self, instance):
         representation = super().to_representation(instance)
         representation['sender'] = UserBasicInfoSerializer(instance.sender).data
@@ -118,8 +127,6 @@ class SentFriendshipRequestSerializer(serializers.ModelSerializer):
         except ValidationError as e:
             raise serializers.ValidationError({"detail": str(e)})
         return FriendshipRequest.objects.create(sender=sender, receiver=receiver)
-
-
 
 #FRIENDS SERIALIZER      
 class FriendsSerializer(serializers.ModelSerializer):

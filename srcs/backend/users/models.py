@@ -13,14 +13,14 @@ class User(AbstractUser):
     country = models.CharField(max_length=100, blank=True)
     create_date = models.DateTimeField(auto_now_add=True)
     update_date = models.DateTimeField(auto_now=True)
-    
+
     friends = models.ManyToManyField('self', symmetrical=False, related_name='friend_of', blank=True)
     blocked_users = models.ManyToManyField('self',symmetrical=False, related_name='blocked_by', blank=True)
 
     objects = UserManager()
 
     def save(self, *args, **kwargs):
-        
+
         # #eğer user pasif olursa friends ve blocked users tablolarında temizlenir.
         # if not self.is_active:
         #     self.friends.clear()
@@ -37,6 +37,9 @@ class User(AbstractUser):
                 img.save(self.avatar.path)
                 #SENEM: kullanıcı yeni avatar eklediğinde eski avatarı silmek için koda ekleme yapmalısın!!
     
+    def __str__(self):
+        return self.username
+
     def __str__(self):
         return self.username
 
@@ -88,8 +91,7 @@ class FriendshipRequest(models.Model):
                 existing_request.update(is_active=False)
         else:
             super().save(*args, **kwargs)
-        
-        
+
+
     def __str__(self):
         return f"{self.sender.username} sent friendship request to the {self.receiver.username}"
-

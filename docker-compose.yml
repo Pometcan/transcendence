@@ -69,7 +69,6 @@ services:
     command:
       - redis-server
       - --appendonly yes
-      - --requirepass "${REDIS_PASSWORD}"
       - --maxmemory 10mb
       - --maxmemory-policy allkeys-lru
     networks:
