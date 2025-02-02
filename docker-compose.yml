@@ -13,7 +13,8 @@ services:
       - ${DJANGO_PORT}:8000
     volumes:
       - backend_vol:/backend
-      - /backend/static
+      - ./srcs/backend/static:/backend/static
+      - media_vol:/backend/uploads
     depends_on:
       - postgresql
       - redis
@@ -38,6 +39,7 @@ services:
       - ./srcs/nginx/ssl:/etc/nginx/ssl
       - ./srcs/nginx:/etc/nginx/conf.d
       - ./srcs/backend/static:/usr/share/nginx/html/static
+      - media_vol:/usr/share/nginx/html/media
       - ./srcs/frontend:/usr/share/nginx/html
       - ./srcs/frontend/static:/usr/share/nginx/html/static
     networks:
@@ -92,6 +94,8 @@ volumes:
       type: none
       o: bind
       device: ./srcs/backend/
+  media_vol:
+    driver: local
   pgdata:
     driver: local
   redis_data:

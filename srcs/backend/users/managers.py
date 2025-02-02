@@ -1,12 +1,20 @@
 from django.db import models
-from django.contrib.auth.models import BaseUserManager
+from django.contrib.auth.models import UserManager as DefaultUserManager
 from django.core.exceptions import ValidationError
 from django.apps import apps
 
-
-class UserManager(BaseUserManager):
+class UserManager(DefaultUserManager):
     use_in_migrations =True
 
+    def get_friend_validation(self, requestUser, friend):
+               
+        if not friend \
+                or not self.filter(id=friend.id).exists() \
+                or not friend.is_active :
+            raise ValidationError("Kullanıcı bulunamadı.")
+        if not requestUser.friends.filter(id = friend.id).exists():
+            raise ValidationError("Kullanıcı zaten arkadaşınız değil.")
+         
     def block_user_validation(self, requestUser, userToBlock):
 
         if not userToBlock \
@@ -28,17 +36,11 @@ class UserManager(BaseUserManager):
                 or requestUser.blocked_by.filter(id = blockedUser.id).exists():
             raise ValidationError("Kullanıcı bulunamadı.")
 
-
-
-
-
-
 class FriendshipRequestManager(models.Manager):
     use_in_migrations = True
 
     def create_friendship_request_validation(self, sender, receiver, status):
-
-        User = apps.get_model('users', 'User')
+        User = apps.get_model('users', 'User') 
         if not receiver \
                 or not User.objects.filter(id=receiver.id).exists() \
                 or not receiver.is_active \

@@ -1,13 +1,14 @@
 from django.db import models
-from django.db.models import Q
 from django.contrib.auth.models import AbstractUser
 from .managers import FriendshipRequestManager, UserManager
+import os
+from django.db.models import Q
 from PIL import Image
 
 
 class User(AbstractUser):
     email = models.EmailField(unique=True, blank=False)
-    avatar = models.ImageField(blank=True, null=True)
+    avatar = models.ImageField(blank=True, null=True, upload_to='.', default = os.getenv('AVATAR_FILE_NAME'))
     rank = models.DecimalField(max_digits=3, decimal_places=2, default=0)
     country = models.CharField(max_length=100, blank=True)
     create_date = models.DateTimeField(auto_now_add=True)
@@ -35,6 +36,9 @@ class User(AbstractUser):
                 img.thumbnail(output_size)
                 img.save(self.avatar.path)
                 #SENEM: kullanıcı yeni avatar eklediğinde eski avatarı silmek için koda ekleme yapmalısın!!
+    
+    def __str__(self):
+        return self.username
 
     def __str__(self):
         return self.username
