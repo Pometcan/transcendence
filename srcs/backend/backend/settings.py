@@ -166,21 +166,26 @@ CORS_ALLOW_HEADERS = [
 # CSRF Güvenilir Kaynaklar
 CSRF_TRUSTED_ORIGINS = [
     "https://localhost:80",
-    "http://localhost:80",
-    "http://localhost:8000",
-    "http://127.0.0.1:8000", #swagger için
+    "https://localhost:8000",
+    "https://127.0.0.1:80",
+    "https://127.0.0.1:8000", #swagger için
 ]
 
 
 # Ensure CSRF_TRUSTED_ORIGINS has correct formatting
 CSRF_TRUSTED_ORIGINS = [
-    "http://localhost:80",
-    "http://localhost:8000",
+    "https://localhost:80",
+    "https://localhost:8000",
+    "https://127.0.0.1:80",
+    "https://127.0.0.1:8000",
 ]
-
+CORS_ALLOW_CREDENTIALS = True
+SECURE_SSL_REDIRECT = True
+SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
 CSRF_COOKIE_SECURE = True  # SENEM: Geliştirme aşamasında, productionda True yapmalıyız.
+CSRF_COOKIE_SAMESITE = 'None'
 SESSION_COOKIE_SECURE = True
-CSRF_COOKIE_HTTPONLY = False  # SENEM: CSRF token yalnızca HTTP başlıklarında mevcut olacak??
+CSRF_COOKIE_HTTPONLY = True  # SENEM: CSRF token yalnızca HTTP başlıklarında mevcut olacak??
 
 # Database
 # https://docs.djangoproject.com/en/5.1/ref/settings/#databases
@@ -246,16 +251,13 @@ USE_TZ = True
 
 
 
-MEDIA_URL = '/media/'
-MEDIA_ROOT = 'uploads'
+MEDIA_URL = '/api/media/'
+MEDIA_ROOT = os.path.join(BASE_DIR, 'uploads')
 
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/5.1/howto/static-files/
 STATIC_URL = '/api/static/'
-STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
-STATICFILES_DIRS = [
-    os.path.join(BASE_DIR, 'static'),
-]
+STATIC_ROOT = os.path.join(BASE_DIR, 'static')
 
 
 

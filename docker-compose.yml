@@ -5,6 +5,7 @@ services:
     container_name: django
     entrypoint: |
       bash -c "
+        python manage.py collectstatic --noinput &&
         python manage.py migrate &&
         python manage.py runserver 0.0.0.0:8000
       "
@@ -36,10 +37,9 @@ services:
       - redis
       - postgresql
     volumes:
-      - ./srcs/nginx/ssl:/etc/nginx/ssl
       - ./srcs/nginx:/etc/nginx/conf.d
-      - ./srcs/backend/static:/usr/share/nginx/html/static
       - ./srcs/frontend:/usr/share/nginx/html
+      - ./srcs/backend/static:/usr/share/nginx/html/static
       - media_vol:/usr/share/nginx/html/media
     networks:
       - trans_network

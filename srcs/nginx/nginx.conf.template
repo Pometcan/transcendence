@@ -8,25 +8,26 @@ http {
     gzip_disable "msie6";
     add_header Cache-Control 'no-store';
 
-    # HTTP server - HTTP isteklerini HTTPS'ye yönlendirme
+     # HTTP'den HTTPS'ye yönlendirme
     server {
-        listen ${NGINX_PORT};
-        #listen [::]:${NGINX_PORT};
-        server_name _;
+        listen 80;
+        server_name ${DOMAIN};
         return 301 https://$host$request_uri;
     }
 
-    # HTTPS server - Ana sunucu
+    # HTTPS - Tek sunucu (Fronteinceptionnd ve Backend)
     server {
+
         listen ${NGINX_PORT_SSL} ssl;
-        listen [::]:${NGINX_PORT_SSL} ssl;
-        server_name ${DOMAIN};
+        #listen [::]:${NGINX_PORT_SSL} ssl;
+        server_name ${DOMAIN} localhost;
 
         # SSL Sertifikaları
-        ssl_certificate /etc/nginx/ssl/fullchain.crt;
+        ssl_certificate /etc/nginx/ssl/server.crt;
         ssl_certificate_key /etc/nginx/ssl/server.key;
         ssl_protocols TLSv1.2 TLSv1.3;
 
+        ###### Frontend config ######
         location / {
             root /usr/share/nginx/html;
             index index.html;
@@ -35,11 +36,6 @@ http {
 
         location /src/ {
             alias /usr/share/nginx/html/src/;
-            autoindex off;
-        }
-
-        location /static/ {
-            alias /usr/share/nginx/html/static/;
             autoindex off;
         }
 
@@ -52,30 +48,44 @@ http {
             alias /usr/share/nginx/html/assets/;
             autoindex off;
         }
-        set $cors_origin https://${DOMAIN};
 
+
+        ###### Backend config ######
+        set $cors_origin https://${DOMAIN};
         # API proxy
         location /api/ {
             proxy_pass http://django:8000;
             proxy_http_version 1.1;
             proxy_set_header Upgrade $http_upgrade;
-            #proxy_set_header Connection $connection_upgrade;
+            proxy_set_header Connection "upgrade";
             proxy_set_header Host $host;
             proxy_set_header X-Real-IP $remote_addr;
             proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
             proxy_set_header X-Forwarded-Proto $scheme;
+        }
+        location /ws/pong/ {
+            proxy_pass http://django:8000;
+            proxy_http_version 1.1;
+            proxy_set_header Upgrade $http_upgrade;
             proxy_set_header Connection "Upgrade";
+            proxy_set_header Host $host;
+            proxy_set_header X-Real-IP $remote_addr;
+            proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+            proxy_set_header X-Forwarded-Proto $scheme;
+            proxy_buffering off;
+            proxy_read_timeout 86400s;
+            proxy_send_timeout 86400s;
         }
 
         # API'nin statik dosyaları
         location /api/static/ {
             alias /usr/share/nginx/html/static/;
-            autoindex off;
+            autoindex on;
         }
 
-        location /media/ {
+        location /api/media/ {
             alias /usr/share/nginx/html/media/;
-            autoindex off;
+            autoindex on;
         }
     }
 

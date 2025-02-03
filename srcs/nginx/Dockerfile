@@ -2,12 +2,15 @@ FROM nginx:1.27.3-alpine-slim
 
 RUN apk add --no-cache openssl bash gettext
 
-COPY nginx.conf.template /etc/nginx/nginx.conf.template
-COPY entrypoint.sh /entrypoint.sh
+RUN mkdir -p /etc/nginx/ssl && \
+    openssl req -x509 -nodes -days 365 -newkey rsa:2048 \
+    -keyout /etc/nginx/ssl/server.key \
+    -out /etc/nginx/ssl/server.crt \
+    -subj "/C=TR/ST=Istanbul/L=Istanbul/O=Pomet/OU=Development/CN=localhost"
 
-RUN chmod +x /entrypoint.sh && \
-    mkdir -p /etc/nginx/ssl
+COPY ./nginx.conf.template /etc/nginx/nginx.conf.template
 
-ENTRYPOINT ["/entrypoint.sh"]
+CMD envsubst '${DOMAIN} ${NGINX_PORT} ${NGINX_PORT_SSL}' \
+    < /etc/nginx/nginx.conf.template > /etc/nginx/nginx.conf && nginx -g 'daemon off;'
 
-EXPOSE 80 443
+EXPOSE ${NGINX_PORT} ${NGINX_PORT_SSL}
