@@ -210,7 +210,7 @@
                    let userID;
 
                    function connectWebSocket(path) {
-                       websocket = new WebSocket('wss://' + window.location.host  + path );
+                       websocket = new WebSocket('wss://localhost' + path );
 
                        websocket.onopen = () => {
                            console.log("WebSocket bağlantısı açıldı:", path);

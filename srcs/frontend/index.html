@@ -182,46 +182,46 @@
                     this.paddleHeight = 100;
                     this.paddleTopWidth = 100;
                     this.paddleTopHeight = 30;
-                    this.p1_y = 50; // Left Paddle (Magenta)
-                    this.p2_y = 50; // Right Paddle (Cyan)
-                    this.p3_x = 50; // Top Paddle (Yellow)
-                    this.p4_x = 50; // Bottom Paddle (Lime)
+                    this.p1_y = 50;
+                    this.p2_y = 50;
+                    this.p3_x = 50;
+                    this.p4_x = 50;
                     this.ball_x = 50;
                     this.ball_y = 50;
-                    this.p1_score = 0; // Left Score
-                    this.p2_score = 0; // Right Score
-                    this.p3_score = 0; // Top Score
-                    this.p4_score = 0; // Bottom Score
+                    this.p1_score = 0;
+                    this.p2_score = 0;
+                    this.p3_score = 0;
+                    this.p4_score = 0;
                     this.ball_speed = 1;
                     this.isSingleplayer = false;
                     this.isFourPlayer = false;
-                     this.ball_dx = 1; // Ball direction in x-axis (-1 for left, 1 for right)
-                    this.ball_dy = 1; // Ball direction in y-axis (-1 for up, 1 for down)
+                     this.ball_dx = 1;
+                    this.ball_dy = 1;
                     this.draw();
                      this.gameLoop = null;
-                     this.p1_targetY = this.p1_y; // Target Y for smooth movement (Left)
-                     this.p2_targetY = this.p2_y;  // Target Y for smooth movement (Right)
-                     this.p3_targetX = this.p3_x; // Target X for smooth movement (Top)
-                     this.p4_targetX = this.p4_x; // Target X for smooth movement (Bottom)
+                     this.p1_targetY = this.p1_y;
+                     this.p2_targetY = this.p2_y;
+                     this.p3_targetX = this.p3_x;
+                     this.p4_targetX = this.p4_x;
                      this.keys = {
-                        'w': false, // P1 Up (Left Paddle)
-                        's': false, // P1 Down (Left Paddle)
-                        'ArrowUp': false, // P2 Up (Right Paddle)
-                        'ArrowDown': false, // P2 Down (Right Paddle)
-                        'v': false, // P3 Left (Top Paddle) - Changed from 'a' to 'v'
-                        'b': false, // P3 Right (Top Paddle) - Changed from 'd' to 'b'
-                        'j': false, // P4 Left (Bottom Paddle)
-                        'l': false  // P4 Right (Bottom Paddle)
+                        'w': false,
+                        's': false,
+                        'ArrowUp': false,
+                        'ArrowDown': false,
+                        'v': false,
+                        'b': false,
+                        'j': false,
+                        'l': false
                     };
                      this.maxScore = 10;
                      this.gameEnded = false;
-                     this.currentMap = 'normal'; // Default map is normal
+                     this.currentMap = 'normal';
                 }
 
                 updatePaddles(p1, p2, p3, p4) {
                      const canvasHeight = this.canvas.height;
                        const paddleHeight = this.paddleHeight;
-                       const speedMultiplier = 2.5; // Paddle speed multiplier
+                       const speedMultiplier = 2.5;
                     if(p1 !== undefined){
                         this.p1_targetY = Math.max(0, Math.min(100, p1));
                      }
@@ -236,7 +236,7 @@
                      }
                 }
                   updatePaddlePositions(){
-                      const speed = 0.2; // Smoothing speed for paddles
+                      const speed = 0.2;
                        if(this.p1_y !== this.p1_targetY)
                        {
                            this.p1_y += (this.p1_targetY - this.p1_y) * speed;
@@ -267,36 +267,36 @@
                         }
                 }
              movePaddles(){
-                const speedMultiplier = 2.5; // Paddle speed multiplier
-                 if(this.keys['w']) // P1 Up
+                const speedMultiplier = 2.5;
+                 if(this.keys['w'])
                     {
                        this.updatePaddles(this.p1_targetY - 2 * speedMultiplier, undefined, undefined, undefined);
                     }
-                   if(this.keys['s']) // P1 Down
+                   if(this.keys['s'])
                     {
                        this.updatePaddles(this.p1_targetY + 2* speedMultiplier, undefined, undefined, undefined);
                     }
-                   if(this.keys['ArrowUp']) // P2 Up
+                   if(this.keys['ArrowUp'])
                     {
                          this.updatePaddles(undefined, this.p2_targetY - 2* speedMultiplier, undefined, undefined);
                     }
-                     if(this.keys['ArrowDown']) // P2 Down
+                     if(this.keys['ArrowDown'])
                     {
                         this.updatePaddles(undefined, this.p2_targetY + 2* speedMultiplier, undefined, undefined);
                     }
-                    if(this.keys['v']) // P3 Left - Changed from 'a' to 'v'
+                    if(this.keys['v'])
                     {
                         this.updatePaddles(undefined, undefined, this.p3_targetX - 2 * speedMultiplier, undefined);
                     }
-                    if(this.keys['b']) // P3 Right - Changed from 'd' to 'b'
+                    if(this.keys['b'])
                     {
                         this.updatePaddles(undefined, undefined, this.p3_targetX + 2 * speedMultiplier, undefined);
                     }
-                    if(this.keys['j']) // P4 Left
+                    if(this.keys['j'])
                     {
                         this.updatePaddles(undefined, undefined, undefined, this.p4_targetX - 2 * speedMultiplier);
                     }
-                    if(this.keys['l']) // P4 Right
+                    if(this.keys['l'])
                     {
                         this.updatePaddles(undefined, undefined, undefined, this.p4_targetX + 2 * speedMultiplier);
                     }
@@ -338,7 +338,7 @@
 
                     // Collision with top and bottom walls (now just bounce in 4 player mode)
                         if (ballY + 10 > this.canvas.height || ballY - 10 < 0) {
-                            this.ball_dy *= -1; // Reverse direction for top and bottom walls in both modes
+                            this.ball_dy *= -1;
                         }
 
                         // Collision with left paddle (P1)
@@ -347,11 +347,11 @@
                             ballX - 10 <= 20 + this.paddleWidth &&
                             ballY + 10 >= p1Y &&
                             ballY - 10 <= p1Y + this.paddleHeight &&
-                             this.ball_dx < 0 //Only check if the ball is going to left
+                             this.ball_dx < 0
                         ) {
-                           this.ball_dx *= -1; // Reverse x direction
-                           this.ball_speed *= 1.1; //Increase speed
-                           this.ball_dx = Math.abs(this.ball_dx); // Ensure that the ball goes to the right.
+                           this.ball_dx *= -1;
+                           this.ball_speed *= 1.1;
+                           this.ball_dx = Math.abs(this.ball_dx);
                         }
 
                        // Collision with right paddle (P2)
@@ -360,11 +360,11 @@
                             ballX + 10 >= this.canvas.width - 20 - this.paddleWidth &&
                             ballY + 10 >= p2Y &&
                             ballY - 10 <= p2Y + this.paddleHeight &&
-                            this.ball_dx > 0 // Only check if the ball is going to the right
+                            this.ball_dx > 0
                         ) {
-                           this.ball_dx *= -1; // Reverse x direction
-                           this.ball_speed *= 1.1; //Increase speed
-                           this.ball_dx = - Math.abs(this.ball_dx); //Ensure that the ball goes to the left.
+                           this.ball_dx *= -1;
+                           this.ball_speed *= 1.1;
+                           this.ball_dx = - Math.abs(this.ball_dx);
                         }
 
                         // Collision with top paddle (P3)
@@ -408,20 +408,20 @@
                             }
                         } else {
                             // Ball scoring for 4 player mode (corners)
-                            const cornerScoreRange = 150; // Define the range for corner scoring in pixels from top/bottom
+                            const cornerScoreRange = 150;
                             if (ballX < 0) {
                                 if (ballY < cornerScoreRange || ballY > this.canvas.height - cornerScoreRange) {
-                                    this.p2_score++; // Right player scores on left corners
+                                    this.p2_score++;
                                     this.resetBall();
                                 } else {
-                                    this.ball_dx *= -1; // Bounce off left wall if not in corner score zone
+                                    this.ball_dx *= -1;
                                 }
                             } else if (ballX > this.canvas.width) {
                                 if (ballY < cornerScoreRange || ballY > this.canvas.height - cornerScoreRange) {
-                                    this.p1_score++; // Left player scores on right corners
+                                    this.p1_score++;
                                     this.resetBall();
                                 } else {
-                                    this.ball_dx *= -1; // Bounce off right wall if not in corner score zone
+                                    this.ball_dx *= -1;
                                 }
                             }
                         }
@@ -432,25 +432,25 @@
                     const canvasWidth = this.canvas.width;
                     const canvasHeight = this.canvas.height;
 
-                    if (this.currentMap === 'map1') { // Heart Pattern
+                    if (this.currentMap === 'map1') {
                         const heart = this.getHeartPath(canvasWidth / 2, canvasHeight / 2, 100);
                         if (this.isPointInPath(ballX, ballY, heart)) {
                             this.ball_dx *= -1;
                             this.ball_dy *= -1;
                             this.ball_speed *= 1.1;
                         }
-                    } else if (this.currentMap === 'map2') { // Star Pattern
+                    } else if (this.currentMap === 'map2') {
                         const star = this.getStarPath(canvasWidth / 2, canvasHeight / 2, 80, 40);
                         if (this.isPointInPath(ballX, ballY, star)) {
                             this.ball_dx *= -1;
                             this.ball_dy *= -1;
                             this.ball_speed *= 1.1;
                         }
-                    } else if (this.currentMap === 'map3') { // Circle Pattern
+                    } else if (this.currentMap === 'map3') {
                         const centerX = canvasWidth / 2;
                         const centerY = canvasHeight / 2;
                         const radius = 60;
-                        if (Math.sqrt((ballX - centerX) ** 2 + (ballY - centerY) ** 2) <= radius + 10) { // +10 for ball radius
+                        if (Math.sqrt((ballX - centerX) ** 2 + (ballY - centerY) ** 2) <= radius + 10) {
                             const angle = Math.atan2(ballY - centerY, ballX - centerX);
                             const ballAngle = Math.atan2(this.ball_dy, this.ball_dx);
                             const diffAngle = angle - ballAngle;
@@ -501,7 +501,6 @@
 
                 resetBall(){
                     this.ball_x = 50;
-                    // Start from top for custom maps, center otherwise
                     this.ball_y = ['map1', 'map2', 'map3'].includes(this.currentMap) ? 10 : 50;
                     this.ball_speed = 1;
                     this.ball_dx = Math.random() > 0.5 ? 1 : -1;
@@ -542,13 +541,13 @@
                  }
 
                 drawMapPatterns(mapType) {
-                    if (mapType === 'normal') return; // Do not draw patterns for normal map
+                    if (mapType === 'normal') return;
 
-                    this.ctx.fillStyle = 'rgba(255, 255, 255, 0.2)'; // Semi-transparent white for patterns
+                    this.ctx.fillStyle = 'rgba(255, 255, 255, 0.2)';
                     const canvasWidth = this.canvas.width;
                     const canvasHeight = this.canvas.height;
 
-                    if (mapType === 'map1') { // Heart
+                    if (mapType === 'map1') {
                         const heartPath = this.getHeartPath(canvasWidth / 2, canvasHeight / 2, 100);
                         this.ctx.beginPath();
                         this.ctx.moveTo(heartPath[0][0], heartPath[0][1]);
@@ -558,7 +557,7 @@
                         this.ctx.closePath();
                         this.ctx.fill();
 
-                    } else if (mapType === 'map2') { // Star
+                    } else if (mapType === 'map2') {
                         const starPath = this.getStarPath(canvasWidth / 2, canvasHeight / 2, 80, 40);
                         this.ctx.beginPath();
                         this.ctx.moveTo(starPath[0][0], starPath[0][1]);
@@ -567,7 +566,7 @@
                         }
                         this.ctx.closePath();
                         this.ctx.fill();
-                    } else if (mapType === 'map3') { // Circle
+                    } else if (mapType === 'map3') {
                         this.ctx.beginPath();
                         this.ctx.arc(canvasWidth / 2, canvasHeight / 2, 60, 0, Math.PI * 2);
                         this.ctx.closePath();
@@ -580,9 +579,8 @@
                     this.ctx.fillStyle = '#1a1a1a';
                     this.ctx.fillRect(0, 0, this.canvas.width, this.canvas.height);
 
-                    this.drawMapPatterns(this.currentMap); // Draw map patterns
+                    this.drawMapPatterns(this.currentMap);
 
-                    // Left Paddle (P1)
                     this.ctx.fillStyle = 'magenta';
                     const p1Y = (this.canvas.height - this.paddleHeight) * (this.p1_y / 100);
                     this.ctx.fillRect(
@@ -592,7 +590,6 @@
                         this.paddleHeight
                     );
 
-                     // Right Paddle (P2)
                     this.ctx.fillStyle = 'cyan';
                     const p2Y = (this.canvas.height - this.paddleHeight) * (this.p2_y / 100);
                     this.ctx.fillRect(
@@ -603,7 +600,6 @@
                     );
 
                     if (this.isFourPlayer) {
-                        // Top Paddle (P3) - Yellow
                         this.ctx.fillStyle = 'yellow';
                         const p3X = (this.canvas.width - this.paddleTopWidth) * (this.p3_x / 100);
                         this.ctx.fillRect(
@@ -613,7 +609,6 @@
                             this.paddleTopHeight
                         );
 
-                        // Bottom Paddle (P4) - Lime
                         this.ctx.fillStyle = 'lime';
                         const p4X = (this.canvas.width - this.paddleTopWidth) * (this.p4_x / 100);
                         this.ctx.fillRect(
@@ -624,7 +619,6 @@
                         );
                     }
 
-                    // Ball
                     this.ctx.beginPath();
                     const ballX = this.canvas.width * (this.ball_x / 100);
                     const ballY = this.canvas.height * (this.ball_y / 100);
@@ -635,11 +629,11 @@
                 }
                 startGameLoop() {
                      this.gameLoop = setInterval(() => {
-                         this.updatePaddlePositions(); // Update paddle positions for smooth movement in every frame
+                         this.updatePaddlePositions();
                          if (isMultiplayer) {
-                             this.draw(); // For multiplayer, only draw (positions are updated by server)
+                             this.draw();
                          } else {
-                             this.updateSingleplayer(); // For singleplayer, update game logic and draw
+                             this.updateSingleplayer();
                          }
                         }, 1000 / 60);
                 }
@@ -658,7 +652,7 @@
              const multiplayerBtn = document.getElementById('multiplayerBtn');
              const singleplayerBtn = document.getElementById('singleplayerBtn');
              const oneVsOneBtn = document.getElementById('oneVsOneBtn');
-            const fourPlayerBtn = document.getElementById('fourPlayerBtn'); // New button
+            const fourPlayerBtn = document.getElementById('fourPlayerBtn');
             const tournamentBtn = document.getElementById('tournamentBtn');
               const createPlayersBtn = document.getElementById('createPlayersBtn');
              const numberOfPlayersInput = document.getElementById('numberOfPlayersInput');
@@ -690,7 +684,8 @@
             let currentP2Index = 1;
 
             function connectWebSocket(path) {
-                websocket = new WebSocket('wss://' + window.location.host + path);
+                const protocol = window.location.protocol === 'https:' ? 'wss://' : 'ws://';
+                websocket = new WebSocket(protocol + window.location.host + path);
 
                 websocket.onopen = () => {
                     console.log("WebSocket bağlantısı açıldı:", path);
@@ -701,11 +696,11 @@
                      backButtonContainer.style.display = 'block';
                     statusDiv.textContent = "Bağlandı - Oda: " + roomID;
                     scoreDisplay.style.display = 'block';
-                    isMultiplayer = true; // Set isMultiplayer to true when connected in multiplayer mode
+                    isMultiplayer = true;
 
                     const canvas = document.getElementById('gameCanvas');
                     game = new PongGame(canvas);
-                    game.startGameLoop(); // Start game loop for rendering and smooth paddles
+                    game.startGameLoop();
                     setupKeyListeners();
                     setupScrollListener();
                 };
@@ -716,7 +711,6 @@
 
                     if(data.type === 'move') {
                         if(game) {
-                            // Use updatePaddles to set target and achieve smooth movement
                             game.updatePaddles(data.p1_y, data.p2_y, undefined, undefined);
                         }
                     } else if (data.type === 'update_ball') {
@@ -730,10 +724,10 @@
                            singleplayerModeContainer.style.display = 'none';
                             backButtonContainer.style.display = 'none';
                         game = null;
-                        websocket.close();
-                        statusDiv.textContent = `Oyun sonlandı! Kazanan: ${data.Winner}`;
+                        websocket.close(1000, "Oyun sonlandı");
+                        statusDiv.textContent = `Oyun sonlandı! Kazanan: ${data.Winner || 'Belirlenemedi'}`;
                         scoreDisplay.style.display = 'none';
-                        isMultiplayer = false; // Reset isMultiplayer when disconnected
+                        isMultiplayer = false;
 
                     }
                 };
@@ -745,15 +739,15 @@
                        gameModeContainer.style.display = 'flex';
                         backButtonContainer.style.display = 'none';
                         singleplayerModeContainer.style.display = 'none';
-                    statusDiv.textContent = "Hata: " + error.message;
+                    statusDiv.textContent = "WebSocket Hatası: " + error.message;
                     removeKeyListeners();
                     removeScrollListener();
                     scoreDisplay.style.display = 'none';
-                    isMultiplayer = false; // Reset isMultiplayer on error
+                    isMultiplayer = false;
                 };
 
-                websocket.onclose = () => {
-                    console.log("WebSocket bağlantısı kapandı.");
+                websocket.onclose = (event) => {
+                    console.log("WebSocket bağlantısı kapandı. Kod:", event.code, "Sebep:", event.reason);
                     gameContainer.style.display = 'none';
                     multiplayerForm.style.display = 'none';
                      gameModeContainer.style.display = 'flex';
@@ -761,12 +755,12 @@
                      backButtonContainer.style.display = 'none';
                      if (!statusDiv.textContent.startsWith("Oyun sonlandı! Kazanan:"))
                      {
-                        statusDiv.textContent = "Bağlantı kapandı.";
+                        statusDiv.textContent = `Bağlantı kapandı. Kod: ${event.code}, Sebep: ${event.reason || 'Belirtilmedi'}`;
                      }
                     removeKeyListeners();
                     removeScrollListener();
                     scoreDisplay.style.display = 'none';
-                    isMultiplayer = false; // Reset isMultiplayer on close
+                    isMultiplayer = false;
 
                 };
             }
@@ -784,6 +778,15 @@
                 } catch (error) {
                     console.error("POST isteği hatası:", error);
                     return { status: "error", message: "İstek gönderilirken bir hata oluştu." };
+                }
+            }
+
+             function sendMoveMessage(direction) {
+                if (isMultiplayer && websocket?.readyState === WebSocket.OPEN) {
+                    websocket.send(JSON.stringify({
+                        type: 'move',
+                        direction: direction,
+                    }));
                 }
             }
 
@@ -812,7 +815,7 @@
                 isTournamentMode = false;
                 gameModeContainer.style.display = 'none';
                 singleplayerModeContainer.style.display = 'none';
-                mapSelectionContainer.style.display = 'flex'; // Show map selection
+                mapSelectionContainer.style.display = 'flex';
                 backButtonContainer.style.display = 'block';
                 statusDiv.textContent = "1vs1 Harita Seçimi";
             });
@@ -829,7 +832,7 @@
                 const canvas = document.getElementById('gameCanvas');
                 game = new PongGame(canvas);
                 game.isSingleplayer = true;
-                game.isFourPlayer = true; // Enable 4 player mode
+                game.isFourPlayer = true;
                 game.startGameLoop();
                 setupScrollListener();
                 setupKeyListeners();
@@ -887,7 +890,7 @@
                 if (response.status === "success") {
                     roomID = response.room_id;
 
-                     connectWebSocket('/ws/pong/' + roomID + '/' + userID);
+                     connectWebSocket('/api/pong/' + roomID + '/' + userID);
                 } else {
                     statusDiv.textContent = "Hata: " + (response.message || "Bilinmeyen hata");
                 }
@@ -917,7 +920,7 @@
                     {
                         roomID =response.room_id;
                     }
-                    connectWebSocket('/ws/pong/' + roomID + '/' + userID);
+                    connectWebSocket('/api/pong/' + roomID + '/' + userID);
 
                 } else {
                     statusDiv.textContent = "Hata: " + (response.message || "Bilinmeyen hata");
@@ -949,7 +952,7 @@
                   game.keys[key] = true;
                  }
                 }
-                   else if (isMultiplayer && websocket?.readyState === WebSocket.OPEN) { //Check isMultiplayer here
+                   else if (isMultiplayer && websocket?.readyState === WebSocket.OPEN) {
                     let direction;
                    if (event.key === 'ArrowUp' || event.key.toLowerCase() === 'w') {
                         direction = 'up';
@@ -958,10 +961,7 @@
                     }
 
                     if (direction) {
-                        websocket.send(JSON.stringify({
-                            type: 'move', // Changed to 'move'
-                            direction: direction,
-                        }));
+                        sendMoveMessage(direction);
                     }
                 }
             }
@@ -972,7 +972,7 @@
                     game.keys[key] = false;
                   }
                  }
-                  else if (isMultiplayer && websocket?.readyState === WebSocket.OPEN) { //Check isMultiplayer here
+                  else if (isMultiplayer && websocket?.readyState === WebSocket.OPEN) {
                     let direction;
                    if (event.key === 'ArrowUp' || event.key.toLowerCase() === 'w') {
                         direction = 'up';
@@ -981,10 +981,7 @@
                     }
 
                     if (direction) {
-                        websocket.send(JSON.stringify({
-                            type: 'move', // Changed to 'move'
-                            direction: direction,
-                        }));
+                        sendMoveMessage(direction);
                     }
                 }
             }
@@ -992,7 +989,7 @@
                function handleScroll(event) {
                    if(game?.isSingleplayer === true) {
                      let direction;
-                      const speedMultiplier = 2.5; // Paddle speed multiplier
+                      const speedMultiplier = 2.5;
                     if (event.deltaY < 0) {
                          direction = 'up';
                     } else if (event.deltaY > 0) {
@@ -1002,7 +999,7 @@
                          game.updatePaddles(undefined, direction === "up" ? game.p2_targetY - 2 * speedMultiplier : game.p2_targetY + 2 * speedMultiplier);
                     }
                    }
-                   else if (isMultiplayer && websocket?.readyState === WebSocket.OPEN) { //Check isMultiplayer here
+                   else if (isMultiplayer && websocket?.readyState === WebSocket.OPEN) {
                     let direction;
                     if (event.deltaY < 0) {
                         direction = 'up';
@@ -1011,10 +1008,7 @@
                     }
 
                     if (direction) {
-                        websocket.send(JSON.stringify({
-                            type: 'move', // Changed to 'move'
-                            direction: direction,
-                        }));
+                        sendMoveMessage(direction);
                     }
                 }
             }
@@ -1030,7 +1024,7 @@
             });
 
             function createPlayerInputs(numberOfPlayers) {
-            tournamentPlayersInputs.innerHTML = ''; // Önceki inputları temizle
+            tournamentPlayersInputs.innerHTML = '';
 
             for (let i = 0; i < numberOfPlayers; i++) {
                 const input = document.createElement('input');
@@ -1053,20 +1047,18 @@
                     const trimmedValue = rawValue.trim();
                     let name;
 
-                    // Boşluk kontrolü
                     if (trimmedValue === "") {
-                        if (rawValue !== "") { // Sadece boşluk girilmişse
+                        if (rawValue !== "") {
                             alert("Lütfen geçerli bir isim girin!");
                             playerInput.focus();
                             return;
-                        } else { // Input tamamen boşsa
+                        } else {
                             name = `Oyuncu ${i + 1}`;
                         }
                     } else {
                         name = trimmedValue;
                     }
 
-                    // Benzersizlik kontrolü
                     if (tempNames.has(name)) {
                         alert("Tüm isimler benzersiz olmalıdır!");
                         playerInput.focus();
@@ -1090,15 +1082,13 @@
                 fourPlayerBtn.style.display = 'none';
                 tournamentBtn.style.display = 'none';
                   matchQueue = [];
-                 //Create all combinations of players
-                for(let i=0; i < tournamentPlayers.length; i++)
+                 for(let i=0; i < tournamentPlayers.length; i++)
                 {
                     for(let j = i + 1; j < tournamentPlayers.length; j++)
                     {
                         matchQueue.push({p1: i, p2: j});
                     }
                 }
-                //shuffle the match queue
                 for (let i = matchQueue.length - 1; i > 0; i--) {
                      const j = Math.floor(Math.random() * (i + 1));
                     [matchQueue[i], matchQueue[j]] = [matchQueue[j], matchQueue[i]];
@@ -1121,12 +1111,9 @@
 
               function handleTournamentMatchEnd(winnerIndex) {
                  const loserIndex = winnerIndex === currentP1Index ? currentP2Index : currentP1Index;
-                 // Remove the loser from the tournamentPlayers array
                  tournamentPlayers.splice(loserIndex, 1);
 
-                 // Update the matchQueue to remove matches involving the loser
                 matchQueue = matchQueue.filter(match => match.p1 !== loserIndex && match.p2 !== loserIndex);
-                //Adjust the indexes in matchQueue
                  for (let i = 0; i < matchQueue.length; i++) {
                        if (matchQueue[i].p1 > loserIndex) {
                            matchQueue[i].p1--;
@@ -1135,7 +1122,6 @@
                          matchQueue[i].p2--;
                      }
                  }
-                 // If there's only one player left, they are the winner
                 if (tournamentPlayers.length === 1) {
                      statusDiv.textContent = `Turnuva Bitti! Kazanan: ${tournamentPlayers[0]}`;
                       removeKeyListeners();
@@ -1156,7 +1142,6 @@
                      game.updateScoreDisplay();
                      matchQueue.shift();
                 } else {
-                    // If the queue is empty but more than one player remains, start a new round
                     startTournament();
                 }
              }
