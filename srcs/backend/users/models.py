@@ -40,10 +40,6 @@ class User(AbstractUser):
     def __str__(self):
         return self.username
 
-    def __str__(self):
-        return self.username
-
-
 
 
 # Arkadaşlık İsteği Modeli

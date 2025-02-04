@@ -1,4 +1,3 @@
-from os import getenv
 from pickle import GET
 """
 Django settings for backend project.
@@ -54,6 +53,7 @@ INSTALLED_APPS = [
     'allauth',
     'allauth.account',
     'allauth.socialaccount', #SENEM: 42 intra ile bağlamak için kullanılabilir- social login
+    'allauth.socialaccount.providers.oauth2',
     'dj_rest_auth',
     'dj_rest_auth.registration',
 
@@ -61,19 +61,21 @@ INSTALLED_APPS = [
     'requests',
     'users.apps.UsersConfig',
     'drf_spectacular', #SENEM: swagger içindi sanırım
-
     #MELIH
     'channels',
     'game',
 ]
 
 
-
 AUTH_USER_MODEL = 'users.User'
+
+INTRA_CLIENT_ID = os.getenv('INTRA_CLIENT_ID')
+INTRA_CLIENT_SECRET= os.getenv('INTRA_CLIENT_SECRET')
+INTRA_REDIRECT_URI = os.getenv('INTRA_REDIRECT_URI')
 
 REST_FRAMEWORK = {
     'DEFAULT_PERMISSION_CLASSES': [
-        'rest_framework.permissions.DjangoModelPermissionsOrAnonReadOnly'
+        'rest_framework.permissions.DjangoModelPermissionsOrAnonReadOnly' #SENEM: jwt entegre edildiğine jwt permission da eklenmeli.
     ],
 
     'DEFAULT_SCHEMA_CLASS': 'drf_spectacular.openapi.AutoSchema', #SENEM: swagger için
@@ -248,9 +250,6 @@ USE_I18N = True
 
 USE_TZ = True
 
-
-
-
 MEDIA_URL = '/api/media/'
 MEDIA_ROOT = os.path.join(BASE_DIR, 'uploads')
 
@@ -258,7 +257,6 @@ MEDIA_ROOT = os.path.join(BASE_DIR, 'uploads')
 # https://docs.djangoproject.com/en/5.1/howto/static-files/
 STATIC_URL = '/api/static/'
 STATIC_ROOT = os.path.join(BASE_DIR, 'static')
-
 
 
 # Default primary key field type

@@ -69,12 +69,12 @@ http {
         # API'nin statik dosyaları
         location /api/static/ {
             alias /usr/share/nginx/html/static/;
-            autoindex on;
+            autoindex off;
         }
 
-        location /api/media/ {
+        location /media/ {
             alias /usr/share/nginx/html/media/;
-            autoindex on;
+            autoindex off;
         }
     }
 

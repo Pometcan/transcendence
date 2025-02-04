@@ -13,12 +13,6 @@ class UserBasicInfoSerializer(serializers.ModelSerializer):
         fields = ['id', 'username', 'avatar', 'rank']
         read_only_fields = ['id','avatar', 'rank']
 
-class UserBasicInfoSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = User
-        fields = ['id', 'username', 'avatar', 'rank']
-        read_only_fields = ['id','avatar', 'rank']
-
 
 class GetUserSerializer(serializers.ModelSerializer):
     class Meta:
@@ -57,6 +51,25 @@ class AvatarSerializer(serializers.ModelSerializer):
         if old_avatar:
             self.delete_old_avatar(instance, old_avatar)
         return instance
+        
+
+    def update(self, instance, validated_data):
+        new_avatar = validated_data.get('avatar')
+        if new_avatar is not None:
+            old_avatar = instance.avatar
+            instance.avatar = new_avatar
+            instance.save()
+            if old_avatar:
+                self.delete_old_avatar(instance, old_avatar)
+        return instance
+    
+    def delete(self, instance):
+        old_avatar = instance.avatar
+        instance.avatar = instance._meta.get_field('avatar').get_default()
+        instance.save()
+        if old_avatar:
+            self.delete_old_avatar(instance, old_avatar)
+        return instance
 
 
 #FRIENDSHIP REQUEST SERIALIZERS
@@ -66,11 +79,6 @@ class ReceivedFriendshipRequestSerializer(serializers.ModelSerializer):
         fields = ['id', 'sender', 'receiver', 'status', 'is_active', 'created_date']
         read_only_fields = ['id', 'sender', 'receiver', 'is_active', 'created_date']
     
-    def to_representation(self, instance):
-        representation = super().to_representation(instance)
-        representation['sender'] = UserBasicInfoSerializer(instance.sender).data
-        return representation
-
     def to_representation(self, instance):
         representation = super().to_representation(instance)
         representation['sender'] = UserBasicInfoSerializer(instance.sender).data
@@ -127,7 +135,6 @@ class SentFriendshipRequestSerializer(serializers.ModelSerializer):
         except ValidationError as e:
             raise serializers.ValidationError({"detail": str(e)})
         return FriendshipRequest.objects.create(sender=sender, receiver=receiver)
-
 #FRIENDS SERIALIZER      
 class FriendsSerializer(serializers.ModelSerializer):
     friend_id = serializers.IntegerField(write_only=True)

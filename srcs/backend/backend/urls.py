@@ -20,6 +20,7 @@ from django.conf import settings
 from django.conf.urls.static import static
 from rest_framework import permissions
 from drf_spectacular.views import SpectacularAPIView, SpectacularSwaggerView
+from users.views import CustomLoginView
 
 
 urlpatterns = [
@@ -29,6 +30,7 @@ urlpatterns = [
     #authentication için
     path('api/api-auth', include('rest_framework.urls')),
     path('api/rest-auth/', include('dj_rest_auth.urls')),
+    path('api/rest-auth/login/', CustomLoginView.as_view(), name='custom_rest_auth_login'),
 
     #registration için
     path('api/rest-auth/registration/', include('dj_rest_auth.registration.urls')),
