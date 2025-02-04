@@ -27,10 +27,13 @@ load_dotenv()
 SECRET_KEY = os.getenv('SECRET_KEY', 'Agla Kudur')
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = os.getenv('DEBUG', 'True')
+DEBUG = os.getenv('DEBUG', 'true')
 
 ALLOWED_HOSTS = ['*']
 
+######################################################################################################################################---ÖNEMLİ
+CSRF_COOKIE_PATH = '/'
+#################################################################################################################
 
 # Application definition
 
@@ -41,15 +44,58 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+    'django.contrib.sites', #SENEM: social login için gerekli
+
     'rest_framework',
+
+    #authentication için
+    'rest_framework.authtoken',
+    #registraton için
+    'allauth',
+    'allauth.account',
+    'allauth.socialaccount', #SENEM: 42 intra ile bağlamak için kullanılabilir- social login
+    'dj_rest_auth',
+    'dj_rest_auth.registration',
+
     "corsheaders",
+    'requests',
+    'users.apps.UsersConfig',
+    'drf_spectacular', #SENEM: swagger içindi sanırım
+
+    #MELIH
+    'channels',
+    'game',
 ]
+
+
+
+AUTH_USER_MODEL = 'users.User'
 
 REST_FRAMEWORK = {
     'DEFAULT_PERMISSION_CLASSES': [
         'rest_framework.permissions.DjangoModelPermissionsOrAnonReadOnly'
-    ]
+    ],
+
+    'DEFAULT_SCHEMA_CLASS': 'drf_spectacular.openapi.AutoSchema', #SENEM: swagger için
+
+    'DEFAULT_AUTHENTICATION_CLASSES': [
+        'rest_framework.authentication.SessionAuthentication',  # CSRF için
+        'rest_framework.authentication.TokenAuthentication',
+    ],
 }
+
+AUTHENTICATION_BACKENDS = (
+    'allauth.account.auth_backends.AuthenticationBackend',
+)
+
+SITE_ID = 1
+ACCOUNT_EMAIL_VERIFICATION = 'none' #SENEM: 2fa için değiştirmek gerekebilir??
+# SENEM: ACCOUNT_EMAIL_VERIFICATION = 'mandatory'  # E-posta doğrulaması zorunlu
+ACCOUNT_EMAIL_REQUIRED = True #SENEM: Kayıt esnasında email adresi verilmeli mi?
+ACCOUNT_UNIQUE_EMAIL = True
+#SENEM: ACCOUNT_AUTHENTICATED_REDIRECT_URL = '/'  # Başarılı giriş sonrası yönlendirilecek URL
+
+
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
@@ -61,6 +107,7 @@ MIDDLEWARE = [
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
     "corsheaders.middleware.CorsMiddleware",
     "django.middleware.common.CommonMiddleware",
+    "allauth.account.middleware.AccountMiddleware",
 ]
 
 ROOT_URLCONF = 'backend.urls'
@@ -82,8 +129,18 @@ TEMPLATES = [
 ]
 
 WSGI_APPLICATION = 'backend.wsgi.application'
+ASGI_APPLICATION = 'backend.asgi.application'
 
+CHANNEL_LAYERS = {
+    'default': {
+        'BACKEND': 'channels_redis.core.RedisChannelLayer',
+        'CONFIG': {
+            "hosts": [('redis', 6379)]
+        },
+    },
+}
 # CORS Ayarları
+CORS_ORIGIN_ALLOW_ALL = True
 CORS_ALLOW_ALL_ORIGINS = True
 CORS_ALLOW_CREDENTIALS = True
 CORS_ALLOW_METHODS = [
@@ -108,12 +165,27 @@ CORS_ALLOW_HEADERS = [
 ]
 # CSRF Güvenilir Kaynaklar
 CSRF_TRUSTED_ORIGINS = [
-    f"https://{os.getenv('FRONTEND_DOMAIN')}",
-    f"https://{os.getenv('BACKEND_DOMAIN')}",
-    f"https://{os.getenv('GRAFANA_DOMAIN')}",
-    "http://localhost:80",
-    "http://localhost:8000",
+    "https://localhost:80",
+    "https://localhost:8000",
+    "https://127.0.0.1:80",
+    "https://127.0.0.1:8000", #swagger için
 ]
+
+
+# Ensure CSRF_TRUSTED_ORIGINS has correct formatting
+CSRF_TRUSTED_ORIGINS = [
+    "https://localhost:80",
+    "https://localhost:8000",
+    "https://127.0.0.1:80",
+    "https://127.0.0.1:8000",
+]
+CORS_ALLOW_CREDENTIALS = True
+SECURE_SSL_REDIRECT = True
+SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
+CSRF_COOKIE_SECURE = True  # SENEM: Geliştirme aşamasında, productionda True yapmalıyız.
+CSRF_COOKIE_SAMESITE = 'None'
+SESSION_COOKIE_SECURE = True
+CSRF_COOKIE_HTTPONLY = True  # SENEM: CSRF token yalnızca HTTP başlıklarında mevcut olacak??
 
 # Database
 # https://docs.djangoproject.com/en/5.1/ref/settings/#databases
@@ -134,8 +206,7 @@ CACHES = {
         'BACKEND': 'django_redis.cache.RedisCache',
         'LOCATION': f"redis://redis:{os.getenv('REDIS_PORT')}/1",
         'OPTIONS': {
-            'CLIENT_CLASS': 'django_redis.client.DefaultClient',
-            'PASSWORD': os.getenv('REDIS_PASSWORD', None),
+            'CLIENT_CLASS': 'django_redis.client.DefaultClient'
         }
     }
 }
@@ -160,6 +231,9 @@ AUTH_PASSWORD_VALIDATORS = [
     {
         'NAME': 'django.contrib.auth.password_validation.NumericPasswordValidator',
     },
+    # {
+    #     'NAME': 'user.validators.custom_password_validator',
+    # },
 ]
 
 
@@ -175,13 +249,17 @@ USE_I18N = True
 USE_TZ = True
 
 
+
+
+MEDIA_URL = '/api/media/'
+MEDIA_ROOT = os.path.join(BASE_DIR, 'uploads')
+
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/5.1/howto/static-files/
-STATIC_URL = '/usr/share/nginx/html/backstatic/'
-STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
-STATICFILES_DIRS = [
-    os.path.join(BASE_DIR, '/backend/static'),
-]
+STATIC_URL = '/api/static/'
+STATIC_ROOT = os.path.join(BASE_DIR, 'static')
+
+
 
 # Default primary key field type
 # https://docs.djangoproject.com/en/5.1/ref/settings/#default-auto-field

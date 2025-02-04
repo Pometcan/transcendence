@@ -1,0 +1,1190 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pong Game</title>
+    <style>
+        body {
+            font-family: sans-serif;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+            background-color: rgb(46, 49, 50);
+            color: white;
+            overflow: hidden;
+            position: relative;
+        }
+         .form-container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 10px;
+             z-index: 2;
+        }
+        #gameContainer {
+            display: none;
+            width: 1280px;
+            height: 720px;
+            position: relative;
+            margin: 0 auto;
+        }
+        #gameCanvas {
+            width: 100%;
+            height: 100%;
+            background-color: #1a1a1a;
+        }
+        .button-container {
+            display: flex;
+            gap: 20px;
+            margin-bottom: 20px;
+        }
+         .game-mode-container{
+            display: flex;
+             gap: 20px;
+            margin-bottom: 20px;
+             z-index: 2;
+        }
+         .singleplayer-mode-container{
+            display: none;
+            flex-direction: column;
+            align-items: center;
+            gap: 20px;
+            margin-bottom: 20px;
+             z-index: 2;
+        }
+         .tournament-input-container {
+             display: none;
+            flex-direction: column;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 20px;
+            z-index: 2;
+        }
+         .tournament-player-inputs{
+            display: none;
+             flex-direction: column;
+             align-items: center;
+             gap: 10px;
+            margin-bottom: 20px;
+        }
+        button {
+            padding: 15px 30px;
+            font-size: 1.2em;
+            cursor: pointer;
+            background-color: #121212;
+            color: white;
+            border: none;
+            border-radius: 5px;
+        }
+        button:hover {
+            background-color: #bca220;
+        }
+        #status {
+             position: absolute;
+             top: 10px;
+            left: 50%;
+            transform: translateX(-50%);
+            font-size: 1.5em;
+            z-index: 2;
+            text-align: center;
+        }
+        #scores {
+            position: absolute;
+             top: 40px;
+            left: 50%;
+            transform: translateX(-50%);
+            font-size: 1.5em;
+            z-index: 2;
+            display: none;
+        }
+        input {
+            padding: 10px;
+            font-size: 1em;
+            margin-bottom: 10px;
+            width: 200px;
+            border-radius: 5px;
+            border: 1px solid #ccc;
+        }
+        .back-button-container {
+            display: none;
+            position: absolute;
+            top: 20px;
+            left: 20px;
+             z-index: 3;
+        }
+         .map-selection-container {
+            display: none;
+            flex-direction: column;
+            align-items: center;
+            gap: 20px;
+            margin-bottom: 20px;
+            z-index: 2;
+        }
+         .map-options {
+            display: flex;
+            gap: 10px;
+        }
+    </style>
+</head>
+<body>
+    <div id="status"></div>
+    <div id="scores">P1: 0 | P2: 0</div>
+
+    <div class="game-mode-container" id="gameModeContainer">
+        <button id="singleplayerBtn">Singleplayer</button>
+        <button id="multiplayerBtn">Multiplayer</button>
+    </div>
+      <div class="singleplayer-mode-container" id="singleplayerModeContainer">
+            <button id="oneVsOneBtn">1vs1</button>
+            <button id="fourPlayerBtn">4 Player</button> <button id="tournamentBtn">Tournament</button>
+             <div class="tournament-input-container" id="tournamentInputContainer">
+                <input type="number" id="numberOfPlayersInput" min="2" placeholder="Oyuncu Sayısı">
+                <button id="createPlayersBtn">Oyuncuları Oluştur</button>
+             </div>
+             <div class="tournament-player-inputs" id="tournamentPlayersInputs">
+                 </div>
+      </div>
+
+    <div class="map-selection-container" id="mapSelectionContainer">
+        <div class="map-options">
+            <button id="normalMapBtn">Normal Harita</button>
+            <button id="map1Btn">Harita 1 (Kalp)</button>
+            <button id="map2Btn">Harita 2 (Yıldız)</button>
+            <button id="map3Btn">Harita 3 (Daire)</button>
+        </div>
+    </div>
+
+    <div class="form-container" id="multiplayerForm" style="display: none;">
+        <input type="text" id="userIdInput" placeholder="Kullanıcı ID'nizi girin">
+        <div class="button-container">
+            <button id="hostBtn">Host</button>
+            <button id="joinBtn">Join</button>
+        </div>
+    </div>
+
+     <div class="back-button-container" id="backButtonContainer">
+        <button id="backBtn">Geri</button>
+     </div>
+
+    <div id="gameContainer">
+        <canvas id="gameCanvas" width="1280" height="720"></canvas>
+    </div>
+    <script>
+        class PongGame {
+                constructor(canvas) {
+                    this.canvas = canvas;
+                    this.ctx = canvas.getContext('2d');
+                    this.paddleWidth = 30;
+                    this.paddleHeight = 100;
+                    this.paddleTopWidth = 100;
+                    this.paddleTopHeight = 30;
+                    this.p1_y = 50;
+                    this.p2_y = 50;
+                    this.p3_x = 50;
+                    this.p4_x = 50;
+                    this.ball_x = 50;
+                    this.ball_y = 50;
+                    this.p1_score = 0;
+                    this.p2_score = 0;
+                    this.p3_score = 0;
+                    this.p4_score = 0;
+                    this.ball_speed = 1;
+                    this.isSingleplayer = false;
+                    this.isFourPlayer = false;
+                     this.ball_dx = 1;
+                    this.ball_dy = 1;
+                    this.draw();
+                     this.gameLoop = null;
+                     this.p1_targetY = this.p1_y;
+                     this.p2_targetY = this.p2_y;
+                     this.p3_targetX = this.p3_x;
+                     this.p4_targetX = this.p4_x;
+                     this.keys = {
+                        'w': false,
+                        's': false,
+                        'ArrowUp': false,
+                        'ArrowDown': false,
+                        'v': false,
+                        'b': false,
+                        'j': false,
+                        'l': false
+                    };
+                     this.maxScore = 10;
+                     this.gameEnded = false;
+                     this.currentMap = 'normal';
+                }
+
+                updatePaddles(p1, p2, p3, p4) {
+                     const canvasHeight = this.canvas.height;
+                       const paddleHeight = this.paddleHeight;
+                       const speedMultiplier = 2.5;
+                    if(p1 !== undefined){
+                        this.p1_targetY = Math.max(0, Math.min(100, p1));
+                     }
+                    if(p2 !== undefined){
+                         this.p2_targetY = Math.max(0, Math.min(100, p2));
+                      }
+                     if(p3 !== undefined){
+                         this.p3_targetX = Math.max(0, Math.min(100, p3));
+                     }
+                     if(p4 !== undefined){
+                         this.p4_targetX = Math.max(0, Math.min(100, p4));
+                     }
+                }
+                  updatePaddlePositions(){
+                      const speed = 0.2;
+                       if(this.p1_y !== this.p1_targetY)
+                       {
+                           this.p1_y += (this.p1_targetY - this.p1_y) * speed;
+                            if (Math.abs(this.p1_targetY - this.p1_y) < 0.1) {
+                                this.p1_y = this.p1_targetY;
+                            }
+                        }
+                        if(this.p2_y !== this.p2_targetY)
+                        {
+                            this.p2_y += (this.p2_targetY - this.p2_y) * speed;
+                             if (Math.abs(this.p2_targetY - this.p2_y) < 0.1) {
+                                 this.p2_y = this.p2_targetY;
+                                }
+                        }
+                         if(this.p3_x !== this.p3_targetX)
+                        {
+                            this.p3_x += (this.p3_targetX - this.p3_x) * speed;
+                             if (Math.abs(this.p3_targetX - this.p3_x) < 0.1) {
+                                 this.p3_x = this.p3_targetX;
+                                }
+                        }
+                         if(this.p4_x !== this.p4_targetX)
+                        {
+                            this.p4_x += (this.p4_targetX - this.p4_x) * speed;
+                             if (Math.abs(this.p4_targetX - this.p4_x) < 0.1) {
+                                 this.p4_x = this.p4_targetX;
+                                }
+                        }
+                }
+             movePaddles(){
+                const speedMultiplier = 2.5;
+                 if(this.keys['w'])
+                    {
+                       this.updatePaddles(this.p1_targetY - 2 * speedMultiplier, undefined, undefined, undefined);
+                    }
+                   if(this.keys['s'])
+                    {
+                       this.updatePaddles(this.p1_targetY + 2* speedMultiplier, undefined, undefined, undefined);
+                    }
+                   if(this.keys['ArrowUp'])
+                    {
+                         this.updatePaddles(undefined, this.p2_targetY - 2* speedMultiplier, undefined, undefined);
+                    }
+                     if(this.keys['ArrowDown'])
+                    {
+                        this.updatePaddles(undefined, this.p2_targetY + 2* speedMultiplier, undefined, undefined);
+                    }
+                    if(this.keys['v'])
+                    {
+                        this.updatePaddles(undefined, undefined, this.p3_targetX - 2 * speedMultiplier, undefined);
+                    }
+                    if(this.keys['b'])
+                    {
+                        this.updatePaddles(undefined, undefined, this.p3_targetX + 2 * speedMultiplier, undefined);
+                    }
+                    if(this.keys['j'])
+                    {
+                        this.updatePaddles(undefined, undefined, undefined, this.p4_targetX - 2 * speedMultiplier);
+                    }
+                    if(this.keys['l'])
+                    {
+                        this.updatePaddles(undefined, undefined, undefined, this.p4_targetX + 2 * speedMultiplier);
+                    }
+            }
+
+                 updateSingleplayer() {
+                         this.movePaddles();
+                        this.updatePaddlePositions();
+                        this.updateBallPosition();
+                        this.handleCollisions();
+                        this.draw();
+                        this.checkGameEnd();
+                    }
+                    updateMultiplayer(p1, p2)
+                    {
+                         if (p1 !== undefined) {
+                             this.p1_targetY = p1;
+                         }
+                         if (p2 !== undefined) {
+                             this.p2_targetY = p2;
+                         }
+                           this.updatePaddlePositions();
+                        this.draw();
+                    }
+
+                updateBall(ball_x, ball_y, p1_score, p2_score, ball_speed) {
+                    this.ball_x = ball_x;
+                    this.ball_y = ball_y;
+                    this.p1_score = p1_score;
+                    this.p2_score = p2_score;
+                    this.ball_speed = ball_speed;
+                    this.updateScoreDisplay();
+                    this.draw();
+                }
+
+                  handleCollisions(){
+                      const ballX = this.canvas.width * (this.ball_x / 100);
+                      const ballY = this.canvas.height * (this.ball_y / 100);
+
+                    // Collision with top and bottom walls (now just bounce in 4 player mode)
+                        if (ballY + 10 > this.canvas.height || ballY - 10 < 0) {
+                            this.ball_dy *= -1;
+                        }
+
+                        // Collision with left paddle (P1)
+                        const p1Y = (this.canvas.height - this.paddleHeight) * (this.p1_y / 100);
+                        if (
+                            ballX - 10 <= 20 + this.paddleWidth &&
+                            ballY + 10 >= p1Y &&
+                            ballY - 10 <= p1Y + this.paddleHeight &&
+                             this.ball_dx < 0
+                        ) {
+                           this.ball_dx *= -1;
+                           this.ball_speed *= 1.1;
+                           this.ball_dx = Math.abs(this.ball_dx);
+                        }
+
+                       // Collision with right paddle (P2)
+                       const p2Y = (this.canvas.height - this.paddleHeight) * (this.p2_y / 100);
+                            if (
+                            ballX + 10 >= this.canvas.width - 20 - this.paddleWidth &&
+                            ballY + 10 >= p2Y &&
+                            ballY - 10 <= p2Y + this.paddleHeight &&
+                            this.ball_dx > 0
+                        ) {
+                           this.ball_dx *= -1;
+                           this.ball_speed *= 1.1;
+                           this.ball_dx = - Math.abs(this.ball_dx);
+                        }
+
+                        // Collision with top paddle (P3)
+                        const p3X = (this.canvas.width - this.paddleTopWidth) * (this.p3_x / 100);
+                        const p3Y = 20;
+                        if (this.isFourPlayer &&
+                            ballY - 10 <= p3Y + this.paddleTopHeight &&
+                            ballX + 10 >= p3X &&
+                            ballX - 10 <= p3X + this.paddleTopWidth &&
+                            this.ball_dy < 0) {
+                            this.ball_dy *= -1;
+                            this.ball_speed *= 1.1;
+                            this.ball_dy = Math.abs(this.ball_dy);
+                        }
+
+                        // Collision with bottom paddle (P4)
+                        const p4X = (this.canvas.width - this.paddleTopWidth) * (this.p4_x / 100);
+                        const p4Y = this.canvas.height - 20 - this.paddleTopHeight;
+                        if (this.isFourPlayer &&
+                            ballY + 10 >= p4Y &&
+                            ballX + 10 >= p4X &&
+                            ballX - 10 <= p4X + this.paddleTopWidth &&
+                            this.ball_dy > 0) {
+                            this.ball_dy *= -1;
+                            this.ball_speed *= 1.1;
+                            this.ball_dy = -Math.abs(this.ball_dy);
+                        }
+
+                        // Collision with map patterns
+                        this.handleMapPatternCollision(ballX, ballY);
+
+
+                         // Ball scoring for 2 player mode (left and right walls)
+                        if (!this.isFourPlayer) {
+                            if (ballX < 0) {
+                                this.p2_score++;
+                                 this.resetBall();
+                            } else if (ballX > this.canvas.width) {
+                                this.p1_score++;
+                                this.resetBall();
+                            }
+                        } else {
+                            // Ball scoring for 4 player mode (corners)
+                            const cornerScoreRange = 150;
+                            if (ballX < 0) {
+                                if (ballY < cornerScoreRange || ballY > this.canvas.height - cornerScoreRange) {
+                                    this.p2_score++;
+                                    this.resetBall();
+                                } else {
+                                    this.ball_dx *= -1;
+                                }
+                            } else if (ballX > this.canvas.width) {
+                                if (ballY < cornerScoreRange || ballY > this.canvas.height - cornerScoreRange) {
+                                    this.p1_score++;
+                                    this.resetBall();
+                                } else {
+                                    this.ball_dx *= -1;
+                                }
+                            }
+                        }
+                       this.updateScoreDisplay();
+                }
+
+                handleMapPatternCollision(ballX, ballY) {
+                    const canvasWidth = this.canvas.width;
+                    const canvasHeight = this.canvas.height;
+
+                    if (this.currentMap === 'map1') {
+                        const heart = this.getHeartPath(canvasWidth / 2, canvasHeight / 2, 100);
+                        if (this.isPointInPath(ballX, ballY, heart)) {
+                            this.ball_dx *= -1;
+                            this.ball_dy *= -1;
+                            this.ball_speed *= 1.1;
+                        }
+                    } else if (this.currentMap === 'map2') {
+                        const star = this.getStarPath(canvasWidth / 2, canvasHeight / 2, 80, 40);
+                        if (this.isPointInPath(ballX, ballY, star)) {
+                            this.ball_dx *= -1;
+                            this.ball_dy *= -1;
+                            this.ball_speed *= 1.1;
+                        }
+                    } else if (this.currentMap === 'map3') {
+                        const centerX = canvasWidth / 2;
+                        const centerY = canvasHeight / 2;
+                        const radius = 60;
+                        if (Math.sqrt((ballX - centerX) ** 2 + (ballY - centerY) ** 2) <= radius + 10) {
+                            const angle = Math.atan2(ballY - centerY, ballX - centerX);
+                            const ballAngle = Math.atan2(this.ball_dy, this.ball_dx);
+                            const diffAngle = angle - ballAngle;
+
+                            if (Math.abs(diffAngle) > Math.PI / 2 && Math.abs(diffAngle) < 3 * Math.PI / 2) {
+                                this.ball_dx *= -1;
+                            } else {
+                                this.ball_dy *= -1;
+                            }
+                            this.ball_speed *= 1.1;
+                        }
+                    }
+                }
+
+                isPointInPath(x, y, path) {
+                    this.ctx.beginPath();
+                    this.ctx.moveTo(path[0][0], path[0][1]);
+                    for (let i = 1; i < path.length; i++) {
+                        this.ctx.lineTo(path[i][0], path[i][1]);
+                    }
+                    this.ctx.closePath();
+                    return this.ctx.isPointInPath(x, y);
+                }
+                getHeartPath(centerX, centerY, size) {
+                    const path = [];
+                    const topCurveHeight = size * 0.3;
+                    path.push([centerX, centerY + size * 0.25]);
+                    path.push([centerX - size / 2, centerY - topCurveHeight]);
+                    path.push([centerX - size, centerY + size / 4]);
+                    path.push([centerX, centerY + size]);
+                    path.push([centerX + size, centerY + size / 4]);
+                    path.push([centerX + size / 2, centerY - topCurveHeight]);
+                    path.push([centerX, centerY + size * 0.25]);
+                    return path;
+                }
+
+                getStarPath(centerX, centerY, outerRadius, innerRadius) {
+                    const points = 5;
+                    const path = [];
+                    for (let i = 0; i < 2 * points; i++) {
+                        const radius = i % 2 === 0 ? outerRadius : innerRadius;
+                        const angle = (i * Math.PI) / points;
+                        path.push([centerX + radius * Math.cos(angle), centerY + radius * Math.sin(angle)]);
+                    }
+                    return path;
+                }
+
+
+                resetBall(){
+                    this.ball_x = 50;
+                    this.ball_y = ['map1', 'map2', 'map3'].includes(this.currentMap) ? 10 : 50;
+                    this.ball_speed = 1;
+                    this.ball_dx = Math.random() > 0.5 ? 1 : -1;
+                    this.ball_dy = Math.random() > 0.5 ? 1 : -1;
+                }
+
+                 updateBallPosition(){
+                    const speedMultiplier = this.isSingleplayer ? 0.5 : 1;
+                     this.ball_x += this.ball_dx * this.ball_speed * speedMultiplier;
+                    this.ball_y += this.ball_dy * this.ball_speed * speedMultiplier;
+                }
+
+                updateScoreDisplay(){
+                    if (!this.isFourPlayer) {
+                        document.getElementById('scores').textContent = `P1: ${this.p1_score} | P2: ${this.p2_score}`;
+                    } else {
+                        document.getElementById('scores').textContent = `Sol Köşe: ${this.p1_score} | Sağ Köşe: ${this.p2_score}`;
+                    }
+                }
+                 checkGameEnd() {
+                        if (this.isSingleplayer && !this.gameEnded) {
+                            if (this.p1_score >= this.maxScore || this.p2_score >= this.maxScore || (this.isFourPlayer && (this.p1_score >= this.maxScore || this.p2_score >= this.maxScore))) {
+                                this.gameEnded = true;
+                                this.stopGameLoop();
+                                let winnerText = "Oyun Bitti! ";
+                                if (!this.isFourPlayer) {
+                                    winnerText += `${this.p1_score > this.p2_score ? 'P1 Kazandı' : 'P2 Kazandı'}`;
+                                } else {
+                                    winnerText += `${this.p1_score > this.p2_score ? 'Sol Köşe Kazandı' : 'Sağ Köşe Kazandı'}`;
+                                }
+
+                                statusDiv.textContent = winnerText;
+                                if (isTournamentMode) {
+                                    handleTournamentMatchEnd(this.p1_score > this.p2_score ? currentP1Index : currentP2Index);
+                                }
+                            }
+                        }
+                 }
+
+                drawMapPatterns(mapType) {
+                    if (mapType === 'normal') return;
+
+                    this.ctx.fillStyle = 'rgba(255, 255, 255, 0.2)';
+                    const canvasWidth = this.canvas.width;
+                    const canvasHeight = this.canvas.height;
+
+                    if (mapType === 'map1') {
+                        const heartPath = this.getHeartPath(canvasWidth / 2, canvasHeight / 2, 100);
+                        this.ctx.beginPath();
+                        this.ctx.moveTo(heartPath[0][0], heartPath[0][1]);
+                        for (let i = 1; i < heartPath.length; i++) {
+                            this.ctx.lineTo(heartPath[i][0], heartPath[i][1]);
+                        }
+                        this.ctx.closePath();
+                        this.ctx.fill();
+
+                    } else if (mapType === 'map2') {
+                        const starPath = this.getStarPath(canvasWidth / 2, canvasHeight / 2, 80, 40);
+                        this.ctx.beginPath();
+                        this.ctx.moveTo(starPath[0][0], starPath[0][1]);
+                        for (let i = 1; i < starPath.length; i++) {
+                            this.ctx.lineTo(starPath[i][0], starPath[i][1]);
+                        }
+                        this.ctx.closePath();
+                        this.ctx.fill();
+                    } else if (mapType === 'map3') {
+                        this.ctx.beginPath();
+                        this.ctx.arc(canvasWidth / 2, canvasHeight / 2, 60, 0, Math.PI * 2);
+                        this.ctx.closePath();
+                        this.ctx.fill();
+                    }
+                }
+
+
+                draw() {
+                    this.ctx.fillStyle = '#1a1a1a';
+                    this.ctx.fillRect(0, 0, this.canvas.width, this.canvas.height);
+
+                    this.drawMapPatterns(this.currentMap);
+
+                    this.ctx.fillStyle = 'magenta';
+                    const p1Y = (this.canvas.height - this.paddleHeight) * (this.p1_y / 100);
+                    this.ctx.fillRect(
+                        20,
+                        p1Y,
+                        this.paddleWidth,
+                        this.paddleHeight
+                    );
+
+                    this.ctx.fillStyle = 'cyan';
+                    const p2Y = (this.canvas.height - this.paddleHeight) * (this.p2_y / 100);
+                    this.ctx.fillRect(
+                        this.canvas.width - 20 - this.paddleWidth,
+                        p2Y,
+                        this.paddleWidth,
+                        this.paddleHeight
+                    );
+
+                    if (this.isFourPlayer) {
+                        this.ctx.fillStyle = 'yellow';
+                        const p3X = (this.canvas.width - this.paddleTopWidth) * (this.p3_x / 100);
+                        this.ctx.fillRect(
+                            p3X,
+                            20,
+                            this.paddleTopWidth,
+                            this.paddleTopHeight
+                        );
+
+                        this.ctx.fillStyle = 'lime';
+                        const p4X = (this.canvas.width - this.paddleTopWidth) * (this.p4_x / 100);
+                        this.ctx.fillRect(
+                            p4X,
+                            this.canvas.height - 20 - this.paddleTopHeight,
+                            this.paddleTopWidth,
+                            this.paddleTopHeight
+                        );
+                    }
+
+                    this.ctx.beginPath();
+                    const ballX = this.canvas.width * (this.ball_x / 100);
+                    const ballY = this.canvas.height * (this.ball_y / 100);
+                    this.ctx.arc(ballX, ballY, 10, 0, Math.PI * 2);
+                    this.ctx.fillStyle = 'white';
+                    this.ctx.fill();
+                    this.ctx.closePath();
+                }
+                startGameLoop() {
+                     this.gameLoop = setInterval(() => {
+                         this.updatePaddlePositions();
+                         if (isMultiplayer) {
+                             this.draw();
+                         } else {
+                             this.updateSingleplayer();
+                         }
+                        }, 1000 / 60);
+                }
+
+
+                 stopGameLoop() {
+                        clearInterval(this.gameLoop);
+                    }
+            }
+
+            let game = null;
+             let isMultiplayer = false;
+             let isTournamentMode = false;
+            const hostBtn = document.getElementById('hostBtn');
+            const joinBtn = document.getElementById('joinBtn');
+             const multiplayerBtn = document.getElementById('multiplayerBtn');
+             const singleplayerBtn = document.getElementById('singleplayerBtn');
+             const oneVsOneBtn = document.getElementById('oneVsOneBtn');
+            const fourPlayerBtn = document.getElementById('fourPlayerBtn');
+            const tournamentBtn = document.getElementById('tournamentBtn');
+              const createPlayersBtn = document.getElementById('createPlayersBtn');
+             const numberOfPlayersInput = document.getElementById('numberOfPlayersInput');
+            const statusDiv = document.getElementById('status');
+            const userIdInput = document.getElementById('userIdInput');
+            const gameContainer = document.getElementById('gameContainer');
+            const scoreDisplay = document.getElementById('scores');
+            const multiplayerForm = document.getElementById('multiplayerForm');
+             const gameModeContainer = document.getElementById('gameModeContainer');
+             const backButtonContainer = document.getElementById('backButtonContainer');
+             const singleplayerModeContainer = document.getElementById('singleplayerModeContainer');
+               const tournamentInputContainer = document.getElementById('tournamentInputContainer');
+             const tournamentPlayersInputs = document.getElementById('tournamentPlayersInputs');
+              const backBtn = document.getElementById('backBtn');
+              const mapSelectionContainer = document.getElementById('mapSelectionContainer');
+              const normalMapBtn = document.getElementById('normalMapBtn');
+              const map1Btn = document.getElementById('map1Btn');
+              const map2Btn = document.getElementById('map2Btn');
+              const map3Btn = document.getElementById('map3Btn');
+
+
+            let websocket;
+            let roomID;
+            let userID;
+
+             let tournamentPlayers = [];
+            let matchQueue = [];
+            let currentP1Index = 0;
+            let currentP2Index = 1;
+
+            function connectWebSocket(path) {
+                const protocol = window.location.protocol === 'https:' ? 'wss://' : 'ws://';
+                websocket = new WebSocket(protocol + window.location.host + path);
+
+                websocket.onopen = () => {
+                    console.log("WebSocket bağlantısı açıldı:", path);
+                    gameContainer.style.display = 'block';
+                    multiplayerForm.style.display = 'none';
+                     gameModeContainer.style.display = 'none';
+                    singleplayerModeContainer.style.display = 'none';
+                     backButtonContainer.style.display = 'block';
+                    statusDiv.textContent = "Bağlandı - Oda: " + roomID;
+                    scoreDisplay.style.display = 'block';
+                    isMultiplayer = true;
+
+                    const canvas = document.getElementById('gameCanvas');
+                    game = new PongGame(canvas);
+                    game.startGameLoop();
+                    setupKeyListeners();
+                    setupScrollListener();
+                };
+
+                websocket.onmessage = (event) => {
+                    const data = JSON.parse(event.data);
+                    console.log("Gelen mesaj:", data);
+
+                    if(data.type === 'move') {
+                        if(game) {
+                            game.updatePaddles(data.p1_y, data.p2_y, undefined, undefined);
+                        }
+                    } else if (data.type === 'update_ball') {
+                        if(game) {
+                            game.updateBall(data.ball_x, data.ball_y, data.p1_score, data.p2_score, data.ball_speed);
+                        }
+                    } else if(data.type === 'disconnect') {
+                        gameContainer.style.display = 'none';
+                         multiplayerForm.style.display = 'none';
+                           gameModeContainer.style.display = 'flex';
+                           singleplayerModeContainer.style.display = 'none';
+                            backButtonContainer.style.display = 'none';
+                        game = null;
+                        websocket.close(1000, "Oyun sonlandı");
+                        statusDiv.textContent = `Oyun sonlandı! Kazanan: ${data.Winner || 'Belirlenemedi'}`;
+                        scoreDisplay.style.display = 'none';
+                        isMultiplayer = false;
+
+                    }
+                };
+
+                websocket.onerror = (error) => {
+                    console.error("WebSocket hatası:", error);
+                    gameContainer.style.display = 'none';
+                     multiplayerForm.style.display = 'none';
+                       gameModeContainer.style.display = 'flex';
+                        backButtonContainer.style.display = 'none';
+                        singleplayerModeContainer.style.display = 'none';
+                    statusDiv.textContent = "WebSocket Hatası: " + error.message;
+                    removeKeyListeners();
+                    removeScrollListener();
+                    scoreDisplay.style.display = 'none';
+                    isMultiplayer = false;
+                };
+
+                websocket.onclose = (event) => {
+                    console.log("WebSocket bağlantısı kapandı. Kod:", event.code, "Sebep:", event.reason);
+                    gameContainer.style.display = 'none';
+                    multiplayerForm.style.display = 'none';
+                     gameModeContainer.style.display = 'flex';
+                    singleplayerModeContainer.style.display = 'none';
+                     backButtonContainer.style.display = 'none';
+                     if (!statusDiv.textContent.startsWith("Oyun sonlandı! Kazanan:"))
+                     {
+                        statusDiv.textContent = `Bağlantı kapandı. Kod: ${event.code}, Sebep: ${event.reason || 'Belirtilmedi'}`;
+                     }
+                    removeKeyListeners();
+                    removeScrollListener();
+                    scoreDisplay.style.display = 'none';
+                    isMultiplayer = false;
+
+                };
+            }
+
+            async function sendPostRequest(url, data) {
+                try {
+                    const response = await fetch(url, {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                        },
+                        body: JSON.stringify(data),
+                    });
+                    return await response.json();
+                } catch (error) {
+                    console.error("POST isteği hatası:", error);
+                    return { status: "error", message: "İstek gönderilirken bir hata oluştu." };
+                }
+            }
+
+             function sendMoveMessage(direction) {
+                if (isMultiplayer && websocket?.readyState === WebSocket.OPEN) {
+                    websocket.send(JSON.stringify({
+                        type: 'move',
+                        direction: direction,
+                    }));
+                }
+            }
+
+             multiplayerBtn.addEventListener('click', () => {
+                 isMultiplayer = true;
+                gameModeContainer.style.display = 'none';
+                 multiplayerForm.style.display = 'flex';
+                 backButtonContainer.style.display = 'block';
+                 singleplayerModeContainer.style.display = 'none';
+                 tournamentInputContainer.style.display = 'none';
+                  tournamentPlayersInputs.style.display = 'none';
+                  mapSelectionContainer.style.display = 'none';
+            });
+
+             singleplayerBtn.addEventListener('click', () => {
+                 gameModeContainer.style.display = 'none';
+                  singleplayerModeContainer.style.display = 'flex';
+                 backButtonContainer.style.display = 'block';
+                  tournamentInputContainer.style.display = 'none';
+                  tournamentPlayersInputs.style.display = 'none';
+                  mapSelectionContainer.style.display = 'none';
+            });
+
+            oneVsOneBtn.addEventListener('click', () => {
+                isMultiplayer = false;
+                isTournamentMode = false;
+                gameModeContainer.style.display = 'none';
+                singleplayerModeContainer.style.display = 'none';
+                mapSelectionContainer.style.display = 'flex';
+                backButtonContainer.style.display = 'block';
+                statusDiv.textContent = "1vs1 Harita Seçimi";
+            });
+
+            fourPlayerBtn.addEventListener('click', () => {
+                isMultiplayer = false;
+                isTournamentMode = false;
+                gameModeContainer.style.display = 'none';
+                singleplayerModeContainer.style.display = 'none';
+                gameContainer.style.display = 'block';
+                backButtonContainer.style.display = 'block';
+                scoreDisplay.style.display = 'block';
+                statusDiv.textContent = "Tek oyunculu 4 Player Modu";
+                const canvas = document.getElementById('gameCanvas');
+                game = new PongGame(canvas);
+                game.isSingleplayer = true;
+                game.isFourPlayer = true;
+                game.startGameLoop();
+                setupScrollListener();
+                setupKeyListeners();
+            });
+
+             tournamentBtn.addEventListener('click', () => {
+                 isMultiplayer = false;
+                 isTournamentMode = true;
+                 gameModeContainer.style.display = 'none';
+                 singleplayerModeContainer.style.display = 'flex';
+                gameContainer.style.display = 'none';
+                backButtonContainer.style.display = 'block';
+                tournamentInputContainer.style.display = 'flex';
+                 tournamentPlayersInputs.style.display = 'none';
+                 scoreDisplay.style.display = 'block';
+                 mapSelectionContainer.style.display = 'none';
+            });
+
+             backBtn.addEventListener('click', () =>{
+                oneVsOneBtn.style.display = 'block';
+                fourPlayerBtn.style.display = 'block';
+                tournamentBtn.style.display = 'block';
+                  gameContainer.style.display = 'none';
+                 multiplayerForm.style.display = 'none';
+                 gameModeContainer.style.display = 'flex';
+                  singleplayerModeContainer.style.display = 'none';
+                 backButtonContainer.style.display = 'none';
+                  scoreDisplay.style.display = 'none';
+                  statusDiv.textContent = "";
+                 removeKeyListeners();
+                 removeScrollListener();
+                   if(game?.gameLoop) {
+                        game.stopGameLoop();
+                     }
+                    game = null;
+                    if (isMultiplayer && websocket && websocket.readyState === WebSocket.OPEN) {
+                        websocket.close();
+                        isMultiplayer = false;
+                    }
+                    isTournamentMode = false;
+                     tournamentInputContainer.style.display = 'none';
+                      tournamentPlayersInputs.style.display = 'none';
+                      mapSelectionContainer.style.display = 'none';
+            });
+
+            hostBtn.addEventListener('click', async () => {
+                userID = userIdInput.value.trim();
+                if (!userID) {
+                    alert("Lütfen bir Kullanıcı ID girin.");
+                    return;
+                }
+
+                const response = await sendPostRequest(`https://${window.location.host}/api/game/host/`, { user_id: userID });
+
+                if (response.status === "success") {
+                    roomID = response.room_id;
+
+                     connectWebSocket('/api/pong/' + roomID + '/' + userID);
+                } else {
+                    statusDiv.textContent = "Hata: " + (response.message || "Bilinmeyen hata");
+                }
+            });
+
+            joinBtn.addEventListener('click', async () => {
+                userID = userIdInput.value.trim();
+                if (!userID) {
+                    alert("Lütfen bir Kullanıcı ID girin.");
+                    return;
+                }
+
+                const joinRoomID = prompt("Oda ID'sini girin:");
+                if (!joinRoomID) {
+                    alert("Lütfen bir Oda ID girin.");
+                    return;
+                }
+
+                const response = await sendPostRequest(`https://${window.location.host}/api/game/join/`, {
+                    user_id: userID,
+                    room_id: joinRoomID
+                });
+
+                if (response.status === "success") {
+
+                    if (response.room_id != null)
+                    {
+                        roomID =response.room_id;
+                    }
+                    connectWebSocket('/api/pong/' + roomID + '/' + userID);
+
+                } else {
+                    statusDiv.textContent = "Hata: " + (response.message || "Bilinmeyen hata");
+                }
+            });
+
+           function setupKeyListeners() {
+                 document.addEventListener('keydown', handleKeyDown);
+                document.addEventListener('keyup', handleKeyUp);
+            }
+
+            function removeKeyListeners() {
+                document.removeEventListener('keydown', handleKeyDown);
+                 document.removeEventListener('keyup', handleKeyUp);
+            }
+
+            function setupScrollListener() {
+                document.addEventListener('wheel', handleScroll);
+            }
+
+            function removeScrollListener() {
+                document.removeEventListener('wheel', handleScroll);
+            }
+
+           function handleKeyDown(event) {
+            if(game?.isSingleplayer === true) {
+                const key = event.key;
+                if (game.keys.hasOwnProperty(key)) {
+                  game.keys[key] = true;
+                 }
+                }
+                   else if (isMultiplayer && websocket?.readyState === WebSocket.OPEN) {
+                    let direction;
+                   if (event.key === 'ArrowUp' || event.key.toLowerCase() === 'w') {
+                        direction = 'up';
+                    } else if (event.key === 'ArrowDown' || event.key.toLowerCase() === 's') {
+                        direction = 'down';
+                    }
+
+                    if (direction) {
+                        sendMoveMessage(direction);
+                    }
+                }
+            }
+             function handleKeyUp(event) {
+              if(game?.isSingleplayer === true) {
+                const key = event.key;
+                   if (game.keys.hasOwnProperty(key)) {
+                    game.keys[key] = false;
+                  }
+                 }
+                  else if (isMultiplayer && websocket?.readyState === WebSocket.OPEN) {
+                    let direction;
+                   if (event.key === 'ArrowUp' || event.key.toLowerCase() === 'w') {
+                        direction = 'up';
+                    } else if (event.key === 'ArrowDown' || event.key.toLowerCase() === 's') {
+                        direction = 'down';
+                    }
+
+                    if (direction) {
+                        sendMoveMessage(direction);
+                    }
+                }
+            }
+
+               function handleScroll(event) {
+                   if(game?.isSingleplayer === true) {
+                     let direction;
+                      const speedMultiplier = 2.5;
+                    if (event.deltaY < 0) {
+                         direction = 'up';
+                    } else if (event.deltaY > 0) {
+                        direction = 'down';
+                    }
+                    if(direction) {
+                         game.updatePaddles(undefined, direction === "up" ? game.p2_targetY - 2 * speedMultiplier : game.p2_targetY + 2 * speedMultiplier);
+                    }
+                   }
+                   else if (isMultiplayer && websocket?.readyState === WebSocket.OPEN) {
+                    let direction;
+                    if (event.deltaY < 0) {
+                        direction = 'up';
+                    } else if (event.deltaY > 0) {
+                        direction = 'down';
+                    }
+
+                    if (direction) {
+                        sendMoveMessage(direction);
+                    }
+                }
+            }
+            createPlayersBtn.addEventListener('click', () => {
+                const numberOfPlayers = parseInt(numberOfPlayersInput.value);
+                if (numberOfPlayers >= 3 && numberOfPlayers <= 20) {
+                   createPlayerInputs(numberOfPlayers);
+                    tournamentInputContainer.style.display = 'none';
+                } else {
+                    alert("Oyuncu sayisi en az 3 maksimum 20 olmalidir.");
+                }
+
+            });
+
+            function createPlayerInputs(numberOfPlayers) {
+            tournamentPlayersInputs.innerHTML = '';
+
+            for (let i = 0; i < numberOfPlayers; i++) {
+                const input = document.createElement('input');
+                input.type = 'text';
+                input.placeholder = `Oyuncu ${i + 1} Adı`;
+                input.id = `player${i + 1}`;
+                tournamentPlayersInputs.appendChild(input);
+            }
+
+            const startBtn = document.createElement("button");
+            startBtn.textContent = "Turnuva Başlat";
+
+            startBtn.addEventListener("click", () => {
+                tournamentPlayers = [];
+                const tempNames = new Set();
+
+                for (let i = 0; i < numberOfPlayers; i++) {
+                    const playerInput = document.getElementById(`player${i + 1}`);
+                    const rawValue = playerInput.value;
+                    const trimmedValue = rawValue.trim();
+                    let name;
+
+                    if (trimmedValue === "") {
+                        if (rawValue !== "") {
+                            alert("Lütfen geçerli bir isim girin!");
+                            playerInput.focus();
+                            return;
+                        } else {
+                            name = `Oyuncu ${i + 1}`;
+                        }
+                    } else {
+                        name = trimmedValue;
+                    }
+
+                    if (tempNames.has(name)) {
+                        alert("Tüm isimler benzersiz olmalıdır!");
+                        playerInput.focus();
+                        return;
+                    }
+
+                    tempNames.add(name);
+                    tournamentPlayers.push(name);
+                }
+
+                tournamentPlayersInputs.style.display = 'none';
+                gameContainer.style.display = 'block';
+                startTournament();
+            });
+
+            tournamentPlayersInputs.appendChild(startBtn);
+            tournamentPlayersInputs.style.display = 'flex';
+        }
+             function startTournament() {
+                oneVsOneBtn.style.display = 'none';
+                fourPlayerBtn.style.display = 'none';
+                tournamentBtn.style.display = 'none';
+                  matchQueue = [];
+                 for(let i=0; i < tournamentPlayers.length; i++)
+                {
+                    for(let j = i + 1; j < tournamentPlayers.length; j++)
+                    {
+                        matchQueue.push({p1: i, p2: j});
+                    }
+                }
+                for (let i = matchQueue.length - 1; i > 0; i--) {
+                     const j = Math.floor(Math.random() * (i + 1));
+                    [matchQueue[i], matchQueue[j]] = [matchQueue[j], matchQueue[i]];
+                }
+                currentP1Index = matchQueue[0].p1;
+                currentP2Index = matchQueue[0].p2;
+                statusDiv.textContent = `${tournamentPlayers[currentP1Index]} vs ${tournamentPlayers[currentP2Index]}`;
+                const canvas = document.getElementById('gameCanvas');
+                 setupKeyListeners();
+                setupScrollListener();
+                game = new PongGame(canvas);
+                game.isSingleplayer = true;
+                game.startGameLoop();
+                 game.gameEnded = false;
+                game.resetBall();
+                game.p1_score = 0;
+                game.p2_score = 0;
+                game.updateScoreDisplay();
+             }
+
+              function handleTournamentMatchEnd(winnerIndex) {
+                 const loserIndex = winnerIndex === currentP1Index ? currentP2Index : currentP1Index;
+                 tournamentPlayers.splice(loserIndex, 1);
+
+                matchQueue = matchQueue.filter(match => match.p1 !== loserIndex && match.p2 !== loserIndex);
+                 for (let i = 0; i < matchQueue.length; i++) {
+                       if (matchQueue[i].p1 > loserIndex) {
+                           matchQueue[i].p1--;
+                      }
+                       if (matchQueue[i].p2 > loserIndex) {
+                         matchQueue[i].p2--;
+                     }
+                 }
+                if (tournamentPlayers.length === 1) {
+                     statusDiv.textContent = `Turnuva Bitti! Kazanan: ${tournamentPlayers[0]}`;
+                      removeKeyListeners();
+                     removeScrollListener();
+                    game.stopGameLoop();
+                    game = null;
+                    return;
+                  }
+                if (matchQueue.length > 0) {
+                     currentP1Index = matchQueue[0].p1;
+                    currentP2Index = matchQueue[0].p2;
+                    statusDiv.textContent = `${tournamentPlayers[currentP1Index]} vs ${tournamentPlayers[currentP2Index]}`;
+                     game.startGameLoop();
+                    game.gameEnded = false;
+                    game.resetBall();
+                     game.p1_score = 0;
+                     game.p2_score = 0;
+                     game.updateScoreDisplay();
+                     matchQueue.shift();
+                } else {
+                    startTournament();
+                }
+             }
+
+             normalMapBtn.addEventListener('click', () => {
+                startGameWithMap('normal');
+             });
+
+             map1Btn.addEventListener('click', () => {
+                startGameWithMap('map1');
+             });
+
+             map2Btn.addEventListener('click', () => {
+                 startGameWithMap('map2');
+             });
+
+             map3Btn.addEventListener('click', () => {
+                 startGameWithMap('map3');
+             });
+
+             function startGameWithMap(mapName) {
+                mapSelectionContainer.style.display = 'none';
+                gameContainer.style.display = 'block';
+                scoreDisplay.style.display = 'block';
+                statusDiv.textContent = "Tek oyunculu 1vs1 Modu - " + getMapDisplayName(mapName);
+                const canvas = document.getElementById('gameCanvas');
+                game = new PongGame(canvas);
+                game.isSingleplayer = true;
+                game.currentMap = mapName;
+                game.startGameLoop();
+                setupScrollListener();
+                setupKeyListeners();
+             }
+
+             function getMapDisplayName(mapName) {
+                 switch (mapName) {
+                     case 'normal': return 'Normal Harita';
+                     case 'map1': return 'Harita 1 (Kalp)';
+                     case 'map2': return 'Harita 2 (Yıldız)';
+                     case 'map3': return 'Harita 3 (Daire)';
+                     default: return 'Bilinmeyen Harita';
+                 }
+             }
+        </script>
+</body>
+</html>

@@ -5,15 +5,17 @@ services:
     container_name: django
     entrypoint: |
       bash -c "
+        python manage.py collectstatic --noinput &&
         python manage.py migrate &&
-        python manage.py runserver 0.0.0.0:8000
+        daphne -b 0.0.0.0 -p 8000 backend.asgi:application
       "
     env_file: .env
     ports:
       - ${DJANGO_PORT}:8000
     volumes:
+      - ./srcs/backend/static:/backend/static
       - backend_vol:/backend
-      - /backend/static
+      - media_vol:/backend/uploads
     depends_on:
       - postgresql
       - redis
@@ -36,9 +38,9 @@ services:
       - postgresql
     volumes:
       - ./srcs/nginx:/etc/nginx/conf.d
-      - ./srcs/backend/static:/usr/share/nginx/html/static
       - ./srcs/frontend:/usr/share/nginx/html
-      - ./srcs/frontend/static:/usr/share/nginx/html/static
+      - ./srcs/backend/static:/usr/share/nginx/html/static
+      - media_vol:/usr/share/nginx/html/media
     networks:
       - trans_network
     restart: always
@@ -66,7 +68,6 @@ services:
     command:
       - redis-server
       - --appendonly yes
-      - --requirepass "${REDIS_PASSWORD}"
       - --maxmemory 10mb
       - --maxmemory-policy allkeys-lru
     networks:
@@ -92,6 +93,8 @@ volumes:
       type: none
       o: bind
       device: ./srcs/backend/
+  media_vol:
+    driver: local
   pgdata:
     driver: local
   redis_data:
