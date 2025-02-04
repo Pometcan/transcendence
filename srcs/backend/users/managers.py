@@ -3,7 +3,6 @@ from django.contrib.auth.models import UserManager as DefaultUserManager
 from django.core.exceptions import ValidationError
 from django.apps import apps
 
-
 class UserManager(DefaultUserManager):
     use_in_migrations =True
 
@@ -17,7 +16,6 @@ class UserManager(DefaultUserManager):
             raise ValidationError("Kullanıcı zaten arkadaşınız değil.")
          
     def block_user_validation(self, requestUser, userToBlock):
-        
         if not userToBlock \
                 or not self.filter(id=userToBlock.id).exists() \
                 or not userToBlock.is_active \
@@ -27,7 +25,7 @@ class UserManager(DefaultUserManager):
             raise ValueError("Kendinizi engelleyemezsiniz.")
         if requestUser.blocked_users.filter(id = userToBlock.id).exists():
             raise ValidationError("Kullanıcı zaten engellenmiş.")
-        
+
     def get_blocked_user_valdation(self, requestUser, blockedUser):
 
         if  not blockedUser \
@@ -36,11 +34,11 @@ class UserManager(DefaultUserManager):
                 or not requestUser.blocked_users.filter(id = blockedUser.id).exists() \
                 or requestUser.blocked_by.filter(id = blockedUser.id).exists():
             raise ValidationError("Kullanıcı bulunamadı.")
-        
+
 
 class FriendshipRequestManager(models.Manager):
     use_in_migrations = True
-    
+
     def create_friendship_request_validation(self, sender, receiver, status):
         
         User = apps.get_model('users', 'User') 
@@ -56,15 +54,15 @@ class FriendshipRequestManager(models.Manager):
             raise ValidationError(f"{sender.username} ve {receiver.username} zaten arkadaşlar.")
         if receiver and self.filter(sender=sender, receiver=receiver, is_active=True, status='P').exists() and status=='P':
             raise ValidationError("Bu kullanıcıya zaten aktif bir arkadaşlık isteğiniz var.")
-        
+
     def get_sent_friendship_request_validation(self, instance, request_user):
-        
+
         if not instance.is_active \
                 or not instance.sender == request_user :
-            raise ValidationError("Arkadaşlık isteği bulunamadı.")    
+            raise ValidationError("Arkadaşlık isteği bulunamadı.")
 
     def get_received_friendship_request_validation(self, instance, request_user):
-    
+
         if not instance.is_active \
                 or not instance.receiver == request_user :
             raise ValidationError("Arkadaşlık isteği bulunamadı.")

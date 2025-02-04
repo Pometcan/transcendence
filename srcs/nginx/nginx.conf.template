@@ -8,37 +8,39 @@ http {
     gzip_disable "msie6";
     add_header Cache-Control 'no-store';
 
-    # HTTP server - HTTP isteklerini HTTPS'ye yönlendirme
+     # HTTP'den HTTPS'ye yönlendirme
     server {
-        listen ${NGINX_PORT};
-        listen [::]:${NGINX_PORT};
-        server_name _;
+        listen 80;
+        server_name ${DOMAIN};
         return 301 https://$host$request_uri;
     }
 
-    # HTTPS server - Ana sunucu
+    # HTTPS - Tek sunucu (Fronteinceptionnd ve Backend)
     server {
+
         listen ${NGINX_PORT_SSL} ssl;
-        listen [::]:${NGINX_PORT_SSL} ssl;
-        server_name ${FRONTEND_DOMAIN};
+        #listen [::]:${NGINX_PORT_SSL} ssl;
+        server_name ${DOMAIN} localhost;
 
         # SSL Sertifikaları
-        ssl_certificate /etc/nginx/ssl/inception.crt;
-        ssl_certificate_key /etc/nginx/ssl/inception.key;
+        ssl_certificate /etc/nginx/ssl/server.crt;
+        ssl_certificate_key /etc/nginx/ssl/server.key;
         ssl_protocols TLSv1.2 TLSv1.3;
 
+        ###### Frontend config ######
         location / {
             root /usr/share/nginx/html;
             index index.html;
             try_files $uri $uri/ /index.html;
         }
 
-        location /src/ { types {
-            application/javascript js ts;
+        location /src/ {
+            alias /usr/share/nginx/html/src/;
+            autoindex off;
         }
 
-        default_type application/javascript;
-            alias /usr/share/nginx/html/src/;
+        location /css/ {
+            alias /usr/share/nginx/html/css/;
             autoindex off;
         }
 
@@ -47,51 +49,26 @@ http {
             autoindex off;
         }
 
-        location /static/ {
-            alias /usr/share/nginx/html/static/;
-            autoindex off;
-        }
 
-        error_page 404 /404.html;
-        location = /404.html {
-            root /usr/share/nginx/html;#
-            default_type text/html;
-            internal;
-        }
-
-        error_page 403 /403.html;
-        location = /403.html {
-            root /usr/share/nginx/html;
-            default_type text/html;
-            internal;
-        }
-    }
-
-    # Backend API server
-    server {
-        listen ${NGINX_PORT_SSL} ssl;
-        listen [::]:${NGINX_PORT_SSL} ssl;
-        
-        listen [::]:${NGINX_PORT};
-        server_name ${BACKEND_DOMAIN};
-
-        # SSL Sertifikaları
-        ssl_certificate /etc/nginx/ssl/inception.crt;
-        ssl_certificate_key /etc/nginx/ssl/inception.key;
-        ssl_protocols TLSv1.2 TLSv1.3;
-
+        ###### Backend config ######
+        set $cors_origin https://${DOMAIN};
         # API proxy
-        location / {
-            proxy_pass http://django:8000/;
+        location /api/ {
+            proxy_pass http://django:8000;
+            proxy_http_version 1.1;
+            proxy_set_header Upgrade $http_upgrade;
+            proxy_set_header Connection "upgrade";
             proxy_set_header Host $host;
             proxy_set_header X-Real-IP $remote_addr;
             proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
             proxy_set_header X-Forwarded-Proto $scheme;
+            proxy_read_timeout 86400s;
+            proxy_send_timeout 86400s;
         }
 
         # API'nin statik dosyaları
-        location /static/ {
-            alias /usr/share/nginx/html/bstatic/;
+        location /api/static/ {
+            alias /usr/share/nginx/html/static/;
             autoindex off;
         }
 

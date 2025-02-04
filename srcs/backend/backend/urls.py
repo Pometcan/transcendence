@@ -24,19 +24,21 @@ from users.views import CustomLoginView
 
 
 urlpatterns = [
-    path('admin/', admin.site.urls),
-    path("users/", include("users.urls")),
+    path('api/admin/', admin.site.urls),
+    path("api/users/", include("users.urls")),
 
     #authentication için
-    path('api-auth', include('rest_framework.urls')),
+    path('api/api-auth', include('rest_framework.urls')),
     path('api/rest-auth/', include('dj_rest_auth.urls')),
     path('api/rest-auth/login/', CustomLoginView.as_view(), name='custom_rest_auth_login'),
+
     #registration için
     path('api/rest-auth/registration/', include('dj_rest_auth.registration.urls')),
 
     #SENEM: swagger için
-    path('schema/', SpectacularAPIView.as_view(), name='schema'),  # OpenAPI schema
-    path('swagger/', SpectacularSwaggerView.as_view(url_name='schema'), name='swagger-ui'),
+    path('api/schema/', SpectacularAPIView.as_view(), name='schema'),  # OpenAPI schema
+    path('api/swagger/', SpectacularSwaggerView.as_view(url_name='schema'), name='swagger-ui'),
+    path('api/game/', include('game.urls'))
 ]
 
 urlpatterns += static(settings.STATIC_URL, document_root=settings.STATIC_ROOT)
