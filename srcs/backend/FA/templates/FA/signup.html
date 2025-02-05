@@ -1,0 +1,54 @@
+{% extends 'base.html' %}
+
+{% block title %}Sign Up{% endblock %}
+
+{% block content %}
+{% load socialaccount %}
+
+    <!-- Form Section -->
+    <div class="container-login">
+        <div class="row align-items-center justify-content-center" style="height: 100vh">
+            <div class="col-lg-3"></div>
+
+            <div class="col-lg-6"> <!-- Increased width for form -->
+                <div class="bg-white p-4 rounded-3 shadow text-center">
+                    <h2 class="text-dark">Welcome!</h2>
+
+                    
+                    <a href="{% provider_login_url 'google' %}">
+                        <button class="btn btn-google">
+                            <img src="https://playtht-website-assets.s3.amazonaws.com/img/brand/google.svg" alt="Google logo"/>Sign up with Google
+                        </button>
+                    </a>
+                    <a href="{% provider_login_url 'github' %}">
+                        <button class="btn btn-google github">
+                            <img src="https://upload.wikimedia.org/wikipedia/commons/9/91/Octicons-mark-github.svg" alt="GitHub logo"/>Sign up with GitHub
+                        </button>
+                    </a>
+
+
+
+                    <div class="divider"></div>
+                    <form method="post" action="{% url 'signup' %}" class="form">
+                        {% csrf_token %}
+                        
+                        <input type="email" class="form-control" name="email" id="email" placeholder="Email" required>
+
+                        <input type="password" class="form-control" name="password1" id="password1" placeholder="Password" required>
+                        
+                        <input type="password" class="form-control" name="password2" id="password2" placeholder="Confirm Password" required>
+
+
+                        <button type="submit" class="btn btn-submit">Sign Up</button>
+                    </form>
+                    <div class="divider"></div>
+                    <p class="text-dark text-muted">
+                        Forgot your password? <a href="#">Reset</a>
+                    </p>
+                </div>
+            </div>
+            
+            <div class="col-lg-3"></div>
+        </div>
+    </div>
+{% endblock %}
