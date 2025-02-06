@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Chat App</title>
+    <style>
+        /*... existing styles... */
+    </style>
+</head>
+<body>
+    <h1>Chat App</h1>
+
+    <div id="chat-log"></div>
+
+    <input id="chat-message-input" type="text" placeholder="Mesajınızı yazın...">
+    <button id="chat-message-submit">Gönder</button>
+
+    <script>
+        const senderId = prompt("Gönderici ID'nizi girin:", "1"); // Gönderici ID'sini kullanıcıdan alın
+        const receiverId = prompt("Alıcı ID'sini girin:", "2"); // Alıcı ID'sini kullanıcıdan alın
+
+        // Create private chat and get room name
+        fetch(`https://${window.location.host}/api/chat/create_private_chat/`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+                user1_id: senderId,
+                user2_id: receiverId
+            })
+        })
+      .then(response => response.json())
+      .then(data => {
+            const roomName = data.room_name;
+
+            const chatSocket = new WebSocket(
+                'ws://' + window.location.host + '/ws/chat/' + roomName + '/'
+            );
+
+            chatSocket.onmessage = function(e) {
+                const data = JSON.parse(e.data);
+                const messageElement = document.createElement('p');
+
+                // UserSerializer verilerini kullanarak mesajı biçimlendirin
+                messageElement.textContent = `${data.sender.username}: ${data.message}`;
+
+                document.querySelector('#chat-log').appendChild(messageElement);
+            };
+
+            chatSocket.onclose = function(e) {
+                console.error('Chat socket closed unexpectedly');
+            };
+
+            document.querySelector('#chat-message-input').focus();
+            document.querySelector('#chat-message-input').onkeyup = function(e) {
+                if (e.keyCode === 13) {  // Enter tuşuna basıldığında
+                    document.querySelector('#chat-message-submit').click();
+                }
+            };
+
+            document.querySelector('#chat-message-submit').onclick = function(e) {
+                const messageInputDom = document.querySelector('#chat-message-input');
+                const message = messageInputDom.value;
+                chatSocket.send(JSON.stringify({
+                    'sender': senderId,
+                    'receiver': receiverId,
+                    'message': message,
+                    'room_name': roomName  // Include the room name in the message
+                }));
+                messageInputDom.value = '';
+            };
+        })
+      .catch(error => {
+            console.error('Private chat creation failed:', error);
+        });
+    </script>
+</body>
+</html>

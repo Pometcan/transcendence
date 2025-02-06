@@ -64,7 +64,9 @@ INSTALLED_APPS = [
     #MELIH
     'channels',
     'game',
+    
     'FA',
+    'chat',
 ]
 
 
