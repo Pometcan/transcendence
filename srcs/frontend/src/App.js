@@ -14,7 +14,6 @@ export class App extends HTMLElement {
     this.attachShadow({ mode: 'open' });
     this.pageManager = new PageManager(this.shadowRoot, Layout);
     this.router = new Router(this.pageManager);
-    this.getCsrf();
 
     window.router = this.router;
 
@@ -61,22 +60,6 @@ export class App extends HTMLElement {
       this.router.handleRoute("/");
     else
       this.router.navigate("/auth");
-  }
-
-  async getCsrf() {
-    fetch(`https://${window.location.host}/api/users/csrf/`, {
-        method: "GET",
-        credentials: "include",
-        headers: {
-            Accept: "application/json",
-        },
-    })
-    .then((response) => response.json())
-    .then((data) => {
-      console.log("CSRF Token:", data.csrfToken);
-      setCookie('csrftoken', data.csrfToken, 1);
-    })
-    .catch((error) => console.error("Error:", error));
   }
 }
 

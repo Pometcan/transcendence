@@ -49,7 +49,6 @@ async function getCsrfToken () {
           },
       });
       const data = await response.json();
-      console.log("CSRF Token:", data.csrfToken);
       setCookie('csrftoken', data.csrfToken, 1);
       return data.csrfToken;
 }

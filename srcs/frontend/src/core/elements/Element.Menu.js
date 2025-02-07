@@ -1,6 +1,6 @@
 import { DivComponent } from "../components/Type.Component.js";
 
-const MenuElement = (id) => {
+const MenuElement = (id, elements) => {
   const holoplate = new DivComponent(id, {
     styles: {
       background: 'linear-gradient(180.2deg, \
@@ -15,6 +15,7 @@ const MenuElement = (id) => {
       flex: 1,
     },
     class: ""
+
   });
 
   const menuContainer = new DivComponent("menuContainer", {
@@ -30,7 +31,8 @@ const MenuElement = (id) => {
       animation: 'pulse 2s infinite alternate',
       flex: 1,
     },
-    class: ""
+    class: "",
+    elements: elements
   });
 
   holoplate.elements = [
