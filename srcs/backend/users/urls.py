@@ -17,7 +17,7 @@ router.register(r'friends', FriendsViewSet, basename = 'friend')
 urlpatterns = [
     path('', include(router.urls)),
     #login
-    path('login/', AuthViewSet.as_view({'post':'login'}), name='api-login')
+    path('login/', AuthViewSet.as_view({'post':'login'}), name='api-login'),
     
     path('csrf/', get_csrf_token, name='get_csrf_token'),
    
