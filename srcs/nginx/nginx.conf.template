@@ -75,7 +75,7 @@ http {
         # API'nin statik dosyaları
         location /api/static/ {
             alias /usr/share/nginx/html/static/;
-            autoindex on;
+            autoindex off;
         }
 
         location /api/media/ {

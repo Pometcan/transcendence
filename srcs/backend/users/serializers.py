@@ -1,24 +1,100 @@
-from django.db.models import Q
-from rest_framework import serializers
-from .models import User, FriendshipRequest
-from django.core.exceptions import ValidationError
 import os
+import pyotp
+import requests
 from django.conf import settings
+from django.core.exceptions import ValidationError
+from django.db.models import Q
+from .models import User, FriendshipRequest
+from rest_framework import serializers
+from rest_framework_simplejwt.tokens import RefreshToken
+from django.contrib.auth import login
+from django.contrib.auth.hashers import check_password
+from django.core.files.base import ContentFile
+from django.shortcuts import get_object_or_404
 
 
-#USER SERIALIZERS
+
+CLIENT_ID = settings.INTRA_CLIENT_ID
+REDIRECT_URI = settings.INTRA_REDIRECT_URI
+TOKEN_URL = os.getenv('TOKEN_URL')
+USER_INFO_URL = os.getenv('USER_INFO_URL')
+CLIENT_SECRET = settings.INTRA_CLIENT_SECRET
+
+
 class UserBasicInfoSerializer(serializers.ModelSerializer):
     class Meta:
         model = User
-        fields = ['id', 'username', 'avatar', 'rank']
+        fields = ['id', 'username', 'avatar', 'rank', 'mfa_enabled']
         read_only_fields = ['id','avatar', 'rank']
 
-class UserBasicInfoSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = User
-        fields = ['id', 'username', 'avatar', 'rank']
-        read_only_fields = ['id','avatar', 'rank']
 
+#AUTH SERIALIZERS-----------------------------------------
+
+class LoginSerializer(serializers.Serializer):
+    username = serializers.CharField()
+    password = serializers.CharField(write_only=True)
+
+    def validate(self, data):
+        user = get_object_or_404(User, username=data['username'])
+        if not check_password(data['password'], user.password):
+            raise serializers.ValidationError("Invalid credentials")
+        return {'user': user}
+
+class OAuthLoginSerializer(serializers.Serializer):
+    code = serializers.CharField(write_only=True)
+    def validate(self, data):
+        request = self.context.get("request")
+        code = data.get("code")
+        token_data = {
+            "grant_type": "authorization_code",
+            "client_id": CLIENT_ID,
+            "client_secret": CLIENT_SECRET,
+            "code": code,
+            "redirect_uri": REDIRECT_URI,
+        }
+        token_response = requests.post(TOKEN_URL, data=token_data)
+        token_json = token_response.json()
+        if "access_token" not in token_json:
+            raise serializers.ValidationError({"error": "Failed to retrieve access token"})
+        
+        access_token = token_json["access_token"]
+        user_response = requests.get(USER_INFO_URL, headers={"Authorization": f"Bearer {access_token}"})
+        user_info = user_response.json()
+        user, created = User.objects.update_or_create(
+            id=user_info['id'],
+            defaults={'username': user_info['login'], 'email': user_info.get('email', '')}
+        )
+        
+        profile_image_url = user_info.get('image', {}).get('link', '')
+        if created and profile_image_url:
+            response = requests.get(profile_image_url)
+            if response.status_code == 200:
+                file_name = f"{user.username}_avatar.jpg"
+                user.avatar.save(file_name, ContentFile(response.content), save=True)
+        
+        login(request, user)
+        
+        refresh = RefreshToken.for_user(user)
+        return {
+            'refresh': str(refresh),
+            'access': str(refresh.access_token),
+            'user': user.username,
+        }
+    
+
+class TwoFAVerifySerializer(serializers.Serializer):
+    username = serializers.CharField()
+    otp_code = serializers.CharField()
+
+    def validate(self, data):
+        user = get_object_or_404(User, username=data['username'])
+        totp = pyotp.TOTP(user.mfa_secret)
+        if not totp.verify(data['otp_code']):
+            raise serializers.ValidationError("Invalid OTP code")
+        return {'user': user}
+    
+
+#USER MOEL SERIALIZERS------------------------------------------------------------
 
 class GetUserSerializer(serializers.ModelSerializer):
     class Meta:
@@ -57,6 +133,25 @@ class AvatarSerializer(serializers.ModelSerializer):
         if old_avatar:
             self.delete_old_avatar(instance, old_avatar)
         return instance
+        
+
+    def update(self, instance, validated_data):
+        new_avatar = validated_data.get('avatar')
+        if new_avatar is not None:
+            old_avatar = instance.avatar
+            instance.avatar = new_avatar
+            instance.save()
+            if old_avatar:
+                self.delete_old_avatar(instance, old_avatar)
+        return instance
+    
+    def delete(self, instance):
+        old_avatar = instance.avatar
+        instance.avatar = instance._meta.get_field('avatar').get_default()
+        instance.save()
+        if old_avatar:
+            self.delete_old_avatar(instance, old_avatar)
+        return instance
 
 
 #FRIENDSHIP REQUEST SERIALIZERS
@@ -66,11 +161,6 @@ class ReceivedFriendshipRequestSerializer(serializers.ModelSerializer):
         fields = ['id', 'sender', 'receiver', 'status', 'is_active', 'created_date']
         read_only_fields = ['id', 'sender', 'receiver', 'is_active', 'created_date']
     
-    def to_representation(self, instance):
-        representation = super().to_representation(instance)
-        representation['sender'] = UserBasicInfoSerializer(instance.sender).data
-        return representation
-
     def to_representation(self, instance):
         representation = super().to_representation(instance)
         representation['sender'] = UserBasicInfoSerializer(instance.sender).data
