@@ -4,9 +4,9 @@ const MenuElement = (id, elements, style) => {
   const holoplate = new DivComponent(id, {
     styles: {
       background: 'linear-gradient(180.2deg, \
-      rgba(0, 0, 0, 0.8) 15%, \
-      rgba(100, 100, 100, 0.8) 60%, \
-      rgba(0, 40, 100, 0.8) 75%)',
+      rgba(0, 0, 0, 0.6) 15%, \
+      rgba(100, 100, 100, 0.6) 60%, \
+      rgba(0, 40, 100, 0.6) 75%)',
       borderRadius: '10px',
       backgroundSize: '100% 13px',
       backgroundRepeat: 'repeat-y',
@@ -22,7 +22,7 @@ const MenuElement = (id, elements, style) => {
   const menuContainer = new DivComponent("menuContainer", {
     styles: {
       background: 'rgba(0, 40, 100, 0.2)',
-      border: '2px solid rgba(0, 150, 255, 0.5)',
+      border: '2px solid rgba(0, 150, 255, 0.3)',
       borderRadius: '10px',
       padding: '20px',
       boxShadow: '0 0 20px rgba(0, 150, 255, 0.5), \

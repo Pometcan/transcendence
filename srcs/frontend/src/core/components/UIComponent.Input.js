@@ -6,8 +6,10 @@ export class InputComponent extends UIComponent {
     this.placeholder = props.placeholder || "";
     this._value = props.value || "";
     this.type = props.type || "text";
+    this.styles = props.styles || {};
+    this.class = props.class || "";
 
-    this.expectedListeners = { // Doğru tanım: obje literal
+    this.expectedListeners = {
       input: this.onInput,
       focus: this.onFocus,
       blur: this.onBlur,

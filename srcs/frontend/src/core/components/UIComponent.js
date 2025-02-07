@@ -94,8 +94,7 @@ class UIComponent {
       this.transitionIn( createdElement );
     }
 
-    this.addEventListeners( createdElement, this.expectedListeners() ); // **Satır 114 - Hata burada**
-
+    this.addEventListeners( createdElement, this.expectedListeners() );
     return createdElement;
   }
 

@@ -44,24 +44,28 @@ export class App extends HTMLElement {
   loadCSS() {
     const link = document.createElement('link');
     const animate = document.createElement('link');
+    const elements = document.createElement('link');
     const bootstrapCSS = document.createElement('link');
     const bootstrapJS = document.createElement('script');
     link.rel = 'stylesheet';
     link.href = '../app.css';
     animate.rel = 'stylesheet';
     animate.href = 'src/css/Animation.css';
+    elements.rel = 'stylesheet';
+    elements.href = 'src/css/Elements.css';
     bootstrapCSS.rel = 'stylesheet';
     bootstrapCSS.href = 'https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css';
     bootstrapJS.src = 'https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js';
     this.shadowRoot.appendChild(link);
     this.shadowRoot.appendChild(animate);
+    this.shadowRoot.appendChild(elements);
     this.shadowRoot.appendChild(bootstrapCSS);
     this.shadowRoot.appendChild(bootstrapJS);
   }
 
   async connectedCallback() {
     await this.initLanguage();
-    await new Promise(resolve => setTimeout(resolve, 3000));
+    //await new Promise(resolve => setTimeout(resolve, 3000));
     if (getCookie("login") === "true")
       this.router.handleRoute("/");
     else

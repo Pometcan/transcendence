@@ -1,11 +1,15 @@
 // HomePage.js
 import { ButtonComponent, DivComponent, TextComponent, withEventHandlers } from '../core/components/Type.Component.js';
 import MenuElement from '../core/elements/Element.Menu.js';
-import {eraseCookie} from '../core/Cookie.js';
+import {eraseCookie, getCookie} from '../core/Cookie.js';
 
 const HomePage = {
   layoutVisibility: true,
   render: () => {
+    if (getCookie("login") !== "true") {
+      window.router.navigate("/auth");
+      return;
+    }
     const pageContainer = MenuElement("homePage");
     const title = new TextComponent("homeTitle", { text: "Ana Sayfa" });
     const content = new TextComponent("homeContent", { text: "Burası ana sayfa içeriği." });

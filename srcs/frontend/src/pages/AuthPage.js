@@ -1,19 +1,17 @@
-import {MenuElement, SubmitButton} from '../core/elements/Type.Element.js';
+import {InputElement, MenuElement, SubmitButton} from '../core/elements/Type.Element.js';
 import {FormComponent, ButtonComponent, InputComponent,  withEventHandlers, DivComponent } from '../core/components/Type.Component.js';
-import { setCookie, getCookie, getCsrfToken } from '../core/Cookie.js';
+import { setCookie, getCsrfToken } from '../core/Cookie.js';
 import {t} from '../i42n.js';
 
 const LoginElement = () => {
   const loginForm = new DivComponent("loginForm", {});
-  const usernameInput = new InputComponent("usernameInput", { type: "text", name: "username", placeholder: t("auth.username")});
-  const emailInput = new InputComponent("emailInput", { type: "email", name: "email", placeholder: t("auth.email") });
-  const passwordInput = new InputComponent("passwordInput", { type: "password", name: "password", placeholder: t("auth.password") });
+  const usernameInput = InputElement("usernameInput", t("auth.username"), "text");
+  const passwordInput = InputElement("passwordInput", t("auth.password"), "password");
   const submitButton = SubmitButton("submitButton", t("auth.loginSubmitButton") );
   const errorDiv = new DivComponent("loginError", { styles: { color: 'red', marginTop: '10px', display: 'none' } });
 
   loginForm.elements = [
     usernameInput,
-    emailInput,
     passwordInput,
     submitButton,
     errorDiv
@@ -24,9 +22,8 @@ const LoginElement = () => {
 
     const csrfToken = await getCsrfToken();
     const payload = {
-      username: usernameInput.value,
-      email: emailInput.value,
-      password: passwordInput.value
+      username: usernameInput.elements[0].value,
+      password: passwordInput.elements[0].value
     };
 
     try {
@@ -53,7 +50,6 @@ const LoginElement = () => {
         errorDiv.element.textContent = errorMessage.trim();
         errorDiv.element.style.display = 'block';
       } else {
-        // Başarılı giriş işlemi
         if (data.key) {
           setCookie('login', 'true', 1);
           setCookie('loginKey', data.key, 1);

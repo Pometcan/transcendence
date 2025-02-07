@@ -5,12 +5,14 @@ export class ButtonComponent extends UIComponent {
     super( id, props.styles, props.class);
     this.label = props.label;
     this.styles = props.styles;
+    this.hoverStyles = props.hoverStyles || {};
     this.class = props.class || '';
 
     this.expectedListeners = () => ({
       click: this.onClick,
       mouseenter: this.onMouseEnter,
       mouseleave: this.onMouseLeave,
+      hover: this.onHover,
     });
   }
 

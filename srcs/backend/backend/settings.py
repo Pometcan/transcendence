@@ -91,7 +91,7 @@ AUTHENTICATION_BACKENDS = (
 SITE_ID = 1
 ACCOUNT_EMAIL_VERIFICATION = 'none' #SENEM: 2fa için değiştirmek gerekebilir??
 # SENEM: ACCOUNT_EMAIL_VERIFICATION = 'mandatory'  # E-posta doğrulaması zorunlu
-ACCOUNT_EMAIL_REQUIRED = True #SENEM: Kayıt esnasında email adresi verilmeli mi?
+ACCOUNT_EMAIL_REQUIRED = False #SENEM: Kayıt esnasında email adresi verilmeli mi?
 ACCOUNT_UNIQUE_EMAIL = True
 #SENEM: ACCOUNT_AUTHENTICATED_REDIRECT_URL = '/'  # Başarılı giriş sonrası yönlendirilecek URL
 

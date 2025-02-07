@@ -9,9 +9,10 @@
     "loginSubmitButton": "ログイン",
     "registerSubmitButton": "登録"
   },
-  "errors": {
+  "error": {
     "LoginFailed": "ログインに失敗しました。もう一度お試しください。",
     "serverError": "サーバーエラー。もう一度お試しください。",
+    "loginFailed": "ログインに失敗しました。もう一度お試しください。",
     "registerFailed": "登録に失敗しました。もう一度お試しください。",
     "passwordMismatch": "パスワードが一致しません。"
   }

@@ -9,9 +9,10 @@
     "loginSubmitButton": "Giriş Yap",
     "registerSubmitButton": "Kaydol"
   },
-  "errors": {
+  "error": {
     "LoginFailed": "Giriş başarısız oldu. Lütfen tekrar deneyin.",
     "serverError": "Sunucu hatası. Lütfen tekrar deneyin.",
+    "loginFailed": "Giriş başarısız oldu. Lütfen tekrar deneyin.",
     "registerFailed": "Kayıt başarısız oldu. Lütfen tekrar deneyin.",
     "passwordMismatch": "Şifreler eşleşmiyor."
   }
