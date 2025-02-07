@@ -1,0 +1,19 @@
+{
+  "auth": {
+    "login": "Giriş Yap",
+    "register": "Kaydol",
+    "username": "Kullanıcı Adı",
+    "password": "Şifre",
+    "password2": "Şifreyi Onayla",
+    "email": "E-posta",
+    "loginSubmitButton": "Giriş Yap",
+    "registerSubmitButton": "Kaydol"
+  },
+  "error": {
+    "LoginFailed": "Giriş başarısız oldu. Lütfen tekrar deneyin.",
+    "serverError": "Sunucu hatası. Lütfen tekrar deneyin.",
+    "loginFailed": "Giriş başarısız oldu. Lütfen tekrar deneyin.",
+    "registerFailed": "Kayıt başarısız oldu. Lütfen tekrar deneyin.",
+    "passwordMismatch": "Şifreler eşleşmiyor."
+  }
+}

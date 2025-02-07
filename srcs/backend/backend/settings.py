@@ -78,9 +78,10 @@ from datetime import timedelta
 REST_USE_JWT = True
 ACCOUNT_AUTHENTICATION_METHOD = 'username'  # E-posta ile giriş yapma istersen 'email' veya 'username_email' kullan
 ACCOUNT_EMAIL_REQUIRED = False
-#ACCOUNT_EMAIL_VERIFICATION = 'optional'
 ACCOUNT_UNIQUE_EMAIL = True
+ACCOUNT_EMAIL_VERIFICATION = 'none' 
 #SENEM: ACCOUNT_AUTHENTICATED_REDIRECT_URL = '/'  # Başarılı giriş sonrası yönlendirilecek URL
+
 
 SIMPLE_JWT = {
     'ACCESS_TOKEN_LIFETIME': timedelta(minutes=30),
@@ -119,9 +120,6 @@ REST_FRAMEWORK = {
 AUTHENTICATION_BACKENDS = (
     'allauth.account.auth_backends.AuthenticationBackend',
 )
-
-
-
 
 
 MIDDLEWARE = [
