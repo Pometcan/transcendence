@@ -23,4 +23,35 @@ function eraseCookie(name) {
     document.cookie = name +'=; Path=/; Expires=Thu, 01 Jan 1970 00:00:01 GMT;';
 }
 
-export { setCookie, getCookie, eraseCookie };
+function checkCookie(name) {
+    var cookie = getCookie(name);
+    if (cookie != null) {
+        return true;
+    }
+    return false;
+}
+
+function listCookies() {
+    var theCookies = document.cookie.split(';');
+    var aString = '';
+    for (var i = 1 ; i <= theCookies.length; i++) {
+        aString += i + ' ' + theCookies[i-1] + "\n";
+    }
+    return aString;
+}
+
+async function getCsrfToken () {
+  const response = await fetch(`https://${window.location.host}/api/users/csrf/`, { // await eklendi
+          method: "GET",
+          credentials: "include",
+          headers: {
+              Accept: "application/json",
+          },
+      });
+      const data = await response.json();
+      console.log("CSRF Token:", data.csrfToken);
+      setCookie('csrftoken', data.csrfToken, 1);
+      return data.csrfToken;
+}
+
+export { setCookie, getCookie, eraseCookie, checkCookie, listCookies, getCsrfToken };

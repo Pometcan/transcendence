@@ -1,8 +1,4 @@
-import Component from "../Components";
-
-const injectedCSSComponents = new WeakSet();
-
-class UIComponent extends Component {
+class UIComponent {
   /**
    *
    * @param {string} id
@@ -10,27 +6,15 @@ class UIComponent extends Component {
    * @param {string} _class
    */
   constructor( id, styles = {}, object, _class ) {
-    super();
     this.id = id;
+
     this.styles = styles;
     this._object = object;
     this.class = _class || '';
     this.active = false;
     this.element = null;
 
-    this.constructor.injectComponentCSS(this.constructor);
-
     this.expectedListeners = () => ({});
-  }
-
-  static css = null;
-  static injectComponentCSS(componentClass) {
-    if (componentClass.css && !injectedCSSComponents.has(componentClass)) {
-      const style = document.createElement('style');
-      style.textContent = componentClass.css;
-      document.head.appendChild(style);
-      injectedCSSComponents.add(componentClass);
-    }
   }
 
   get object() {

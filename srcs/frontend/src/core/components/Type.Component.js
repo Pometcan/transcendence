@@ -1,4 +1,3 @@
-import { AssetComponent, BoundaryComponent, PositionComponent, VelocityComponent } from "../Components";
 import UIComponent from "./UIComponent";
 import { ButtonComponent } from "./UIComponent.Button";
 import { TextComponent } from "./UIComponent.Text";
@@ -11,8 +10,8 @@ import { LinkComponent } from "./UIComponent.Link";
 import { withTransitions, withEventHandlers } from "./UIComponent.Util";
 
 export {
-  AssetComponent, BoundaryComponent, ButtonComponent, InputComponent,
-  PositionComponent, TextComponent, DivComponent, SVGComponent,
-  UIComponent, VelocityComponent, FormComponent, LabelComponent,
+   ButtonComponent, InputComponent,
+  TextComponent, DivComponent, SVGComponent,
+  UIComponent, FormComponent, LabelComponent,
   LinkComponent, withTransitions, withEventHandlers
 };

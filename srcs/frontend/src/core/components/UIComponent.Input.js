@@ -4,14 +4,25 @@ export class InputComponent extends UIComponent {
   constructor(id, props = {}) {
     super(id, props.styles, props.class);
     this.placeholder = props.placeholder || "";
-    this.value = props.value || "";
+    this._value = props.value || "";
     this.type = props.type || "text";
 
-    this.expectedListeners = {
+    this.expectedListeners = { // Doğru tanım: obje literal
       input: this.onInput,
       focus: this.onFocus,
       blur: this.onBlur,
     };
+  }
+
+  get value() {
+    return this._value;
+  }
+
+  set value(newValue) {
+    this._value = newValue;
+    if (this.element) {
+      this.element.value = newValue;
+    }
   }
 
   render() {
@@ -26,7 +37,7 @@ export class InputComponent extends UIComponent {
     inputElement.id = this.id;
     inputElement.type = this.type;
     inputElement.placeholder = this.placeholder;
-    inputElement.value = this.value;
+    inputElement.value = this._value;
 
     this.applyStyles(inputElement);
     this.applyClasses(inputElement);
@@ -35,8 +46,12 @@ export class InputComponent extends UIComponent {
       this.transitionIn(inputElement);
     }
 
-    this.addEventListeners(inputElement, this.expectedListeners);
+    this.addEventListeners(inputElement, this.expectedListeners); // Doğru kullanım: obje direkt olarak geçiriliyor
 
     return inputElement;
   }
+
+  onInput = (event) => {
+    this.value = event.target.value;
+  };
 }

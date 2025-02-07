@@ -20,8 +20,6 @@ export class PageManager {
     if (this.activePage) {
       const currentPage = this.pages.get(this.activePage);
       if (currentPage && currentPage.element) {
-        // Geçiş animasyonları ve setTimeout kaldırıldığı için sadece eski sayfayı hemen kaldırıyoruz
-        // Sayfa içeriğini doğru konteynerden kaldır
         const contentContainer = this.layoutElement ? this.layoutElement.querySelector("#page-content-container") : this.containerElement;
         if (contentContainer && currentPage.element.parentNode === contentContainer) {
           contentContainer.removeChild(currentPage.element);
