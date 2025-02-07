@@ -1,0 +1,18 @@
+{
+  "auth": {
+    "login": "ログイン",
+    "register": "登録",
+    "username": "ユーザー名",
+    "password": "パスワード",
+    "password2": "パスワードを認証",
+    "email": "Eメール",
+    "loginSubmitButton": "ログイン",
+    "registerSubmitButton": "登録"
+  },
+  "errors": {
+    "LoginFailed": "ログインに失敗しました。もう一度お試しください。",
+    "serverError": "サーバーエラー。もう一度お試しください。",
+    "registerFailed": "登録に失敗しました。もう一度お試しください。",
+    "passwordMismatch": "パスワードが一致しません。"
+  }
+}

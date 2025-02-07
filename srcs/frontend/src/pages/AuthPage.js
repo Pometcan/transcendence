@@ -1,13 +1,14 @@
 import {MenuElement, SubmitButton} from '../core/elements/Type.Element.js';
 import {FormComponent, ButtonComponent, InputComponent,  withEventHandlers, DivComponent } from '../core/components/Type.Component.js';
-import { setCookie, getCookie, listCookies, getCsrfToken } from '../core/Cookie.js';
+import { setCookie, getCookie, getCsrfToken } from '../core/Cookie.js';
+import {t} from '../i42n.js';
 
 const LoginElement = () => {
   const loginForm = new DivComponent("loginForm", {});
-  const usernameInput = new InputComponent("usernameInput", { type: "text", name: "username", placeholder: "Kullanıcı Adı" });
-  const emailInput = new InputComponent("emailInput", { type: "email", name: "email", placeholder: "E-posta" });
-  const passwordInput = new InputComponent("passwordInput", { type: "password", name: "password", placeholder: "Şifre" });
-  const submitButton = SubmitButton("submitButton", "Giriş Yap" );
+  const usernameInput = new InputComponent("usernameInput", { type: "text", name: "username", placeholder: t("auth.username")});
+  const emailInput = new InputComponent("emailInput", { type: "email", name: "email", placeholder: t("auth.email") });
+  const passwordInput = new InputComponent("passwordInput", { type: "password", name: "password", placeholder: t("auth.password") });
+  const submitButton = SubmitButton("submitButton", t("auth.loginSubmitButton") );
   const errorDiv = new DivComponent("loginError", { styles: { color: 'red', marginTop: '10px', display: 'none' } });
 
   loginForm.elements = [
@@ -41,7 +42,7 @@ const LoginElement = () => {
       });
       const data = await response.json();
       if (!response.ok) {
-        let errorMessage = "Giriş başarısız. ";
+        let errorMessage = t("error.loginFailed");
 
         if (data) {
           for (const field in data) {
@@ -60,7 +61,7 @@ const LoginElement = () => {
         }
       }
     } catch (error) {
-      errorDiv.element.textContent = error.message || "Sunucuya bağlanırken bir hata oluştu.";
+      errorDiv.element.textContent = error.message || t("error.serverError");
       errorDiv.element.style.display = 'block';
     }
   } });
@@ -70,11 +71,11 @@ const LoginElement = () => {
 
 const RegisterElement = () => {
   const registerForm = new DivComponent("registerForm", { styles: { display: 'none' } });
-  const usernameInput = new InputComponent("usernameInput", { type: "text", name: "username", placeholder: "Kullanıcı Adı" });
-  const emailInput = new InputComponent("emailInput", { type: "email", name: "email", placeholder: "E-posta" });
-  const passwordInput = new InputComponent("passwordInput", { type: "password", name: "password", placeholder: "Şifre" });
-  const password2Input = new InputComponent("password2Input", { type: "password", name: "password2", placeholder: "Şifre Tekrar" });
-  const submitButton = SubmitButton("submitButton", "Kayıt Ol" );
+  const usernameInput = new InputComponent("usernameInput", { type: "text", name: "username", placeholder: t("auth.username")});
+  const emailInput = new InputComponent("emailInput", { type: "email", name: "email", placeholder: t("auth.email") });
+  const passwordInput = new InputComponent("passwordInput", { type: "password", name: "password", placeholder: t("auth.password") });
+  const password2Input = new InputComponent("password2Input", { type: "password", name: "password2", placeholder: t("auth.password2") });
+  const submitButton = SubmitButton("submitButton", t("auth.registerSubmitButton") );
   const errorDiv = new DivComponent("registerError", { styles: { color: 'red', marginTop: '10px', display: 'none' } });
 
   registerForm.elements = [
@@ -87,16 +88,14 @@ const RegisterElement = () => {
   ];
 
   withEventHandlers(submitButton, { onClick: async() => {
-    errorDiv.element.style.display = 'none'; // Onceki hatalari temizle
+    errorDiv.element.style.display = 'none';
+    errorDiv.element.textContent = "";
 
     if (passwordInput.value !== password2Input.value) {
-      errorDiv.element.textContent = "Şifreler eşleşmiyor.";
+      errorDiv.element.textContent = t("error.passwordMismatch");
       errorDiv.element.style.display = 'block';
       return;
     }
-
-    errorDiv.element.style.display = 'none';
-    errorDiv.element.textContent = "";
 
     const csrfToken = await getCsrfToken();
     const payload = {
@@ -119,7 +118,7 @@ const RegisterElement = () => {
       });
       const data = await response.json();
       if (!response.ok) {
-        let errorMessage = "Giriş başarısız. ";
+        let errorMessage = t("error.registerFailed");
 
         if (data) {
           for (const field in data) {
@@ -130,7 +129,6 @@ const RegisterElement = () => {
         errorDiv.element.textContent = errorMessage.trim();
         errorDiv.element.style.display = 'block';
       } else {
-        // Başarılı giriş işlemi
         if (data.key) {
           setCookie('login', 'true', 1);
           setCookie('loginKey', data.key, 1);
@@ -138,7 +136,7 @@ const RegisterElement = () => {
         }
       }
     } catch (error) {
-      errorDiv.element.textContent = error.message || "Sunucuya bağlanırken bir hata oluştu.";
+      errorDiv.element.textContent = error.message || t("error.serverError");
       errorDiv.element.style.display = 'block';
     }
   }
@@ -150,12 +148,14 @@ const RegisterElement = () => {
 const AuthPage = {
   layoutVisibility: false,
   render: () => {
-    const loginButton = new ButtonComponent("loginButton", { label: "Login" });
-    const registerButton = new ButtonComponent("registerButton", { label: "Register" });
+    const loginButton = new ButtonComponent("loginButton", { label: t("auth.login") });
+    const registerButton = new ButtonComponent("registerButton", { label: t("auth.register") });
     const loginForm = LoginElement();
     const registerForm = RegisterElement();
-    const pageContainer = MenuElement("authPage", [loginButton, registerButton, loginForm, registerForm]  );
-
+    const pageContainer = MenuElement("authPage", [loginButton, registerButton, loginForm, registerForm],{
+        "max-width": '500px',
+      });
+    pageContainer.elements[0].elements.class = "container-sm d-flex justify-content-center";
     withEventHandlers(loginButton, { onClick: () => {
       loginForm.element.style.display = 'block';
       registerForm.element.style.display = 'none';

@@ -1,6 +1,6 @@
 import { DivComponent } from "../components/Type.Component.js";
 
-const MenuElement = (id, elements) => {
+const MenuElement = (id, elements, style) => {
   const holoplate = new DivComponent(id, {
     styles: {
       background: 'linear-gradient(180.2deg, \
@@ -13,6 +13,7 @@ const MenuElement = (id, elements) => {
       filter: 'contrast(101%)',
       animation: 'holoEffect 1s steps(14) infinite',
       flex: 1,
+      ...style
     },
     class: ""
 

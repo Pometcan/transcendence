@@ -1,0 +1,18 @@
+{
+  "auth": {
+    "login": "Login",
+    "register": "Register",
+    "username": "Username",
+    "password": "Password",
+    "password2": "Confirm Password",
+    "email": "E-mail",
+    "loginSubmitButton": "Login",
+    "registerSubmitButton": "Register"
+  },
+  "errors": {
+    "LoginFailed": "Login failed. Please try again.",
+    "serverError": "Server error. Please try again.",
+    "registerFailed": "Register failed. Please try again.",
+    "passwordMismatch": "Passwords do not match."
+  }
+}

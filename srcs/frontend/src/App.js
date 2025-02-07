@@ -7,6 +7,10 @@ import AboutPage from "./pages/AboutPage";
 import { PageManager } from "./core/managers/PageManager";
 import Router from "./core/Router";
 import { getCookie,setCookie } from "./core/Cookie";
+import { init, changeLanguage} from "./i42n.js";
+/*import enJson from "../assets/images/locales/en.json";
+import trJson from "../assets/images/locales/tr.json";
+import deJson from "../assets/images/locales/de.json";*/
 
 export class App extends HTMLElement {
   constructor() {
@@ -55,11 +59,31 @@ export class App extends HTMLElement {
     this.shadowRoot.appendChild(bootstrapJS);
   }
 
-  connectedCallback() {
+  async connectedCallback() {
+    await this.initLanguage();
+    await new Promise(resolve => setTimeout(resolve, 3000));
     if (getCookie("login") === "true")
       this.router.handleRoute("/");
     else
       this.router.navigate("/auth");
+  }
+
+  async initLanguage() {
+      const translations = {};
+
+      try {
+          const enResponse = await fetch('../assets/locales/en.json');
+          translations.en = await enResponse.json();
+          const trResponse = await fetch('../assets/locales/tr.json');
+          translations.tr = await trResponse.json();
+          const jaResponse = await fetch('../assets/locales/ja.json');
+          translations.ja = await jaResponse.json();
+          init({ translations: translations, defaultLanguage: ["en",  "ja", "tr"]});
+          setCookie("lang", navigator.language.split("-")[0], 1);
+          changeLanguage(getCookie("lang"));
+      } catch (error) {
+          console.error("Language files could not be loaded:", error);
+      }
   }
 }
 
