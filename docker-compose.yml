@@ -15,7 +15,7 @@ services:
     volumes:
       - ./srcs/backend/static:/backend/static
       - backend_vol:/backend
-      - media_vol:/backend/uploads
+      - media_vol:/backend/media
     depends_on:
       - postgresql
       - redis

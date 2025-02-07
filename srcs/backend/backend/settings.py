@@ -15,6 +15,8 @@ import os
 from pathlib import Path
 from dotenv import load_dotenv
 
+AVATAR_FILE_NAME = os.getenv('AVATAR_FILE_NAME', 'default_avatar.png')
+
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 load_dotenv()
@@ -56,6 +58,8 @@ INSTALLED_APPS = [
     'allauth.socialaccount.providers.oauth2',
     'dj_rest_auth',
     'dj_rest_auth.registration',
+    'rest_framework_simplejwt',
+
 
     "corsheaders",
     'requests',
@@ -69,20 +73,46 @@ INSTALLED_APPS = [
 
 AUTH_USER_MODEL = 'users.User'
 
+
+from datetime import timedelta
+REST_USE_JWT = True
+ACCOUNT_AUTHENTICATION_METHOD = 'username'  # E-posta ile giriş yapma istersen 'email' veya 'username_email' kullan
+ACCOUNT_EMAIL_REQUIRED = False
+#ACCOUNT_EMAIL_VERIFICATION = 'optional'
+ACCOUNT_UNIQUE_EMAIL = True
+#SENEM: ACCOUNT_AUTHENTICATED_REDIRECT_URL = '/'  # Başarılı giriş sonrası yönlendirilecek URL
+
+SIMPLE_JWT = {
+    'ACCESS_TOKEN_LIFETIME': timedelta(minutes=30),
+    'REFRESH_TOKEN_LIFETIME': timedelta(days=7),
+    'ROTATE_REFRESH_TOKENS': True,
+    'BLACKLIST_AFTER_ROTATION': True,
+    'AUTH_HEADER_TYPES': ('Bearer',),
+     'ALGORITHM': 'HS256',
+    'SIGNING_KEY': SECRET_KEY,
+}
+
 INTRA_CLIENT_ID = os.getenv('INTRA_CLIENT_ID')
 INTRA_CLIENT_SECRET= os.getenv('INTRA_CLIENT_SECRET')
 INTRA_REDIRECT_URI = os.getenv('INTRA_REDIRECT_URI')
 
+OTP_LOGIN_URL = '/api/v1/auth/otp/login/'
+
+SITE_ID = 1
+
+
 REST_FRAMEWORK = {
     'DEFAULT_PERMISSION_CLASSES': [
-        'rest_framework.permissions.DjangoModelPermissionsOrAnonReadOnly' #SENEM: jwt entegre edildiğine jwt permission da eklenmeli.
+        'rest_framework.permissions.DjangoModelPermissionsOrAnonReadOnly', #SENEM: jwt entegre edildiğine jwt permission da eklenmeli.
+        'rest_framework.permissions.IsAuthenticated',
     ],
 
     'DEFAULT_SCHEMA_CLASS': 'drf_spectacular.openapi.AutoSchema', #SENEM: swagger için
 
     'DEFAULT_AUTHENTICATION_CLASSES': [
-        'rest_framework.authentication.SessionAuthentication',  # CSRF için
-        'rest_framework.authentication.TokenAuthentication',
+       'rest_framework.authentication.SessionAuthentication',  # CSRF için
+       # 'rest_framework.authentication.TokenAuthentication',
+        'rest_framework_simplejwt.authentication.JWTAuthentication',
     ],
 }
 
@@ -90,12 +120,7 @@ AUTHENTICATION_BACKENDS = (
     'allauth.account.auth_backends.AuthenticationBackend',
 )
 
-SITE_ID = 1
-ACCOUNT_EMAIL_VERIFICATION = 'none' #SENEM: 2fa için değiştirmek gerekebilir??
-# SENEM: ACCOUNT_EMAIL_VERIFICATION = 'mandatory'  # E-posta doğrulaması zorunlu
-ACCOUNT_EMAIL_REQUIRED = True #SENEM: Kayıt esnasında email adresi verilmeli mi?
-ACCOUNT_UNIQUE_EMAIL = True
-#SENEM: ACCOUNT_AUTHENTICATED_REDIRECT_URL = '/'  # Başarılı giriş sonrası yönlendirilecek URL
+
 
 
 
@@ -251,7 +276,7 @@ USE_I18N = True
 USE_TZ = True
 
 MEDIA_URL = '/api/media/'
-MEDIA_ROOT = os.path.join(BASE_DIR, 'uploads')
+MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
 
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/5.1/howto/static-files/
@@ -263,3 +288,17 @@ STATIC_ROOT = os.path.join(BASE_DIR, 'static')
 # https://docs.djangoproject.com/en/5.1/ref/settings/#default-auto-field
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
+
+
+
+
+SWAGGER_SETTINGS = {
+    'SECURITY_DEFINITIONS': {
+        'Bearer': {
+            'type': 'apiKey',
+            'name': 'Authorization',
+            'in': 'header',
+        }
+    },
+    'DEFAULT_API_URL': 'http://127.0.0.1/api/',  # Domain'i buraya güncelle
+}

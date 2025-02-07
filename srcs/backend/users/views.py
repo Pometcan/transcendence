@@ -1,122 +1,124 @@
-from django.shortcuts import render
-from django.conf import settings
-from django.contrib.auth import login
-import requests
-from django.core.files.base import ContentFile
 import os
-from dj_rest_auth.views import LoginView
-from rest_framework import mixins, generics, status, permissions
-from rest_framework.views import APIView
+import pyotp
+import qrcode
+import base64
+from io import BytesIO
+from django.conf import settings
+from django.shortcuts import render
+from django.urls import path
+from rest_framework.decorators import action
+from rest_framework import mixins, status, permissions
 from rest_framework.viewsets import GenericViewSet, ModelViewSet
 from rest_framework.permissions import IsAuthenticated, AllowAny
-from rest_framework.authtoken.models import Token
-from rest_framework.response import Response
-from users.models import User, FriendshipRequest
-from .serializers import GetUserSerializer, AvatarSerializer, ReceivedFriendshipRequestSerializer, SentFriendshipRequestSerializer, BlockUserSerializer, FriendsSerializer
-from users.permissions import RequestOwnerOrReadOnly
-from django.http import JsonResponse
+from rest_framework_simplejwt.tokens import RefreshToken
 from django.middleware.csrf import get_token
+from rest_framework.response import Response
+from django.http import JsonResponse
+from users.permissions import RequestOwnerOrReadOnly
+from users.models import User, FriendshipRequest
+from .serializers import LoginSerializer, \
+                        OAuthLoginSerializer, \
+                        TwoFAVerifySerializer, \
+                        GetUserSerializer, \
+                        AvatarSerializer, \
+                        ReceivedFriendshipRequestSerializer, \
+                        SentFriendshipRequestSerializer, \
+                        BlockUserSerializer, \
+                        FriendsSerializer
+
+
 
 def get_csrf_token(request):
     return JsonResponse({'csrfToken': get_token(request)})
 
-
 AUTHORIZATION_URL = os.getenv('AUTHORIZATION_URL')
-TOKEN_URL = os.getenv('TOKEN_URL')
-USER_INFO_URL = os.getenv('USER_INFO_URL')
 CLIENT_ID = settings.INTRA_CLIENT_ID
-CLIENT_SECRET = settings.INTRA_CLIENT_SECRET
 REDIRECT_URI = settings.INTRA_REDIRECT_URI
 
-
-class IntraOAuthView(APIView):
-
+#LOGIN---------------------------------------------------------------------------
+class AuthViewSet(GenericViewSet, mixins.CreateModelMixin):
+    queryset = User.objects.all()
     permission_classes = [AllowAny]
 
-    def get(self, request, action=None):
-        if action == "login":
-            return self.intra_login(request)
-        elif action == "callback" or action is None:
-            return self.intra_callback(request)
-        return Response({"error": "Invalid action"}, status=400)
+    def get_serializer_class(self):
+        return LoginSerializer
     
-    def intra_login(self, request): # Kullanıcıyı 42 Intra giriş ekranına yönlendir
-        state = "random_string"  # CSRF koruması için rastgele bir state belirle
+    def login(self, request, *args, **kwargs):
+        serializer = LoginSerializer(data=request.data)
+        if serializer.is_valid():
+            user = serializer.validated_data['user']
+            
+            if user.mfa_enabled:
+                return Response({"2fa_required": True, "otp_secret": user.mfa_secret}, status=status.HTTP_200_OK)
+            
+            refresh = RefreshToken.for_user(user)
+            return Response({
+                'refresh': str(refresh),
+                'access': str(refresh.access_token),
+            }, status=status.HTTP_200_OK)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+#INTRA AUTH-------------------------------------------------------------------------------
+class IntraOAuthViewSet(GenericViewSet):
+    permission_classes = [permissions.AllowAny]
+
+    def login(self, request):
+        state = "random_string"
         auth_url = (
             f"{AUTHORIZATION_URL}?client_id={CLIENT_ID}&redirect_uri={REDIRECT_URI}"
             f"&response_type=code&scope=public&state={state}"
         )
         return Response({"auth_url": auth_url})
 
-    def intra_callback(self, request): # 42 Intra'dan dönen kod ile token al ve kullanıcıyı giriş yap
+    def callback(self, request):
         code = request.GET.get("code")
         if not code:
             return Response({"error": "Authorization code not provided"}, status=400)
+        serializer = OAuthLoginSerializer(data={"code": code}, context={"request": request})
+        if serializer.is_valid():
+            return Response(serializer.validated_data, status=status.HTTP_200_OK)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
-        CustomLoginView.intra_oauth_login(request, code)
-        return Response(
-                {"detail": "Login başarılı.."},status=status.HTTP_200_OK)
+#2FA----------------------------------------------------------------------------------
+class TwoFAVerifyViewSet(GenericViewSet, mixins.CreateModelMixin):
+    serializer_class = TwoFAVerifySerializer
+    permission_classes = [permissions.AllowAny]
 
+    def verify(self, request, *args, **kwargs):
+        return self.create(request, *args, **kwargs)
 
-class CustomLoginView(LoginView):
-    @staticmethod 
-    def intra_oauth_login(request, code):
-        # Access token al
-        token_data = {
-            "grant_type": "authorization_code",
-            "client_id": CLIENT_ID,
-            "client_secret": CLIENT_SECRET,
-            "code": code,
-            "redirect_uri": REDIRECT_URI,
-        }
-        token_response = requests.post(TOKEN_URL, data=token_data)
-        token_json = token_response.json()
+class Enable2FAViewSet(GenericViewSet):
+    permission_classes = [permissions.IsAuthenticated]
 
-        if "access_token" not in token_json:
-            return Response({"error": "Failed to retrieve access token"}, status=400)
+    def enable(self, request, *args, **kwargs):
+        user = request.user
+        try:
+            if not user.mfa_secret:
+                user.mfa_secret = pyotp.random_base32()
+                user.save()
+            # user.generate_otp_secret()
+            
+            otp_uri = pyotp.totp.TOTP(user.mfa_secret).provisioning_uri(user.email, issuer_name="PONG")
+            qr = qrcode.make(otp_uri)
+            buffered = BytesIO()
+            qr.save(buffered, format="PNG")
+            qr_b64 = base64.b64encode(buffered.getvalue()).decode()
+            
+            return Response({"otp_secret": user.mfa_secret, "qr_code": qr_b64}, status=status.HTTP_200_OK)
+        except Exception as e:
+            return Response({"error": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
-        access_token = token_json["access_token"]
+class Disable2FAViewSet(GenericViewSet):
+    permission_classes = [permissions.IsAuthenticated]
 
-        # Kullanıcı bilgilerini çek
-        user_response = requests.get(
-            USER_INFO_URL, headers={"Authorization": f"Bearer {access_token}"}
-        )
-        user_info = user_response.json()
+    def disable(self, request, *args, **kwargs):
+        user = request.user
+        user.mfa_secret = ""
+        user.save()
+        return Response({"message": "2FA has been disabled successfully."}, status=status.HTTP_200_OK)
+    
 
-        # Kullanıcıyı kaydet veya güncelle
-        user, created = User.objects.update_or_create(
-            id=user_info['id'],
-            defaults={
-                'username': user_info['login'],
-                'email': user_info.get('email', ''),
-            }
-        )
-
-        profile_image_url = user_info.get('image', {}).get('link', '')
-
-        if created and profile_image_url:
-            response = requests.get(profile_image_url)
-            if response.status_code == 200:
-                file_name = f"{user.username}_avatar.jpg"
-                user.avatar.save(file_name, ContentFile(response.content), save=True)
-
-
-        login(request, user)
-
-        # return Response({
-        #     'user': {
-        #         'id': user.id,
-        #         'username': user.username,
-        #         'email': user.email,
-        #     },
-        #     'message': 'User registered successfully' if created else 'Login successful'
-        # })
-        return Response(
-                {"detail": "Login başarılı.."},status=status.HTTP_200_OK)
-                
-
-
-
+#USER --------------------------------------------------------------------
 class GetUserViewSet(
                 mixins.ListModelMixin,
                 mixins.RetrieveModelMixin,
@@ -125,7 +127,6 @@ class GetUserViewSet(
 
     serializer_class = GetUserSerializer
     permission_classes = [IsAuthenticated, RequestOwnerOrReadOnly]
-    queryset = User.objects.none()
 
     def get_queryset(self):
         user = self.request.user
@@ -168,7 +169,6 @@ class ReceivedFriendshipRequestViewSet(
 
     serializer_class = ReceivedFriendshipRequestSerializer
     permission_classes = [IsAuthenticated]
-    gueryset = FriendshipRequest.objects.none()
 
     def get_queryset(self):
         user = self.request.user
@@ -186,7 +186,6 @@ class SentFriendshipRequestViewSet(
 
     serializer_class = SentFriendshipRequestSerializer
     permission_classes = [IsAuthenticated]
-    gueryset = FriendshipRequest.objects.none()
 
     def get_queryset(self):
         user = self.request.user
@@ -203,7 +202,6 @@ class FriendsViewSet(
 
     serializer_class = FriendsSerializer
     permission_classes = [IsAuthenticated]
-    gueryset = User.objects.none()
 
     def get_queryset(self):
         user_instance = self.request.user
@@ -224,7 +222,6 @@ class BlockUserViewSet(ModelViewSet):
 
     serializer_class = BlockUserSerializer
     permission_classes = [IsAuthenticated]
-    gueryset = User.objects.none()
 
     def get_queryset(self):
         user_instance = self.request.user

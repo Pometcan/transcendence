@@ -4,6 +4,7 @@ from .managers import FriendshipRequestManager, UserManager
 import os
 from django.db.models import Q
 from PIL import Image
+import pyotp
 
 
 class User(AbstractUser):
@@ -16,6 +17,16 @@ class User(AbstractUser):
 
     friends = models.ManyToManyField('self', symmetrical=False, related_name='friend_of', blank=True)
     blocked_users = models.ManyToManyField('self',symmetrical=False, related_name='blocked_by', blank=True)
+
+    #2FA
+    mfa_secret = models.CharField(max_length=16, blank=True, null=True)
+    mfa_enabled = models.BooleanField(default=False)
+
+    def generate_otp_secret(self):
+        if not self.mfa_secret:
+            self.mfa_secret = pyotp.random_base32()
+            self.save()
+        return self.mfa_secret
 
     objects = UserManager()
 
