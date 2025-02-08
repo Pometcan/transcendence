@@ -47,4 +47,25 @@ export class SVGComponent extends UIComponent {
 
     return element;
   }
+
+  update(newProps) {
+    super.update(newProps);
+    if (newProps) {
+      if (newProps.svgContent !== undefined) {
+        this.svgContent = newProps.svgContent;
+        if (this.element)
+          this.element.innerHTML = this.svgContent;
+      }
+      if (newProps.svgPath !== undefined) {
+        this.svgPath = newProps.svgPath;
+        if (this.element)
+          console.warn("SVGComponent: svgPath özelliği henüz implemente edilmedi.");
+      }
+      if (newProps.svgData !== undefined) {
+        this.svgData = newProps.svgData;
+        if (this.element)
+          this.element.data = this.svgData;
+      }
+    }
+  }
 }

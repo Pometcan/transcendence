@@ -4,13 +4,11 @@ import Page404 from "./pages/404Page";
 import Layout from "./pages/Layout";
 import AuthPage from "./pages/AuthPage";
 import AboutPage from "./pages/AboutPage";
+import ProfilePage from "./pages/ProfilePage";
 import { PageManager } from "./core/managers/PageManager";
 import Router from "./core/Router";
 import { getCookie,setCookie } from "./core/Cookie";
 import { init, changeLanguage} from "./i42n.js";
-/*import enJson from "../assets/images/locales/en.json";
-import trJson from "../assets/images/locales/tr.json";
-import deJson from "../assets/images/locales/de.json";*/
 
 export class App extends HTMLElement {
   constructor() {
@@ -19,11 +17,11 @@ export class App extends HTMLElement {
     this.pageManager = new PageManager(this.shadowRoot, Layout);
     this.router = new Router(this.pageManager);
 
+    window.pageManager = this.pageManager;
     window.router = this.router;
-
+    window.app = this;
     this.loadPages();
     this.initRouter();
-
     this.loadCSS();
   }
 
@@ -31,6 +29,7 @@ export class App extends HTMLElement {
     this.router.addRoute("/", "homePage");
     this.router.addRoute("/about", "aboutPage");
     this.router.addRoute("/auth", "authPage");
+    this.router.addRoute("/profile", "profilePage");
     this.router.addRoute("/404", "/404");
   }
 
@@ -38,6 +37,7 @@ export class App extends HTMLElement {
     this.pageManager.addPage("homePage", HomePage);
     this.pageManager.addPage("aboutPage", AboutPage);
     this.pageManager.addPage("authPage", AuthPage);
+    this.pageManager.addPage("profilePage", ProfilePage);
     this.pageManager.addPage("/404", Page404);
   }
 
@@ -67,7 +67,13 @@ export class App extends HTMLElement {
     await this.initLanguage();
     //await new Promise(resolve => setTimeout(resolve, 3000));
     if (getCookie("login") === "true")
-      this.router.handleRoute("/");
+    {
+      const path = window.location.pathname;
+      if (path === "/auth")
+        this.router.navigate("/");
+      else
+        this.router.handleRoute(path);
+    }
     else
       this.router.navigate("/auth");
   }

@@ -18,12 +18,13 @@ class UIComponent {
   }
 
   get object() {
-    this.render();
+    this.render(); // Ensure element is rendered before accessing object
     return this._object;
   }
 
   set object( value ) {
     this._object = value;
+    this.update(); // Automatically update the component when the object is set
   }
 
   applyStyles( element ) {
@@ -46,9 +47,10 @@ class UIComponent {
     }
 
   applyAttributes( element ) {
-    if ( this.object ) {
-      for ( const [key, value] of Object.entries( this.object ) ) {
-        element[key] = value;
+    if ( this._object ) { // Use _object here to reflect the current state
+      for ( const [key, value] of Object.entries( this._object ) ) {
+        if (key !== 'element') // Prevent setting element as attribute
+          element[key] = value;
       }
     }
   }
@@ -82,13 +84,14 @@ class UIComponent {
 
     this.element = this.createElement();
 
-    if (this.object)
-      this.object.element = this.element;
+    if(this._object) // Make sure _object exists before trying to assign element
+      this._object.element = this.element;
 
     const createdElement = this.element
 
     this.applyStyles( createdElement );
     this.applyClasses(createdElement);
+    this.applyAttributes(createdElement); // Apply attributes during initial render
 
     if ( this.transitionIn ) {
       this.transitionIn( createdElement );
@@ -102,6 +105,22 @@ class UIComponent {
     const createdElement = document.createElement( "div" );
     createdElement.id = this.id;
     return createdElement;
+  }
+
+  update(newObject) {
+    if (newObject) {
+      this._object = { ...this._object, ...newObject }; // Merge new object with existing one
+    }
+
+    if (this.element) {
+      // Re-apply styles, classes, and attributes to update the existing element
+      this.applyStyles( this.element );
+      this.applyClasses(this.element);
+      this.applyAttributes(this.element);
+    } else {
+      // If element doesn't exist yet (shouldn't happen if update is called after render), render it.
+      this.render();
+    }
   }
 }
 

@@ -1,21 +1,54 @@
 import {InputElement, MenuElement, SubmitButton} from '../core/elements/Type.Element.js';
-import {FormComponent, ButtonComponent, InputComponent,  withEventHandlers, DivComponent } from '../core/components/Type.Component.js';
-import { setCookie, getCsrfToken } from '../core/Cookie.js';
+import { ButtonComponent, InputComponent,  withEventHandlers, DivComponent } from '../core/components/Type.Component.js';
+import { setCookie, getCsrfToken, getCookie } from '../core/Cookie.js';
 import {t} from '../i42n.js';
 
 const LoginElement = () => {
   const loginForm = new DivComponent("loginForm", {});
   const usernameInput = InputElement("usernameInput", t("auth.username"), "text");
   const passwordInput = InputElement("passwordInput", t("auth.password"), "password");
+  const authButton = SubmitButton("authButton", "42 INTRA" );
   const submitButton = SubmitButton("submitButton", t("auth.loginSubmitButton") );
   const errorDiv = new DivComponent("loginError", { styles: { color: 'red', marginTop: '10px', display: 'none' } });
 
+  authButton.styles = {backgroundColor: '#000', color: '#fff', width: '100%', marginTop: '10px'};
   loginForm.elements = [
     usernameInput,
     passwordInput,
     submitButton,
+    authButton,
     errorDiv
   ];
+
+  withEventHandlers(authButton, {
+    onClick: () => {
+      fetch(`https://${window.location.host}/api/auth/intra/login`, {
+        method: "GET",
+        credentials: "include",
+        headers: {
+          Accept: "application/json",
+          "Content-Type": "application/json",
+        }
+      })
+      .then((response) => response.json())
+      .then((data) => {
+        if (data.error) {
+          console.error("Error:", data.error);
+          setCookie('login', 'false', 1);
+          return;
+        }
+        setCookie('login', 'true', 1);
+        setCookie('userId', data.user_id, 1);
+        window.location.href = data.auth_url;
+      })
+      .catch((error) => {
+        console.error("Error:", error);
+        setCookie('login', 'false', 1);
+      });
+    }
+  });
+
+
   withEventHandlers(submitButton, { onClick: async () => {
     errorDiv.element.style.display = 'none';
     errorDiv.element.textContent = "";
@@ -27,7 +60,7 @@ const LoginElement = () => {
     };
 
     try {
-      const response = await fetch(`https://${window.location.host}/api/rest-auth/login/`, {
+      const response = await fetch(`https://${window.location.host}/api/auth/login/`, {
         method: "POST",
         credentials: "include",
         headers: {
@@ -50,9 +83,11 @@ const LoginElement = () => {
         errorDiv.element.textContent = errorMessage.trim();
         errorDiv.element.style.display = 'block';
       } else {
-        if (data.key) {
+        if (data.refresh && data.access) {
           setCookie('login', 'true', 1);
-          setCookie('loginKey', data.key, 1);
+          setCookie('userId', data.user_id, 1);
+          setCookie('refreshToken', data.refresh, 1);
+          setCookie('accessToken', data.access, 1);
           window.router.navigate("/");
         }
       }
@@ -72,6 +107,7 @@ const RegisterElement = () => {
   const passwordInput = new InputComponent("passwordInput", { type: "password", name: "password", placeholder: t("auth.password") });
   const password2Input = new InputComponent("password2Input", { type: "password", name: "password2", placeholder: t("auth.password2") });
   const submitButton = SubmitButton("submitButton", t("auth.registerSubmitButton") );
+
   const errorDiv = new DivComponent("registerError", { styles: { color: 'red', marginTop: '10px', display: 'none' } });
 
   registerForm.elements = [
