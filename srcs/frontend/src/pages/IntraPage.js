@@ -5,13 +5,14 @@ const IntraPage  = {
   render: (params) => {
     const pageContainer = MenuElement("intraPage");
     console.log(params);
-    fetch(`https://${window.location.host}/api/auth/intra/42-auth/${window.location.search}`, {
+    fetch(`https://${window.location.host}/api/auth/intra/42-auth${window.location.search}`, {
       method: "POST",
       credentials: "include",
       headers: {
         Accept: "application/json",
         "Content-Type": "application/json",
-      }
+      },
+      body: JSON.stringify({ code: params.code }),
     })
     .then((response) => response.json())
     .then((data) => {
