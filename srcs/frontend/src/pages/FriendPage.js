@@ -1,15 +1,56 @@
 import {MenuElement, SearchInput} from "../core/elements/Type.Element";
-import { DivComponent } from "../core/components/Type.Component";
-import { getCsrfToken } from "../core/Cookie";
+import { DivComponent, TextComponent, ImageComponent, ButtonComponent, withEventHandlers } from "../core/components/Type.Component";
+import { getCsrfToken, getCookie } from "../core/Cookie";
 const FriendPage = {
   layoutVisibility: true,
   render: () => {
     const pageContainer = MenuElement("FriendPage");
     const searchInput = SearchInput("searchInput", "Search for a friend");
-
+    const userListDiv= new DivComponent("userListDiv", {class: ""});
     getAllUser()
       .then((data) => {
-        console.log("getAllUser Başarılı Yanıt:", data);
+      for (let i = 0; i < data.length; i++) {
+        const row = new DivComponent(data[i].id, {class: ""});
+        row.elements = [
+          new TextComponent("username", { text: data[i].username }),
+          new ImageComponent("avatar", { src: data[i].avatar }),
+          new ButtonComponent(`addFriend${data[i].id}`, { label: "add Friend ", class: "btn btn-primary" })
+        ];
+        withEventHandlers(row.elements[0], {onClick: () => {
+          window.router.navigate(`/profile`, {id: data[i].id});
+        }});
+        withEventHandlers(row.elements[1], {onClick: () => {
+          window.router.navigate(`/profile`, {id: data[i].id});
+        }});
+        withEventHandlers(row.elements[2], {onClick: async () => {
+          const csrfToken = await getCsrfToken();
+          await fetch(`https://${window.location.host}/api/auth/sent-friendship-request/`, {
+            method: "POST",
+            credentials: "include",
+            headers: {
+              Accept: "application/json",
+              "Content-Type": "application/json",
+              "X-CSRFToken": csrfToken,
+              "Authorization": `Bearer ${getCookie('accessToken')}`
+            },
+            body: JSON.stringify({receiver: data[i].id})
+          })
+          .then((response) => {
+            console.log("addFriend Yanıt Durumu:", response.status, response.statusText);
+            if (!response.ok) {
+              const message = `HTTP error! status: ${response.status}`;
+              throw new Error(message);
+            }
+            console.log("Friend request sent");
+            window.router.navigate("/friends");
+          })
+          .catch((error) => {
+            console.error("addFriend Hatası:", error);
+          });
+        }});
+        userListDiv.elements.push(row);
+      }
+      userListDiv.update( {elements: userListDiv.elements} );
       })
       .catch((error) => {
         console.error("getAllUser Hatası:", error); // Hata durumunda logla
@@ -17,6 +58,7 @@ const FriendPage = {
 
     pageContainer.elements[0].elements = [
       searchInput,
+      userListDiv
     ];
     return pageContainer.render();
   }
@@ -24,39 +66,16 @@ const FriendPage = {
 
 export default FriendPage;
 
-async function getFriends() {
-  try {
-    const response = await fetch(`http://${window.location.host}/api/friends`, {
-      method: "GET",
-      headers: {
-        Accept: "application/json",
-        "Content-Type": "application/json",
-      }
-    });
-
-    console.log("getFriends Yanıt Durumu:", response.status, response.statusText); // Yanıt durumunu logla
-
-    if (!response.ok) { // response.ok, status kodunun 200-299 aralığında olup olmadığını kontrol eder
-      const message = `HTTP error! status: ${response.status}`;
-      throw new Error(message); // Hata durumunda hata fırlat
-    }
-
-    const data = await response.json();
-    return data;
-  } catch (error) {
-    console.error("getFriends Hatası:", error); // Hata durumunda logla
-    throw error; // Hatayı yukarıya fırlat ki çağıran fonksiyon da hatayı işleyebilsin
-  }
-}
-
 async function getAllUser() {
   try {
-    const response = await fetch(`http://${window.location.host}/api/auth/user-list/`, {
+    const csrfToken = await getCsrfToken();
+
+    const response =await fetch(`https://${window.location.host}/api/auth/user-list/`, {
       method: "GET",
       credentials: "include",
       headers: {
-        Accept: "application/json",
-        "Content-Type": "application/json",
+          "X-CSRFToken": csrfToken,
+          "Authorization": `Bearer ${getCookie('accessToken')}`
       }
     });
 
@@ -70,7 +89,6 @@ async function getAllUser() {
     const data = await response.json();
     return data;
   } catch (error) {
-    console.error("getAllUser Hatası:", error); // Hata durumunda logla
-    throw error; // Hatayı yukarıya fırlat
+      console.error("getAllUser Hatası:", error);
   }
 }

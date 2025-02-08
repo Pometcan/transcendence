@@ -30,7 +30,7 @@ const ProfilePage = {
       fa2btnEnable.styles = { display: "none" };
       fa2btnDisable.styles = { display: "none" };
     }
-     getUser(anotherProfile ? getId : getCookie("userId"))
+     getUser(anotherProfile ? getId  : getCookie("userId"))
       .then(user => {
         emailComponent.update({ text: `E-posta: ${user.email}` });
         usernameComponent.update({ text: `Kullanıcı Adı: ${user.username}` });

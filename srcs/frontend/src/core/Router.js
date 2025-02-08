@@ -41,11 +41,19 @@ export default class Router {
     this._routes[path] = pageId;
   }
 
-  navigate(path) {
+  navigate(path, params = {}) {
     if (this._routes[path]) {
-      window.history.pushState({}, "", path);
-      this.selectedPage = path;
-      this.handleRoute(path);
+      if (params) {
+        const urlParams = new URLSearchParams(params);
+        window.history.pushState({}, "", path + "?" + urlParams.toString());
+        this.selectedPage = path;
+        this.handleRoute(path);
+      }
+      else {
+        window.history.pushState({}, "", path);
+        this.selectedPage = path;
+        this.handleRoute(path);
+      }
     }
   }
 
