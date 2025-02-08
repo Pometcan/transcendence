@@ -1,9 +1,9 @@
+import { DivComponent } from "../core/components/UIComponent.Div";
 import { setCookie } from "../core/Cookie";
-import MenuElement from "../core/elements/Element.Menu";
 const IntraPage  = {
   layoutVisibility: false,
   render: (params) => {
-    const pageContainer = MenuElement("intraPage");
+    const pageContainer = new DivComponent;
     const urlcode = params.get("code");
     fetch(`https://${window.location.host}/api/auth/intra/42-auth${window.location.search}`, {
       method: "POST",

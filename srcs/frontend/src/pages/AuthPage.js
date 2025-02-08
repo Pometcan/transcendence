@@ -39,7 +39,6 @@ const LoginElement = () => {
         }
         setCookie('login', 'true', 1);
         setCookie('userId', data.user_id, 1);
-        console.log(data);
         window.location.href = data.auth_url;
       })
       .catch((error) => {
@@ -88,7 +87,6 @@ const LoginElement = () => {
           setCookie('userId', data.user_id, 1);
           setCookie('refreshToken', data.refresh, 1);
           setCookie('accessToken', data.access, 1);
-          console.log(data);
           if (data.mfa_enabled)
           {
             setCookie("qrCode", data.qr_code, 1);
