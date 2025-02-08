@@ -8,7 +8,9 @@ let usernameComponent;
 
 const ProfilePage = {
   layoutVisibility: true,
-  render: () => {
+  render: (params) => {
+    const getId = params.get("id");
+    const anotherProfile = getId ? true : false;
     const pageContainer = MenuElement("ProfilePage");
     const exitBtn = new ButtonComponent("exitBtn", { label: "Çıkış", class: "btn btn-primary" });
     const deleteBtn = new ButtonComponent("deleteBtn", { label: "Hesabı Sil", class: "btn btn-danger" });
@@ -20,16 +22,24 @@ const ProfilePage = {
     //const SwitchBox2FA = SwitchBox("FA2","2FA Etkinlestir");
     const fa2btnEnable = new ButtonComponent("fa2btnEnable", { label: "2FA Etkinleştir", class: "btn btn-primary" });
     const fa2btnDisable = new ButtonComponent("fa2btnDisable", { label: "2FA Devre Dışı Bırak", class: "btn btn-danger" });
-    getUser()
-    .then(user => {
-      emailComponent.update({ text: `E-posta: ${user.email}` });
-      usernameComponent.update({ text: `Kullanıcı Adı: ${user.username}` });
-      photo.elements[0].update({ src: user.avatar });
-    }).catch(error => {
-      console.error("Veri çekme hatası:", error);
-      emailComponent.update({ text: `E-posta: Hata oluştu.` });
-      usernameComponent.update({ text: `Kullanıcı Adı: Hata oluştu.` });
-    });
+    if (anotherProfile) {
+      exitBtn.styles = { display: "none" };
+      deleteBtn.styles = { display: "none" };
+      changePhotoBtn.styles = { display: "none" };
+      deletePhotoBtn.styles = { display: "none" };
+      fa2btnEnable.styles = { display: "none" };
+      fa2btnDisable.styles = { display: "none" };
+    }
+     getUser(anotherProfile ? getId : getCookie("userId"))
+      .then(user => {
+        emailComponent.update({ text: `E-posta: ${user.email}` });
+        usernameComponent.update({ text: `Kullanıcı Adı: ${user.username}` });
+        photo.elements[0].update({ src: user.avatar });
+      }).catch(error => {
+        console.error("Veri çekme hatası:", error);
+        emailComponent.update({ text: `E-posta: Hata oluştu.` });
+        usernameComponent.update({ text: `Kullanıcı Adı: Hata oluştu.` });
+      });
 
     pageContainer.elements[0].elements = [
       exitBtn,
@@ -82,11 +92,12 @@ const ProfilePage = {
                 "Authorization": `Bearer ${getCookie('accessToken')}`
             },
             body: formData
-          });
+          }).then(response => {
+            photo.elements[0].update({ src: user.avatar  });
+          })
         }
       };
       fileInput.click();
-
     }});
 
     withEventHandlers(deletePhotoBtn, { onClick: async() => {
@@ -135,10 +146,9 @@ const ProfilePage = {
   },
 };
 
-async function getUser() {
-  const userId = getCookie('userId');
+async function getUser(id) {
   try {
-    const response = await fetch(`https://${window.location.host}/api/auth/user-list/${userId}/`, {
+    const response = await fetch(`https://${window.location.host}/api/auth/user-list/${id}/`, {
       method: "GET",
       credentials: "include",
       headers: {

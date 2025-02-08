@@ -30,6 +30,7 @@ const VerifyPage = {
     withEventHandlers(submitButton, {
       onClick: async () => {
         try {
+          const username = await getUsernames();
           const response = await fetch(`https://${window.location.host}/api/auth/2fa-verify`, {
             method: "POST",
             credentials: "include",
@@ -39,29 +40,31 @@ const VerifyPage = {
               "Authorization": `Bearer ${getCookie('accessToken')}`
             },
             body: JSON.stringify({
-              "token": input.elements[0].value
+              "username": username,
+              "otp_code": input.elements[0].value
             })
           });
-
           // Response kontrolü
           if (!response.ok) {
             const errorData = await response.json();  // Hata mesajını al
             throw new Error(errorData.message || "Invalid 2FA code");
           }
 
+
+
           // Başarılı giriş
           setCookie('login', 'true', 1);
           window.router.navigate("/");
         } catch (error) {
+
           // Hata mesajını göster
           errorDiv.element.style.display = 'block';
           errorDiv.update({ text: error.message });
+          console.error("Error:", error);
           window.router.navigate("/auth");
         }
       }
     });
-
-
 
     const renderedPage = pageContainer.render();
     return renderedPage;
@@ -69,3 +72,29 @@ const VerifyPage = {
 };
 
 export default VerifyPage;
+
+async function getUsernames() {
+  try {
+    const userId = getCookie("userId");
+    const response = await fetch(`https://${window.location.host}/api/auth/user-list/${userId}/`, {
+      method: "GET",
+      credentials: "include",
+      headers: {
+        Accept: "application/json",
+        "Content-Type": "application/json",
+        "Authorization": `Bearer ${getCookie('accessToken')}`
+      }
+    });
+
+    if (!response.ok) {
+      console.error(`HTTP error! status: ${response.status}`);
+      return [];
+    }
+
+    const data = await response.json();
+    return data.username;
+  } catch (error) {
+    console.error("Fetch Error:", error);
+    return [];
+  }
+}
