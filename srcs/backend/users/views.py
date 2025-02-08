@@ -52,7 +52,7 @@ class AuthViewSet(GenericViewSet, mixins.CreateModelMixin):
                     qr_code = user.generate_qr_code()
                     refresh = RefreshToken.for_user(user)
                     return Response({"mfa_enabled":user.mfa_enabled,
-                                    "otp_secret": user.mfa_secret,     
+                                    "otp_secret": user.mfa_secret,
                                     "qr_code": qr_code,
                                     'refresh': str(refresh),
                                     'access': str(refresh.access_token),
@@ -82,7 +82,7 @@ class IntraOAuthViewSet(GenericViewSet):
         return Response({"auth_url": auth_url})
 
     def callback(self, request):
-        code = request.data.get("code") 
+        code = request.data.get("code")
         if not code:
             return Response({"error": "Authorization code not found."}, status=400)
 
@@ -256,14 +256,13 @@ class SearchUserByUsernameViewSet(ListAPIView):
     serializer_class = UserBasicInfoSerializer
 
     def get_queryset(self):
-        search = self.request.query_params.get('username', '')
+        search = self.request.query_params.get('search', '')
         user = self.request.user
         return User.objects.filter(is_active = True, username__icontains=search) \
                                     .exclude(id__in=user.blocked_by.all()) \
-                                    .exclude(id__in=user.blocked_users.all()) 
-    
+                                    .exclude(id__in=user.blocked_users.all())
+
     def get(self, request, *args, **kwargs):
         users = self.get_queryset()
         response_data = UserBasicInfoSerializer(users, many=True).data
         return Response(response_data)
-        

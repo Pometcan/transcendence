@@ -1,13 +1,17 @@
-import { DivComponent, InputComponent, ButtonComponent } from "../components/Type.Component";
+import { DivComponent, InputComponent, ButtonComponent, withEventHandlers } from "../components/Type.Component";
 import { InputElement } from "./Type.Element";
 
-const SearchInput = (searchText, searchbuttontext, buttonclick) => {
+const SearchInput = (searchText, searchbuttontext) => {
   const searchContainer = new DivComponent("searchContainer", {class: "d-flex justify-content-center"});
   const searchInput = InputElement(searchText, "User Name", "text");
-  searchInput.elements.class = "d-flex justify-content-center align-items-center";
   searchInput.elements[0].styles = {
     width: "60%",
-    borderRadius: "10px 0px 0px 10px !important",
+    marginRight: "10px",
+  };
+  searchInput.elements.styles = {
+    alignItems: "center",
+    justifyContent: "center",
+    width: "100%",
   };
   const searchButton = new ButtonComponent(searchbuttontext, {
     label: "Search",
@@ -19,6 +23,7 @@ const SearchInput = (searchText, searchbuttontext, buttonclick) => {
   });
   searchInput.elements[2] = searchButton;
   searchContainer.elements = [searchInput];
+
 
   return searchContainer;
 }
