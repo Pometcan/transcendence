@@ -39,6 +39,7 @@ const LoginElement = () => {
         }
         setCookie('login', 'true', 1);
         setCookie('userId', data.user_id, 1);
+        console.log(data);
         window.location.href = data.auth_url;
       })
       .catch((error) => {
@@ -102,22 +103,53 @@ const LoginElement = () => {
 
 const RegisterElement = () => {
   const registerForm = new DivComponent("registerForm", { styles: { display: 'none' } });
-  const usernameInput = new InputComponent("usernameInput", { type: "text", name: "username", placeholder: t("auth.username")});
-  const emailInput = new InputComponent("emailInput", { type: "email", name: "email", placeholder: t("auth.email") });
-  const passwordInput = new InputComponent("passwordInput", { type: "password", name: "password", placeholder: t("auth.password") });
-  const password2Input = new InputComponent("password2Input", { type: "password", name: "password2", placeholder: t("auth.password2") });
+  const usernameInput = InputElement("usernameInput", t("auth.username"), "text");
+  const emailInput = InputElement("emailInput",  t("auth.email"), "email");
+  const passwordInput = InputElement("passwordInput", t("auth.password"),"password");
+  const password2Input = InputElement("password2Input", t("auth.password2") ,"password");
   const submitButton = SubmitButton("submitButton", t("auth.registerSubmitButton") );
-
+  const intraButton = SubmitButton("intraButton", "42 INTRA" );
   const errorDiv = new DivComponent("registerError", { styles: { color: 'red', marginTop: '10px', display: 'none' } });
 
+  intraButton.styles = {backgroundColor: '#000', color: '#fff', width: '100%', marginTop: '10px'};
   registerForm.elements = [
     usernameInput,
     emailInput,
     passwordInput,
     password2Input,
     submitButton,
+    intraButton,
     errorDiv
   ];
+
+  withEventHandlers(intraButton, {
+    onClick: () => {
+      fetch(`https://${window.location.host}/api/auth/intra/login`, {
+        method: "GET",
+        credentials: "include",
+        headers: {
+          Accept: "application/json",
+          "Content-Type": "application/json",
+        }
+      })
+      .then((response) => response.json())
+      .then((data) => {
+        if (data.error) {
+          console.error("Error:", data.error);
+          setCookie('login', 'false', 1);
+          return;
+        }
+        setCookie('login', 'true', 1);
+        setCookie('userId', data.user_id, 1);
+        console.log(data);
+        window.location.href = data.auth_url;
+      })
+      .catch((error) => {
+        console.error("Error:", error);
+        setCookie('login', 'false', 1);
+      });
+    }
+  });
 
   withEventHandlers(submitButton, { onClick: async() => {
     errorDiv.element.style.display = 'none';
@@ -216,6 +248,7 @@ const AuthPage = {
     const pageContainer = MenuElement("authPage", [loginButton, registerButton, loginForm, registerForm],{
         "max-width": '500px',
       });
+
     pageContainer.elements[0].elements.class = "container-sm d-flex justify-content-center";
     withEventHandlers(loginButton, { onClick: () => {
       loginForm.element.style.display = 'block';

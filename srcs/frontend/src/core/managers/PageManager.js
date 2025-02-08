@@ -16,7 +16,7 @@ export class PageManager {
     return this.pages.get(this.activePage);
   }
 
-  setActivePage(pageId) {
+  setActivePage(pageId, urlParams) { // urlParams argümanı eklendi
     if (this.activePage) {
       const currentPage = this.pages.get(this.activePage);
       if (currentPage && currentPage.element) {
@@ -35,7 +35,8 @@ export class PageManager {
     if (newPage) {
       newPage.active = true;
       if (newPage.render) {
-        const pageElement = newPage.render();
+        // urlParams'ı render fonksiyonuna geçir
+        const pageElement = newPage.render(urlParams);
         newPage.element = pageElement;
         pageElement.classList.add('page');
 
