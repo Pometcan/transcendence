@@ -6,7 +6,7 @@ export class SVGComponent extends UIComponent {
     super(id, props.styles, props.class);
     this.svgContent = props.svgContent;
     this.svgPath = props.svgPath;
-    this.svgData = props.data; // Yeni: data prop'u
+    this.svgData = props.data;
     this.styles = props.styles;
     this.class = props.class || '';
   }
@@ -19,12 +19,10 @@ export class SVGComponent extends UIComponent {
     let element;
 
     if (this.svgData) {
-      // Eğer data prop'u varsa <object> etiketi oluştur
       element = document.createElement("object");
       element.type = "image/svg+xml";
-      element.data = this.svgData; // data prop'unu <object> etiketine ata
+      element.data = this.svgData;
     } else {
-      // Eğer data prop'u yoksa (svgContent veya svgPath varsa) <svg> etiketi oluştur
       element = document.createElementNS("http://www.w3.org/2000/svg", "svg");
       if (this.svgContent) {
         element.innerHTML = this.svgContent;

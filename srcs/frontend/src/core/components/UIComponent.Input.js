@@ -50,7 +50,7 @@ export class InputComponent extends UIComponent {
       this.transitionIn(inputElement);
     }
 
-    this.addEventListeners(inputElement, this.expectedListeners); // Doğru kullanım: obje direkt olarak geçiriliyor
+    this.addEventListeners(inputElement, this.expectedListeners);
 
     return inputElement;
   }

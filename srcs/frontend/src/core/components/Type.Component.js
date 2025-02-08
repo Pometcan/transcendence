@@ -5,10 +5,11 @@ import { InputComponent } from "./UIComponent.Input";
 import { DivComponent } from "./UIComponent.Div";
 import { LabelComponent } from "./UIComponent.Label";
 import { SVGComponent } from "./UIComponent.SVG";
+import { ImageComponent } from "./UIComponent.Image";
 import { withTransitions, withEventHandlers } from "./UIComponent.Util";
 
 export {
-   ButtonComponent, InputComponent,
+   ButtonComponent, InputComponent, ImageComponent,
   TextComponent, DivComponent, SVGComponent,
   UIComponent, LabelComponent,
    withTransitions, withEventHandlers

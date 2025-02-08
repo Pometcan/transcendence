@@ -86,7 +86,14 @@ class TwoFAVerifyViewSet(GenericViewSet, mixins.CreateModelMixin):
     permission_classes = [permissions.AllowAny]
 
     def verify(self, request, *args, **kwargs):
-        return self.create(request, *args, **kwargs)
+        # Serializer'ı çağır
+        serializer = self.get_serializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+
+        # Serializer başarılıysa kullanıcıyı döndür
+        user = serializer.validated_data["user"]
+        return Response({"message": "2FA verification successful", "username": user.username}, status=status.HTTP_200_OK)
+
 
 class Enable2FAViewSet(GenericViewSet):
     permission_classes = [permissions.IsAuthenticated]
@@ -95,14 +102,25 @@ class Enable2FAViewSet(GenericViewSet):
         user = request.user
         try:
             if not user.mfa_secret:
-                user.mfa_secret = pyotp.random_base32()
+                user.mfa_secret = pyotp.random_base32()[:16]
                 user.save()
             # user.generate_otp_secret()
 
             otp_uri = pyotp.totp.TOTP(user.mfa_secret).provisioning_uri(user.email, issuer_name="PONG")
-            qr = qrcode.make(otp_uri)
+            #qr = qrcode.make(otp_uri)
+            qr = qrcode.QRCode(
+                version=5,  # Daha küçük bir QR kod üretmek için versiyonu küçült
+                error_correction=qrcode.constants.ERROR_CORRECT_L,  # Hata düzeltmeyi minimum seviyeye indir
+                box_size=5,  # Kutucuk boyutunu küçült
+                border=2  # Çerçeve boyutunu küçült
+            )
+
+            qr.add_data(otp_uri)
+            qr.make(fit=True)
+
+            img = qr.make_image(fill="black", back_color="white")
             buffered = BytesIO()
-            qr.save(buffered, format="PNG")
+            img.save(buffered, format="PNG")
             qr_b64 = base64.b64encode(buffered.getvalue()).decode()
 
             return Response({"otp_secret": user.mfa_secret, "qr_code": qr_b64}, status=status.HTTP_200_OK)
@@ -148,6 +166,18 @@ class AvatarViewSet(mixins.UpdateModelMixin,
     def get_object(self):
         return self.request.user
 
+    def update(self, request, *args, **kwargs):
+        serializer = self.get_serializer(instance=self.get_object(), data=request.data) # instance ekleyin
+        if serializer.is_valid():
+            print("Serializer is valid!") # Loglama: Validasyon başarılı
+            self.perform_update(serializer)
+            return Response(serializer.data)
+        else:
+            print("Serializer is NOT valid!") # Loglama: Validasyon başarısız
+            print("Serializer errors:", serializer.errors) # Loglama: Hatalar
+            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+
     def destroy(self, request, *args, **kwargs):
         serializer = self.get_serializer()
         user = self.get_object()
@@ -162,6 +192,9 @@ class AvatarViewSet(mixins.UpdateModelMixin,
                 {"error": "Avatar silme işlemi başarısız oldu.", "details": str(e)},
                 status=status.HTTP_400_BAD_REQUEST
             )
+
+    def perform_update(self, serializer):
+        serializer.save()
 
 class ReceivedFriendshipRequestViewSet(
                 mixins.ListModelMixin,
