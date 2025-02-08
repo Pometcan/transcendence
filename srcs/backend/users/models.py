@@ -5,6 +5,11 @@ import os
 from django.db.models import Q
 from PIL import Image
 import pyotp
+import qrcode
+import base64
+from io import BytesIO
+from rest_framework.response import Response
+
 
 
 class User(AbstractUser):
@@ -24,9 +29,25 @@ class User(AbstractUser):
 
     def generate_otp_secret(self):
         if not self.mfa_secret:
-            self.mfa_secret = pyotp.random_base32()
+            self.mfa_secret = pyotp.random_base32()[:16]
             self.save()
         return self.mfa_secret
+    
+    def generate_qr_code(self):
+        otp_uri = pyotp.totp.TOTP(self.mfa_secret).provisioning_uri(self.email, issuer_name="PONG")
+        qr = qrcode.QRCode(
+            version=5, 
+            error_correction=qrcode.constants.ERROR_CORRECT_L,
+            box_size=5, 
+            border=2 
+        )
+        qr.add_data(otp_uri)
+        qr.make(fit=True)
+        img = qr.make_image(fill="black", back_color="white")
+        buffered = BytesIO()
+        img.save(buffered, format="PNG")
+        qr_b64 = base64.b64encode(buffered.getvalue()).decode()
+        return qr_b64
 
     objects = UserManager()
 
@@ -46,8 +67,7 @@ class User(AbstractUser):
                 output_size = (600,600)
                 img.thumbnail(output_size)
                 img.save(self.avatar.path)
-                #SENEM: kullanıcı yeni avatar eklediğinde eski avatarı silmek için koda ekleme yapmalısın!!
-
+            
     def __str__(self):
         return self.username
 

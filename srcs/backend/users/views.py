@@ -1,11 +1,8 @@
 import os
-import pyotp
-import qrcode
-import base64
-from io import BytesIO
 from django.conf import settings
 from django.shortcuts import render
 from django.urls import path
+from urllib.parse import urlparse, parse_qs
 from rest_framework.decorators import action
 from rest_framework import mixins, status, permissions
 from rest_framework.viewsets import GenericViewSet, ModelViewSet
@@ -42,26 +39,36 @@ class AuthViewSet(GenericViewSet, mixins.CreateModelMixin):
 
     def get_serializer_class(self):
         return LoginSerializer
-
+    
     def login(self, request, *args, **kwargs):
         serializer = LoginSerializer(data=request.data)
         if serializer.is_valid():
             user = serializer.validated_data['user']
-
-            if user.mfa_enabled:
-                return Response({"2fa_required": True, "otp_secret": user.mfa_secret}, status=status.HTTP_200_OK)
+            
+            if user.mfa_enabled :
+                try:
+                    qr_code = user.generate_qr_code()
+                    refresh = RefreshToken.for_user(user)
+                    return Response({"otp_secret": user.mfa_secret,     
+                                    "qr_code": qr_code,
+                                    'refresh': str(refresh),
+                                    'access': str(refresh.access_token),
+                                    'user_id' : user.id,}, status=status.HTTP_200_OK)
+                except Exception as e:
+                    return Response({"error": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
             refresh = RefreshToken.for_user(user)
             return Response({
                 'refresh': str(refresh),
                 'access': str(refresh.access_token),
-                'user_id': user.id,
+                'user_id' : user.id,
             }, status=status.HTTP_200_OK)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 #INTRA AUTH-------------------------------------------------------------------------------
 class IntraOAuthViewSet(GenericViewSet):
     permission_classes = [permissions.AllowAny]
+    serializer_class = OAuthLoginSerializer
 
     def login(self, request):
         state = "random_string"
@@ -72,28 +79,33 @@ class IntraOAuthViewSet(GenericViewSet):
         return Response({"auth_url": auth_url})
 
     def callback(self, request):
-        code = request.data.get("code")
+        frontend_url = request.data.get("url") 
+        if not frontend_url:
+            return Response({"error": "URL parameter is required"}, status=400)
+
+        parsed_url = urlparse(frontend_url)
+        code = parse_qs(parsed_url.query).get("code", [None])[0]
+
         if not code:
-            return Response({"error": "Authorization code not provided"}, status=400)
+            return Response({"error": "Authorization code not found in URL"}, status=400)
+
         serializer = OAuthLoginSerializer(data={"code": code}, context={"request": request})
         if serializer.is_valid():
             return Response(serializer.validated_data, status=status.HTTP_200_OK)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
+
 #2FA----------------------------------------------------------------------------------
-class TwoFAVerifyViewSet(GenericViewSet, mixins.CreateModelMixin):
+
+class TwoFAVerifyViewSet(GenericViewSet):
     serializer_class = TwoFAVerifySerializer
     permission_classes = [permissions.AllowAny]
 
     def verify(self, request, *args, **kwargs):
-        # Serializer'ı çağır
         serializer = self.get_serializer(data=request.data)
-        serializer.is_valid(raise_exception=True)
-
-        # Serializer başarılıysa kullanıcıyı döndür
-        user = serializer.validated_data["user"]
-        return Response({"message": "2FA verification successful", "username": user.username}, status=status.HTTP_200_OK)
-
+        if serializer.is_valid():
+            return Response(serializer.validated_data, status=status.HTTP_200_OK)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 class Enable2FAViewSet(GenericViewSet):
     permission_classes = [permissions.IsAuthenticated]
@@ -101,29 +113,10 @@ class Enable2FAViewSet(GenericViewSet):
     def enable(self, request, *args, **kwargs):
         user = request.user
         try:
-            if not user.mfa_secret:
-                user.mfa_secret = pyotp.random_base32()[:16]
-                user.save()
-            # user.generate_otp_secret()
-
-            otp_uri = pyotp.totp.TOTP(user.mfa_secret).provisioning_uri(user.email, issuer_name="PONG")
-            #qr = qrcode.make(otp_uri)
-            qr = qrcode.QRCode(
-                version=5,  # Daha küçük bir QR kod üretmek için versiyonu küçült
-                error_correction=qrcode.constants.ERROR_CORRECT_L,  # Hata düzeltmeyi minimum seviyeye indir
-                box_size=5,  # Kutucuk boyutunu küçült
-                border=2  # Çerçeve boyutunu küçült
-            )
-
-            qr.add_data(otp_uri)
-            qr.make(fit=True)
-
-            img = qr.make_image(fill="black", back_color="white")
-            buffered = BytesIO()
-            img.save(buffered, format="PNG")
-            qr_b64 = base64.b64encode(buffered.getvalue()).decode()
-
-            return Response({"otp_secret": user.mfa_secret, "qr_code": qr_b64}, status=status.HTTP_200_OK)
+            user.generate_otp_secret()
+            user.mfa_enabled = True
+            user.save()
+            return Response({"otp_secret": user.mfa_secret}, status=status.HTTP_200_OK)
         except Exception as e:
             return Response({"error": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
@@ -133,6 +126,7 @@ class Disable2FAViewSet(GenericViewSet):
     def disable(self, request, *args, **kwargs):
         user = request.user
         user.mfa_secret = ""
+        user.mfa_enabled = False
         user.save()
         return Response({"message": "2FA has been disabled successfully."}, status=status.HTTP_200_OK)
 
@@ -142,7 +136,6 @@ class GetUserViewSet(
                 mixins.ListModelMixin,
                 mixins.RetrieveModelMixin,
                 mixins.UpdateModelMixin,
-                mixins.DestroyModelMixin,
                 GenericViewSet):
 
     serializer_class = GetUserSerializer
@@ -155,28 +148,16 @@ class GetUserViewSet(
                             .exclude(id__in=user.blocked_users.all())
 
 
-class AvatarViewSet(mixins.UpdateModelMixin,
-                    mixins.DestroyModelMixin,
-                    mixins.RetrieveModelMixin,
+class AvatarViewSet(mixins.UpdateModelMixin, 
+                    mixins.DestroyModelMixin, 
+                    mixins.RetrieveModelMixin, 
                     GenericViewSet):
-
+    
     serializer_class = AvatarSerializer
     permission_classes = [IsAuthenticated, RequestOwnerOrReadOnly]
 
-    def get_object(self):
+    def get_object(self): 
         return self.request.user
-
-    def update(self, request, *args, **kwargs):
-        serializer = self.get_serializer(instance=self.get_object(), data=request.data) # instance ekleyin
-        if serializer.is_valid():
-            print("Serializer is valid!") # Loglama: Validasyon başarılı
-            self.perform_update(serializer)
-            return Response(serializer.data)
-        else:
-            print("Serializer is NOT valid!") # Loglama: Validasyon başarısız
-            print("Serializer errors:", serializer.errors) # Loglama: Hatalar
-            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-
 
     def destroy(self, request, *args, **kwargs):
         serializer = self.get_serializer()

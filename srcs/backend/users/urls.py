@@ -4,7 +4,6 @@ from .views import  AuthViewSet, IntraOAuthViewSet, TwoFAVerifyViewSet, Enable2F
 from rest_framework.routers import DefaultRouter
 
 router=DefaultRouter()
-router.register(r'2fa-verify', TwoFAVerifyViewSet, basename='2fa-verify')
 router.register(r'user-list',GetUserViewSet, basename='user')
 router.register(r'received-friendship-request', ReceivedFriendshipRequestViewSet, basename='rec-friendship-req')
 router.register(r'sent-friendship-request', SentFriendshipRequestViewSet, basename='sent-friendship-req')
@@ -22,7 +21,10 @@ urlpatterns = [
     #Intra Auth
     path('intra/login/', IntraOAuthViewSet.as_view({'get': 'login'}), name='intra-login'),
     path('intra/42-auth/', IntraOAuthViewSet.as_view({'post': 'callback'}), name='intra-callback'),
-    path('2fa-enable/', Enable2FAViewSet.as_view({'get': 'enable'}), name='2fa-enable'),
-    path('2fa-disable/', Disable2FAViewSet.as_view({'get': 'disable'}), name='2fa-disable'),
+
+    #2FA
+    path('2fa-enable', Enable2FAViewSet.as_view({'get': 'enable'}), name='2fa-enable'),
+    path('2fa-disable', Disable2FAViewSet.as_view({'get': 'disable'}), name='2fa-disable'),
+    path('2fa-verify', TwoFAVerifyViewSet.as_view({'post' : 'verify'}), name='2fa-verify'),
     path('avatar/', AvatarViewSet.as_view({'get': 'retrieve', 'put': 'update', 'patch': 'partial_update', 'delete': 'destroy'}), name='avatar'),
 ]
