@@ -98,7 +98,7 @@ class TwoFAVerifySerializer(serializers.Serializer):
 class GetUserSerializer(serializers.ModelSerializer):
     class Meta:
         model = User
-        fields = ['id', 'username', 'email', 'avatar', 'is_active']
+        fields = ['id', 'username', 'email', 'avatar', 'rank', 'is_active']
         read_only_fields = ['id', 'avatar']
 
 
