@@ -91,7 +91,7 @@ class TwoFAVerifySerializer(serializers.Serializer):
         if not totp.verify(data['otp_code'],valid_window=5):
             raise serializers.ValidationError("Invalid OTP code")
 
-        return {'username': user.username, 'message': "OTP successfully verified"}
+        return {'user_id': user.id, 'message': "OTP successfully verified"}
 
 #USER MOEL SERIALIZERS------------------------------------------------------------
 
