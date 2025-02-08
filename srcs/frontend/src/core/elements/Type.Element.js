@@ -3,7 +3,8 @@ import NavbarButton from "./Element.NavbarButton";
 import Navbar from "./Element.Navbar";
 import SubmitButton from "./Element.SubmitButton";
 import InputElement from "./Element.Input";
+import ProfilePhoto from "./Element.ProfilePhoto.js";
 
 export {
-  MenuElement, NavbarButton, Navbar, SubmitButton, InputElement
+  MenuElement, NavbarButton, Navbar, SubmitButton, InputElement, ProfilePhoto
 };
