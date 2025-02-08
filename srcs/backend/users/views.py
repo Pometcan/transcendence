@@ -49,7 +49,8 @@ class AuthViewSet(GenericViewSet, mixins.CreateModelMixin):
                 try:
                     qr_code = user.generate_qr_code()
                     refresh = RefreshToken.for_user(user)
-                    return Response({"otp_secret": user.mfa_secret,     
+                    return Response({"mfa_enabled":user.mfa_enabled,
+                                    "otp_secret": user.mfa_secret,     
                                     "qr_code": qr_code,
                                     'refresh': str(refresh),
                                     'access': str(refresh.access_token),
@@ -79,15 +80,9 @@ class IntraOAuthViewSet(GenericViewSet):
         return Response({"auth_url": auth_url})
 
     def callback(self, request):
-        frontend_url = request.data.get("url") 
-        if not frontend_url:
-            return Response({"error": "URL parameter is required"}, status=400)
-
-        parsed_url = urlparse(frontend_url)
-        code = parse_qs(parsed_url.query).get("code", [None])[0]
-
+        code = request.data.get("code") 
         if not code:
-            return Response({"error": "Authorization code not found in URL"}, status=400)
+            return Response({"error": "Authorization code not found."}, status=400)
 
         serializer = OAuthLoginSerializer(data={"code": code}, context={"request": request})
         if serializer.is_valid():
