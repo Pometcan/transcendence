@@ -41,12 +41,12 @@ class AuthViewSet(GenericViewSet, mixins.CreateModelMixin):
 
     def get_serializer_class(self):
         return LoginSerializer
-    
+
     def login(self, request, *args, **kwargs):
         serializer = LoginSerializer(data=request.data)
         if serializer.is_valid():
             user = serializer.validated_data['user']
-            
+
             if user.mfa_enabled :
                 try:
                     qr_code = user.generate_qr_code()
@@ -145,15 +145,15 @@ class GetUserViewSet(
                             .exclude(id__in=user.blocked_users.all())
 
 
-class AvatarViewSet(mixins.UpdateModelMixin, 
-                    mixins.DestroyModelMixin, 
-                    mixins.RetrieveModelMixin, 
+class AvatarViewSet(mixins.UpdateModelMixin,
+                    mixins.DestroyModelMixin,
+                    mixins.RetrieveModelMixin,
                     GenericViewSet):
-    
+
     serializer_class = AvatarSerializer
     permission_classes = [IsAuthenticated, RequestOwnerOrReadOnly]
 
-    def get_object(self): 
+    def get_object(self):
         return self.request.user
 
     def destroy(self, request, *args, **kwargs):
@@ -250,8 +250,6 @@ class BlockUserViewSet(ModelViewSet):
                 status=status.HTTP_200_OK
             )
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-    
-
 
 class SearchUserByUsernameViewSet(ListAPIView):
     permission_classes = [IsAuthenticated]
@@ -269,4 +267,3 @@ class SearchUserByUsernameViewSet(ListAPIView):
         response_data = UserBasicInfoSerializer(users, many=True).data
         return Response(response_data)
         
-    

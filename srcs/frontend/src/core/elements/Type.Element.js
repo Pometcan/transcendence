@@ -5,7 +5,9 @@ import SubmitButton from "./Element.SubmitButton";
 import InputElement from "./Element.Input";
 import ProfilePhoto from "./Element.ProfilePhoto.js";
 import SwitchBox from "./Element.SwitchBox.js";
+import SearchInput from "./Element.SearchInput.js";
 
 export {
-  SwitchBox, MenuElement, NavbarButton, Navbar, SubmitButton, InputElement, ProfilePhoto
+  SwitchBox, MenuElement, NavbarButton, Navbar,
+  SubmitButton, InputElement, ProfilePhoto, SearchInput
 };
