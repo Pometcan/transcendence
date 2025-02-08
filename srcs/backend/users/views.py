@@ -2,6 +2,7 @@ import os
 from django.conf import settings
 from django.shortcuts import render
 from django.urls import path
+from urllib.parse import urlparse, parse_qs
 from rest_framework.decorators import action
 from rest_framework import mixins, status, permissions
 from rest_framework.viewsets import GenericViewSet, ModelViewSet
@@ -67,6 +68,7 @@ class AuthViewSet(GenericViewSet, mixins.CreateModelMixin):
 #INTRA AUTH-------------------------------------------------------------------------------
 class IntraOAuthViewSet(GenericViewSet):
     permission_classes = [permissions.AllowAny]
+    serializer_class = OAuthLoginSerializer
 
     def login(self, request):
         state = "random_string"
@@ -77,13 +79,21 @@ class IntraOAuthViewSet(GenericViewSet):
         return Response({"auth_url": auth_url})
 
     def callback(self, request):
-        code = request.GET.get("code")
+        frontend_url = request.data.get("url") 
+        if not frontend_url:
+            return Response({"error": "URL parameter is required"}, status=400)
+
+        parsed_url = urlparse(frontend_url)
+        code = parse_qs(parsed_url.query).get("code", [None])[0]
+
         if not code:
-            return Response({"error": "Authorization code not provided"}, status=400)
+            return Response({"error": "Authorization code not found in URL"}, status=400)
+
         serializer = OAuthLoginSerializer(data={"code": code}, context={"request": request})
         if serializer.is_valid():
             return Response(serializer.validated_data, status=status.HTTP_200_OK)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
 
 #2FA----------------------------------------------------------------------------------
 

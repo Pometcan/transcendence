@@ -20,7 +20,7 @@ urlpatterns = [
 
     #Intra Auth
     path('intra/login/', IntraOAuthViewSet.as_view({'get': 'login'}), name='intra-login'),
-    path('intra/42-auth/', IntraOAuthViewSet.as_view({'get': 'callback'}), name='intra-callback'),
+    path('intra/42-auth/', IntraOAuthViewSet.as_view({'post': 'callback'}), name='intra-callback'),
 
     #2FA
     path('2fa-enable', Enable2FAViewSet.as_view({'get': 'enable'}), name='2fa-enable'),
