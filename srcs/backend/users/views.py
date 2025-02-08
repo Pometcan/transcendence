@@ -2,7 +2,7 @@ import os
 from django.conf import settings
 from django.shortcuts import render
 from django.urls import path
-from urllib.parse import urlparse, parse_qs
+from rest_framework.generics import ListAPIView
 from rest_framework.decorators import action
 from rest_framework import mixins, status, permissions
 from rest_framework.viewsets import GenericViewSet, ModelViewSet
@@ -21,7 +21,9 @@ from .serializers import LoginSerializer, \
                         ReceivedFriendshipRequestSerializer, \
                         SentFriendshipRequestSerializer, \
                         BlockUserSerializer, \
-                        FriendsSerializer
+                        FriendsSerializer, \
+                        UserBasicInfoSerializer, \
+                        SearcUserByUsernameSerializer
 
 
 
@@ -248,3 +250,23 @@ class BlockUserViewSet(ModelViewSet):
                 status=status.HTTP_200_OK
             )
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+    
+
+
+class SearchUserByUsernameViewSet(ListAPIView):
+    permission_classes = [IsAuthenticated]
+    serializer_class = UserBasicInfoSerializer
+
+    def get_queryset(self):
+        search = self.request.query_params.get('username', '')
+        user = self.request.user
+        return User.objects.filter(is_active = True, username__icontains=search) \
+                                    .exclude(id__in=user.blocked_by.all()) \
+                                    .exclude(id__in=user.blocked_users.all()) 
+    
+    def get(self, request, *args, **kwargs):
+        users = self.get_queryset()
+        response_data = UserBasicInfoSerializer(users, many=True).data
+        return Response(response_data)
+        
+    

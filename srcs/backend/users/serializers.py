@@ -283,3 +283,8 @@ class BlockUserSerializer(serializers.ModelSerializer):
         blocked_user = self.context['blocked_user']
         request_user.blocked_users.remove(blocked_user)
         return blocked_user
+
+class SearcUserByUsernameSerializer(serializers.ModelSerializer):
+    class Meta:
+        model= User
+        fields= ['username']
