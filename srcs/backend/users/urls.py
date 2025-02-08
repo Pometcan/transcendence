@@ -26,6 +26,6 @@ urlpatterns = [
     path('2fa-enable', Enable2FAViewSet.as_view({'get': 'enable'}), name='2fa-enable'),
     path('2fa-disable', Disable2FAViewSet.as_view({'get': 'disable'}), name='2fa-disable'),
     path('2fa-verify', TwoFAVerifyViewSet.as_view({'post' : 'verify'}), name='2fa-verify'),
-
+  
     path('avatar/', AvatarViewSet.as_view({'get': 'retrieve', 'put': 'update', 'patch': 'partial_update', 'delete': 'destroy'}), name='avatar'),
 ]

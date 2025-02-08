@@ -95,3 +95,39 @@
     background: rgba(75, 180, 255, 0.8);
     box-shadow: 0 0 20px #0ff;
 }
+
+.profilePhoto {
+    width: 200px;
+    height: 200px;
+    clip-path: polygon(
+        20% 0%,
+        80% 0%,
+        100% 20%,
+        100% 80%,
+        80% 100%,
+        20% 100%,
+        0% 80%,
+        0% 20%
+    );
+    margin: 4px;
+    object-fit: cover;
+    opacity: 0.7;
+}
+
+.profilePhotoBorder {
+    clip-path: polygon(
+        20% 0%,
+        80% 0%,
+        100% 20%,
+        100% 80%,
+        80% 100%,
+        20% 100%,
+        0% 80%,
+        0% 20%
+    );
+    justify-content: center;
+    align-items: center;
+    display: flex;
+    width: fit-content;
+    background: rgba(0, 150, 255, 0.5);
+}

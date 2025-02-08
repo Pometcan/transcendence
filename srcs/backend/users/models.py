@@ -46,7 +46,7 @@ class User(AbstractUser):
                 output_size = (600,600)
                 img.thumbnail(output_size)
                 img.save(self.avatar.path)
-    
+            
     def __str__(self):
         return self.username
 

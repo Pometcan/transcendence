@@ -90,6 +90,7 @@ class TwoFAVerifySerializer(serializers.Serializer):
         totp = pyotp.TOTP(user.mfa_secret)
         if not totp.verify(data['otp_code'],valid_window=5):
             raise serializers.ValidationError("Invalid OTP code")
+
         return {'username': user.username, 'message': "OTP successfully verified"}
 
 #USER MOEL SERIALIZERS------------------------------------------------------------
@@ -122,6 +123,9 @@ class AvatarSerializer(serializers.ModelSerializer):
             instance.save()
             if old_avatar:
                 self.delete_old_avatar(instance, old_avatar)
+        elif 'avatar' in validated_data:
+            instance.avatar = instance._meta.get_field('avatar').get_default()
+            instance.save()
         return instance
     
     def delete(self, instance):

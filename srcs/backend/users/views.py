@@ -92,6 +92,7 @@ class TwoFAVerifyViewSet(GenericViewSet):
             return Response(serializer.validated_data, status=status.HTTP_200_OK)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
+
 class Enable2FAViewSet(GenericViewSet):
     permission_classes = [permissions.IsAuthenticated]
 
@@ -99,11 +100,21 @@ class Enable2FAViewSet(GenericViewSet):
         user = request.user
         try:
             user.generate_otp_secret()
-
             otp_uri = pyotp.totp.TOTP(user.mfa_secret).provisioning_uri(user.email, issuer_name="PONG")
-            qr = qrcode.make(otp_uri)
+            #qr = qrcode.make(otp_uri)
+            qr = qrcode.QRCode(
+                version=5,  # Daha küçük bir QR kod üretmek için versiyonu küçült
+                error_correction=qrcode.constants.ERROR_CORRECT_L,  # Hata düzeltmeyi minimum seviyeye indir
+                box_size=5,  # Kutucuk boyutunu küçült
+                border=2  # Çerçeve boyutunu küçült
+            )
+
+            qr.add_data(otp_uri)
+            qr.make(fit=True)
+
+            img = qr.make_image(fill="black", back_color="white")
             buffered = BytesIO()
-            qr.save(buffered, format="PNG")
+            img.save(buffered, format="PNG")
             qr_b64 = base64.b64encode(buffered.getvalue()).decode()
             
             return Response({"otp_secret": user.mfa_secret, "qr_code": qr_b64}, status=status.HTTP_200_OK)
@@ -147,7 +158,7 @@ class AvatarViewSet(mixins.UpdateModelMixin,
 
     def get_object(self): 
         return self.request.user
-      
+
     def destroy(self, request, *args, **kwargs):
         serializer = self.get_serializer()
         user = self.get_object()
@@ -162,6 +173,9 @@ class AvatarViewSet(mixins.UpdateModelMixin,
                 {"error": "Avatar silme işlemi başarısız oldu.", "details": str(e)},
                 status=status.HTTP_400_BAD_REQUEST
             )
+
+    def perform_update(self, serializer):
+        serializer.save()
 
 class ReceivedFriendshipRequestViewSet(
                 mixins.ListModelMixin,
