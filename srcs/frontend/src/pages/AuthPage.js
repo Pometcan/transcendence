@@ -161,10 +161,39 @@ const RegisterElement = () => {
         errorDiv.element.textContent = errorMessage.trim();
         errorDiv.element.style.display = 'block';
       } else {
-        if (data.key) {
-          setCookie('login', 'true', 1);
-          setCookie('loginKey', data.key, 1);
-          window.router.navigate("/");
+        if (data) {
+          const csrfToken = await getCsrfToken();
+          const response = await fetch(`https://${window.location.host}/api/auth/login/`, {
+            method: "POST",
+            credentials: "include",
+            headers: {
+                Accept: "application/json",
+                "Content-Type": "application/json",
+                'X-CSRFToken': csrfToken
+            },
+            body: JSON.stringify({username:payload.username, password:payload.password1}),
+          });
+          const data = await response.json();
+          if (!response.ok) {
+            let errorMessage = t("error.loginFailed");
+
+            if (data) {
+              for (const field in data) {
+                errorMessage += `${field}: ${data[field].join(", ")} `;
+              }
+            }
+
+            errorDiv.element.textContent = errorMessage.trim();
+            errorDiv.element.style.display = 'block';
+          } else {
+            if (data.refresh && data.access) {
+              setCookie('login', 'true', 1);
+              setCookie('userId', data.user_id, 1);
+              setCookie('refreshToken', data.refresh, 1);
+              setCookie('accessToken', data.access, 1);
+              window.router.navigate("/");
+            }
+          }
         }
       }
     } catch (error) {
