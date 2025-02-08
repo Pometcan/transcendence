@@ -248,6 +248,7 @@ const AuthPage = {
     const pageContainer = MenuElement("authPage", [loginButton, registerButton, loginForm, registerForm],{
         "max-width": '500px',
       });
+
     pageContainer.elements[0].elements.class = "container-sm d-flex justify-content-center";
     withEventHandlers(loginButton, { onClick: () => {
       loginForm.element.style.display = 'block';
