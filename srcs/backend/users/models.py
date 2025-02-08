@@ -46,7 +46,6 @@ class User(AbstractUser):
                 output_size = (600,600)
                 img.thumbnail(output_size)
                 img.save(self.avatar.path)
-                #SENEM: kullanıcı yeni avatar eklediğinde eski avatarı silmek için koda ekleme yapmalısın!!
     
     def __str__(self):
         return self.username

@@ -56,7 +56,7 @@ class OAuthLoginSerializer(serializers.Serializer):
         token_json = token_response.json()
         if "access_token" not in token_json:
             raise serializers.ValidationError({"error": "Failed to retrieve access token"})
-
+        
         access_token = token_json["access_token"]
         user_response = requests.get(USER_INFO_URL, headers={"Authorization": f"Bearer {access_token}"})
         user_info = user_response.json()
@@ -64,23 +64,22 @@ class OAuthLoginSerializer(serializers.Serializer):
             id=user_info['id'],
             defaults={'username': user_info['login'], 'email': user_info.get('email', '')}
         )
-
+        
         profile_image_url = user_info.get('image', {}).get('link', '')
         if created and profile_image_url:
             response = requests.get(profile_image_url)
             if response.status_code == 200:
                 file_name = f"{user.username}_avatar.jpg"
                 user.avatar.save(file_name, ContentFile(response.content), save=True)
-
+        
         login(request, user)
-
+        
         refresh = RefreshToken.for_user(user)
         return {
             'refresh': str(refresh),
             'access': str(refresh.access_token),
             'user_id': user.id,
         }
-
 
 class TwoFAVerifySerializer(serializers.Serializer):
     username = serializers.CharField()
@@ -89,10 +88,9 @@ class TwoFAVerifySerializer(serializers.Serializer):
     def validate(self, data):
         user = get_object_or_404(User, username=data['username'])
         totp = pyotp.TOTP(user.mfa_secret)
-        if not totp.verify(data['otp_code']):
+        if not totp.verify(data['otp_code'],valid_window=5):
             raise serializers.ValidationError("Invalid OTP code")
-        return {'user': user}
-
+        return {'username': user.username, 'message': "OTP successfully verified"}
 
 #USER MOEL SERIALIZERS------------------------------------------------------------
 
@@ -107,7 +105,7 @@ class AvatarSerializer(serializers.ModelSerializer):
     class Meta:
         model = User
         fields = ['avatar']
-
+    
     @staticmethod
     def delete_old_avatar(instance, old_avatar):
         old_avatar_path = os.path.abspath(old_avatar.path)
@@ -125,7 +123,7 @@ class AvatarSerializer(serializers.ModelSerializer):
             if old_avatar:
                 self.delete_old_avatar(instance, old_avatar)
         return instance
-
+    
     def delete(self, instance):
         old_avatar = instance.avatar
         instance.avatar = instance._meta.get_field('avatar').get_default()
@@ -135,13 +133,14 @@ class AvatarSerializer(serializers.ModelSerializer):
         return instance
 
 
+
 #FRIENDSHIP REQUEST SERIALIZERS
 class ReceivedFriendshipRequestSerializer(serializers.ModelSerializer):
     class Meta:
         model = FriendshipRequest
         fields = ['id', 'sender', 'receiver', 'status', 'is_active', 'created_date']
         read_only_fields = ['id', 'sender', 'receiver', 'is_active', 'created_date']
-
+    
     def to_representation(self, instance):
         representation = super().to_representation(instance)
         representation['sender'] = UserBasicInfoSerializer(instance.sender).data
@@ -179,7 +178,7 @@ class SentFriendshipRequestSerializer(serializers.ModelSerializer):
             self.fields['is_active'].read_only = True
         elif request and request.method in ['PUT', 'PATCH']:
             self.fields['receiver'].read_only = True
-
+           
     def validate(self, data):
         request = self.context.get('request')
         instance = self.instance
@@ -199,7 +198,7 @@ class SentFriendshipRequestSerializer(serializers.ModelSerializer):
             raise serializers.ValidationError({"detail": str(e)})
         return FriendshipRequest.objects.create(sender=sender, receiver=receiver)
 
-#FRIENDS SERIALIZER
+#FRIENDS SERIALIZER      
 class FriendsSerializer(serializers.ModelSerializer):
     friend_id = serializers.IntegerField(write_only=True)
     friend = serializers.SerializerMethodField()
@@ -207,10 +206,10 @@ class FriendsSerializer(serializers.ModelSerializer):
     class Meta:
         model = User
         fields = ['friend_id', 'friend']
-
+    
     def get_friend(self, obj):
         return UserBasicInfoSerializer(obj).data
-
+    
     def validate_friend_id(self, value):
         request = self.context.get('request')
         try:
@@ -223,13 +222,13 @@ class FriendsSerializer(serializers.ModelSerializer):
             raise serializers.ValidationError(str(e))
         self.context['friend'] = friend
         return value
-
+    
     def delete(self, validated_data):
         request_user = self.context['request'].user
         friend = self.context['friend']
         request_user.friends.remove(friend)
         return friend
-
+    
 
 #BLOCKED_USER SERIALIZER
 class BlockUserSerializer(serializers.ModelSerializer):
@@ -266,10 +265,10 @@ class BlockUserSerializer(serializers.ModelSerializer):
         request_user = self.context['request'].user
         blocked_user = self.context['blocked_user']
         request_user.blocked_users.add(blocked_user)
-
+        
         request_user.friends.remove(blocked_user) # Blocklanan kullanıcı arkadaş listesinden çıkarılır.
         blocked_user.friends.remove(request_user) # Blocklanan kullanıcının arkadaş listesinden çıkılır.
-
+        
         FriendshipRequest.objects.filter((Q(sender=request_user, receiver=blocked_user) \
                                         | Q(sender=blocked_user, receiver=request_user)), \
                                         is_active=True).update(is_active=False) #Arkadaşlık istekleri pasife alınır.
