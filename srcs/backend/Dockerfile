@@ -4,6 +4,8 @@ EXPOSE ${DJANGO_PORT}
 
 WORKDIR /backend
 
+RUN ln -sf /usr/share/zoneinfo/Europe/Istanbul /etc/localtime
+
 RUN apt-get update && apt-get install -y libpq-dev gcc
 RUN apt-get clean && rm -rf /var/lib/apt/lists/*
 

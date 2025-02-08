@@ -41,7 +41,7 @@ function listCookies() {
 }
 
 async function getCsrfToken () {
-  const response = await fetch(`https://${window.location.host}/api/users/csrf/`, { // await eklendi
+  const response = await fetch(`https://${window.location.host}/api/auth/csrf/`, { // await eklendi
           method: "GET",
           credentials: "include",
           headers: {

@@ -21,11 +21,23 @@ export class TextComponent extends UIComponent {
 
     this.applyStyles(textElement);
     this.applyClasses(textElement);
+    this.applyAttributes(textElement);
 
     if (this.transitionIn) {
       this.transitionIn(textElement);
     }
 
     return textElement;
+  }
+
+  update(newProps) {
+    super.update(newProps);
+    if (newProps) {
+      if (newProps.text !== undefined) {
+        this.text = newProps.text;
+        if (this.element)
+          this.element.innerText = this.text;
+      }
+    }
   }
 }

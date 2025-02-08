@@ -31,6 +31,7 @@ export class DivComponent extends UIComponent {
 
     this.applyStyles( menuElement );
     this.applyClasses(menuElement);
+    this.applyAttributes(menuElement);
 
     this.elements.forEach( ( child ) => {
       menuElement.appendChild( child.render() );
@@ -57,5 +58,19 @@ export class DivComponent extends UIComponent {
 
   removeElement( element ) {
     this.elements = this.elements?.filter( ( e ) => e !== element );
+  }
+
+  update(newProps) {
+    super.update(newProps);
+    if (newProps) {
+      if (newProps.elements) {
+        this.elements = newProps.elements;
+        if (this.element) {
+          this.elements.forEach( ( child ) => {
+            this.element.appendChild( child.render() );
+          });
+        }
+      }
+    }
   }
 }
