@@ -1,5 +1,5 @@
-import { ButtonComponent, DivComponent, TextComponent, withEventHandlers } from '../core/components/Type.Component.js';
-import {MenuElement, ProfilePhoto} from '../core/elements/Type.Element.js';
+import { ButtonComponent, DivComponent, TextComponent, ImageComponent, withEventHandlers } from '../core/components/Type.Component.js';
+import {MenuElement, ProfilePhoto, SwitchBox} from '../core/elements/Type.Element.js';
 import {eraseCookie, getCookie, getCsrfToken} from '../core/Cookie.js';
 
 // TextComponent örneklerini saklamak için değişkenler
@@ -12,19 +12,18 @@ const ProfilePage = {
     const pageContainer = MenuElement("ProfilePage");
     const exitBtn = new ButtonComponent("exitBtn", { label: "Çıkış", class: "btn btn-primary" });
     const deleteBtn = new ButtonComponent("deleteBtn", { label: "Hesabı Sil", class: "btn btn-danger" });
-    const photo = ProfilePhoto("profilePhoto");
+    const photo = ProfilePhoto("profilePhoto" );
     const changePhotoBtn = new ButtonComponent("changePhotoBtn", { label: "Fotoğrafı Değiştir", class: "btn btn-primary" });
     const deletePhotoBtn = new ButtonComponent("deletePhotoBtn", { label: "Fotoğrafı Sil", class: "btn btn-danger" });
     emailComponent = new TextComponent("email", { text: "E-posta: Yükleniyor..." });
     usernameComponent = new TextComponent("username", { text: "Kullanıcı Adı: Yükleniyor..." });
+    //const SwitchBox2FA = SwitchBox("FA2","2FA Etkinlestir");
     const fa2btnEnable = new ButtonComponent("fa2btnEnable", { label: "2FA Etkinleştir", class: "btn btn-primary" });
     const fa2btnDisable = new ButtonComponent("fa2btnDisable", { label: "2FA Devre Dışı Bırak", class: "btn btn-danger" });
-
     getUser()
     .then(user => {
       emailComponent.update({ text: `E-posta: ${user.email}` });
       usernameComponent.update({ text: `Kullanıcı Adı: ${user.username}` });
-      console.log( photo.elements[0]);
       photo.elements[0].update({ src: user.avatar });
     }).catch(error => {
       console.error("Veri çekme hatası:", error);
@@ -41,7 +40,7 @@ const ProfilePage = {
       changePhotoBtn,
       deletePhotoBtn,
       fa2btnEnable,
-      fa2btnDisable
+      fa2btnDisable,
     ];
 
     withEventHandlers(fa2btnEnable, { onClick: async() => {
@@ -51,15 +50,9 @@ const ProfilePage = {
         headers: {
           "Authorization": `Bearer ${getCookie('accessToken')}`
         }
-        }).then((response) => response.json())
-        .then((data) => {
-          if (data.error) {
-            console.error("Error:", data.error);
-            return;
-          }
-          console.log(data);
-        })
-    }});
+        });
+      }
+    });
 
     withEventHandlers(fa2btnDisable, { onClick: async() => {
       await fetch(`https://${window.location.host}/api/auth/2fa-disable/`, {

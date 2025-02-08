@@ -3,9 +3,9 @@ import HomePage from "./pages/HomePage";
 import Page404 from "./pages/404Page";
 import Layout from "./pages/Layout";
 import AuthPage from "./pages/AuthPage";
-import AboutPage from "./pages/AboutPage";
 import ProfilePage from "./pages/ProfilePage";
 import { PageManager } from "./core/managers/PageManager";
+import IntraPage from "./pages/IntraPage";
 import Router from "./core/Router";
 import { getCookie,setCookie } from "./core/Cookie";
 import { init, changeLanguage} from "./i42n.js";
@@ -27,17 +27,17 @@ export class App extends HTMLElement {
 
   initRouter() {
     this.router.addRoute("/", "homePage");
-    this.router.addRoute("/about", "aboutPage");
     this.router.addRoute("/auth", "authPage");
     this.router.addRoute("/profile", "profilePage");
+    this.router.addRoute("/intra-auth", "IntraPage");
     this.router.addRoute("/404", "/404");
   }
 
   loadPages() {
     this.pageManager.addPage("homePage", HomePage);
-    this.pageManager.addPage("aboutPage", AboutPage);
     this.pageManager.addPage("authPage", AuthPage);
     this.pageManager.addPage("profilePage", ProfilePage);
+    this.pageManager.addPage("IntraPage", IntraPage);
     this.pageManager.addPage("/404", Page404);
   }
 
@@ -65,7 +65,7 @@ export class App extends HTMLElement {
 
   async connectedCallback() {
     await this.initLanguage();
-    //await new Promise(resolve => setTimeout(resolve, 3000));
+    await new Promise(resolve => setTimeout(resolve, 3000));
     if (getCookie("login") === "true")
     {
       const path = window.location.pathname;

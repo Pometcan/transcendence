@@ -72,7 +72,7 @@ class IntraOAuthViewSet(GenericViewSet):
         return Response({"auth_url": auth_url})
 
     def callback(self, request):
-        code = request.GET.get("code")
+        code = request.data.get("code")
         if not code:
             return Response({"error": "Authorization code not provided"}, status=400)
         serializer = OAuthLoginSerializer(data={"code": code}, context={"request": request})

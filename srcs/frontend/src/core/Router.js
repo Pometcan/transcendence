@@ -58,13 +58,16 @@ export default class Router {
   }
 
   handleRoute(path) {
+      const fullUrl = window.location.href; // Tam URL'yi al
+      const urlParams = new URLSearchParams(window.location.search); // Query parametrelerini ayrıştır
+
       const pageId = this._routes[path];
       this.selectedPage = path;
       if (pageId) {
-        this.pageManager.setActivePage(pageId);
+        this.pageManager.setActivePage(pageId, urlParams); // Parametreleri setActivePage'e ilet
       } else {
         if (this._routes["/404"]) {
-          this.pageManager.setActivePage("/404");
+          this.pageManager.setActivePage("/404", urlParams); // 404 sayfası için de parametreleri iletmek isteyebilirsiniz
         }
       }
     }

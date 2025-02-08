@@ -18,6 +18,8 @@ const InputElement = (id, text, type) => {
     class: "element-input",
   });
 
+  label.element.classList.add("element-label");
+
   group.elements = [
     input,
     label
