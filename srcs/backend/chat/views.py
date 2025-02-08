@@ -1,36 +1,58 @@
-import uuid
-from rest_framework.decorators import api_view
-from rest_framework.response import Response
+from.models import *
+from.forms import *
 from django.http import JsonResponse
-from.models import Message
-from.serializers import MessageSerializer
-from users.models import User
+from rest_framework import status
+from django.middleware.csrf import get_token
 from django.shortcuts import get_object_or_404
-from django.db import transaction
+from django.db.models import Q
+from users.models import User
+from users.serializers import UserBasicInfoSerializer
+from django.core import serializers
+import json
 
-def generate_unique_room_name(user1_id, user2_id):
-    sorted_ids = sorted([user1_id, user2_id])
-    return f"private_chat_{sorted_ids}_{sorted_ids}"
+def chatRoom(request, username):
+    print("-+--+--+-- chatRoom function in views.py - beginning ---+--+-")
+    if not request.user.is_authenticated:
+        return JsonResponse({"error": "User not authenticated"}, status=status.HTTP_401_UNAUTHORIZED)
+    other_user = get_object_or_404(User, username=username)
+    if other_user == request.user:
+        return JsonResponse({"error": "User cannot chat with herself/himself"}, status=status.HTTP_403_FORBIDDEN)
 
-@api_view(['POST'])
-def create_private_chat(request):
-    user1_id = request.data.get('user1_id')
-    user2_id = request.data.get('user2_id')
+    if request.user.blocked_users.filter(id=other_user.id).exists():
+        return JsonResponse({"error": "User is blocked"}, status=status.HTTP_403_FORBIDDEN)
 
-    if not user1_id or not user2_id:
-        return Response({'error': 'Both user IDs are required.'}, status=400)
+    room_name = f"{min(request.user.id, other_user.id)}_{max(request.user.id, other_user.id)}"
 
-    try:
-        user1 = User.objects.get(id=user1_id)
-        user2 = User.objects.get(id=user2_id)
-    except User.DoesNotExist:
-        return Response({'error': 'Invalid user ID.'}, status=400)
+    chat_room = ChatRoom.objects.filter(Q(user1=request.user, user2=other_user) | Q(user1=other_user, user2=request.user)).first()
+    if not chat_room:
+        chat_room = ChatRoom.objects.create(user1=request.user, user2=other_user, room_name=room_name)
 
-    room_name = generate_unique_room_name(user1_id, user2_id)
-    return Response({'room_name': room_name})
+    messages = ChatMessage.objects.filter(room_name=chat_room).order_by('timestamp')
 
-@api_view(['GET'])
-def get_room_messages(request, room_name):
-    messages = Message.objects.filter(room_name=room_name)
-    serializer = MessageSerializer(messages, many=True)
-    return Response(serializer.data)
+            
+    for message in messages:
+        serialized_message = message.as_dict()
+        serialized_messages.append(serialized_message)
+
+    print( "-- room_name: ", room_name)
+    print( "-- username: ", request.user.username)
+    print("-- messages: ", serialized_messages)
+    print("-- other_user: ", other_user.username)
+
+    context = {
+        "room_name": room_name,
+        "username": request.user.username,
+        "messages": serialized_messages,
+        "other_user": other_user.username,
+        "status": status.HTTP_200_OK
+    }
+    return JsonResponse(context, status=status.HTTP_200_OK)
+
+def userList(request):
+    if not request.user.is_authenticated:
+        return JsonResponse({"error": "User not authenticated"}, status=status.HTTP_401_UNAUTHORIZED)
+    if request.method == 'POST':
+        users = User.objects.exclude(username=request.user.username)
+        user_data = [{'username': user.username} for user in users]
+        return JsonResponse({'users': user_data}, status=status.HTTP_200_OK)
+    return JsonResponse({"error": "Invalid request method"}, status=status.HTTP_405_METHOD_NOT_ALLOWED)

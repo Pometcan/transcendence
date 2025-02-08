@@ -1,7 +1,8 @@
-from django.urls import path
-from. import views
+from django.urls import path, include
+from chat import views as chat_views
+from django.contrib.auth.views import LogoutView, LoginView
 
 urlpatterns = [
-    path('create_private_chat/', views.create_private_chat, name='create_private_chat'),
-    path('get_room_messages/<str:room_name>/', views.get_room_messages, name='get_room_messages'),
+    path("chat/<str:username>/", chat_views.chatRoom, name="chat_room"),
+    path('users_list/', chat_views.userList, name='user_list'),
 ]
