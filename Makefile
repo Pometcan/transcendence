@@ -19,6 +19,7 @@ help:
 	@echo "  make stop                - Servisleri sadece durdurur, silmez."
 	@echo "  make restart             - Servisleri yeniden başlatır."
 	@echo "  make remove              - Tüm servisleri ve containerları siler."
+	@echo "  make remove_images       - Tüm image'ları siler."
 	@echo "  make clean               - Tüm container, network, volume'ları siler."
 	@echo "  make logs                - Tüm servislerin loglarını görüntüler."
 	@echo "  make shell_nginx         - Nginx konteynerine terminal ile girer."

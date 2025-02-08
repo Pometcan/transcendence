@@ -167,10 +167,10 @@ const RegisterElement = () => {
 
     const csrfToken = await getCsrfToken();
     const payload = {
-      username: usernameInput.value,
-      email: emailInput.value,
-      password1: passwordInput.value,
-      password2: password2Input.value
+      username: usernameInput.elements[0].value,
+      email: emailInput.elements[0].value,
+      password1: passwordInput.elements[0].value,
+      password2: password2Input.elements[0].value
     };
 
     try {
