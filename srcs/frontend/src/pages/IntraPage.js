@@ -4,7 +4,7 @@ const IntraPage  = {
   layoutVisibility: false,
   render: (params) => {
     const pageContainer = MenuElement("intraPage");
-    console.log(params);
+    const urlcode = params.get("code");
     fetch(`https://${window.location.host}/api/auth/intra/42-auth${window.location.search}`, {
       method: "POST",
       credentials: "include",
@@ -12,7 +12,7 @@ const IntraPage  = {
         Accept: "application/json",
         "Content-Type": "application/json",
       },
-      body: JSON.stringify({ code: params.code }),
+      body: JSON.stringify({ code: urlcode }),
     })
     .then((response) => response.json())
     .then((data) => {

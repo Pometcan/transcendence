@@ -7,6 +7,7 @@ import ProfilePage from "./pages/ProfilePage";
 import { PageManager } from "./core/managers/PageManager";
 import IntraPage from "./pages/IntraPage";
 import Router from "./core/Router";
+import VerifyPage from "./pages/VerifyPage";
 import { getCookie,setCookie } from "./core/Cookie";
 import { init, changeLanguage} from "./i42n.js";
 
@@ -30,6 +31,7 @@ export class App extends HTMLElement {
     this.router.addRoute("/auth", "authPage");
     this.router.addRoute("/profile", "profilePage");
     this.router.addRoute("/intra-auth", "IntraPage");
+    this.router.addRoute("/verify", "VerifyPage");
     this.router.addRoute("/404", "/404");
   }
 
@@ -38,6 +40,7 @@ export class App extends HTMLElement {
     this.pageManager.addPage("authPage", AuthPage);
     this.pageManager.addPage("profilePage", ProfilePage);
     this.pageManager.addPage("IntraPage", IntraPage);
+    this.pageManager.addPage("VerifyPage", VerifyPage);
     this.pageManager.addPage("/404", Page404);
   }
 
@@ -65,7 +68,7 @@ export class App extends HTMLElement {
 
   async connectedCallback() {
     await this.initLanguage();
-    await new Promise(resolve => setTimeout(resolve, 3000));
+    //await new Promise(resolve => setTimeout(resolve, 3000));
     if (getCookie("login") === "true")
     {
       const path = window.location.pathname;

@@ -39,17 +39,18 @@ class AuthViewSet(GenericViewSet, mixins.CreateModelMixin):
 
     def get_serializer_class(self):
         return LoginSerializer
-    
+
     def login(self, request, *args, **kwargs):
         serializer = LoginSerializer(data=request.data)
         if serializer.is_valid():
             user = serializer.validated_data['user']
-            
+
             if user.mfa_enabled :
                 try:
                     qr_code = user.generate_qr_code()
                     refresh = RefreshToken.for_user(user)
-                    return Response({"otp_secret": user.mfa_secret,     
+                    return Response({"otp_secret": user.mfa_secret,
+                                    "mfa_enabled": user.mfa_enabled,
                                     "qr_code": qr_code,
                                     'refresh': str(refresh),
                                     'access': str(refresh.access_token),
@@ -79,13 +80,7 @@ class IntraOAuthViewSet(GenericViewSet):
         return Response({"auth_url": auth_url})
 
     def callback(self, request):
-        frontend_url = request.data.get("url") 
-        if not frontend_url:
-            return Response({"error": "URL parameter is required"}, status=400)
-
-        parsed_url = urlparse(frontend_url)
-        code = parse_qs(parsed_url.query).get("code", [None])[0]
-
+        code = request.data.get("code")
         if not code:
             return Response({"error": "Authorization code not found in URL"}, status=400)
 
@@ -148,15 +143,15 @@ class GetUserViewSet(
                             .exclude(id__in=user.blocked_users.all())
 
 
-class AvatarViewSet(mixins.UpdateModelMixin, 
-                    mixins.DestroyModelMixin, 
-                    mixins.RetrieveModelMixin, 
+class AvatarViewSet(mixins.UpdateModelMixin,
+                    mixins.DestroyModelMixin,
+                    mixins.RetrieveModelMixin,
                     GenericViewSet):
-    
+
     serializer_class = AvatarSerializer
     permission_classes = [IsAuthenticated, RequestOwnerOrReadOnly]
 
-    def get_object(self): 
+    def get_object(self):
         return self.request.user
 
     def destroy(self, request, *args, **kwargs):

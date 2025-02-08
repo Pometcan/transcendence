@@ -44,7 +44,7 @@ const ProfilePage = {
     ];
 
     withEventHandlers(fa2btnEnable, { onClick: async() => {
-      await fetch(`https://${window.location.host}/api/auth/2fa-enable/`, {
+      await fetch(`https://${window.location.host}/api/auth/2fa-enable`, {
         method: "GET",
         credentials: "include",
         headers: {
@@ -55,7 +55,7 @@ const ProfilePage = {
     });
 
     withEventHandlers(fa2btnDisable, { onClick: async() => {
-      await fetch(`https://${window.location.host}/api/auth/2fa-disable/`, {
+      await fetch(`https://${window.location.host}/api/auth/2fa-disable`, {
         method: "GET",
         credentials: "include",
         headers: {

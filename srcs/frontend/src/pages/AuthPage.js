@@ -85,11 +85,20 @@ const LoginElement = () => {
         errorDiv.element.style.display = 'block';
       } else {
         if (data.refresh && data.access) {
-          setCookie('login', 'true', 1);
           setCookie('userId', data.user_id, 1);
           setCookie('refreshToken', data.refresh, 1);
           setCookie('accessToken', data.access, 1);
-          window.router.navigate("/");
+          console.log(data);
+          if (data.mfa_enabled)
+          {
+            setCookie("qrCode", data.qr_code, 1);
+            window.router.navigate("/verify");
+          }
+          else
+          {
+            setCookie('login', 'true', 1);
+            window.router.navigate("/");
+          }
         }
       }
     } catch (error) {
@@ -139,9 +148,6 @@ const RegisterElement = () => {
           setCookie('login', 'false', 1);
           return;
         }
-        setCookie('login', 'true', 1);
-        setCookie('userId', data.user_id, 1);
-        console.log(data);
         window.location.href = data.auth_url;
       })
       .catch((error) => {
@@ -223,7 +229,11 @@ const RegisterElement = () => {
               setCookie('userId', data.user_id, 1);
               setCookie('refreshToken', data.refresh, 1);
               setCookie('accessToken', data.access, 1);
-              window.router.navigate("/");
+              console.log(data);
+              if (data.mfa_enabled)
+                window.router.navigate("/verify");
+              else
+                window.router.navigate("/");
             }
           }
         }
