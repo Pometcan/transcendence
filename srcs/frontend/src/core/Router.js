@@ -41,11 +41,19 @@ export default class Router {
     this._routes[path] = pageId;
   }
 
-  navigate(path) {
+  navigate(path, params = {}) {
     if (this._routes[path]) {
-      window.history.pushState({}, "", path);
-      this.selectedPage = path;
-      this.handleRoute(path);
+      if (params) {
+        const urlParams = new URLSearchParams(params);
+        window.history.pushState({}, "", path + "?" + urlParams.toString());
+        this.selectedPage = path;
+        this.handleRoute(path);
+      }
+      else {
+        window.history.pushState({}, "", path);
+        this.selectedPage = path;
+        this.handleRoute(path);
+      }
     }
   }
 
@@ -58,13 +66,16 @@ export default class Router {
   }
 
   handleRoute(path) {
+      const fullUrl = window.location.href; // Tam URL'yi al
+      const urlParams = new URLSearchParams(window.location.search); // Query parametrelerini ayrıştır
+
       const pageId = this._routes[path];
       this.selectedPage = path;
       if (pageId) {
-        this.pageManager.setActivePage(pageId);
+        this.pageManager.setActivePage(pageId, urlParams); // Parametreleri setActivePage'e ilet
       } else {
         if (this._routes["/404"]) {
-          this.pageManager.setActivePage("/404");
+          this.pageManager.setActivePage("/404", urlParams); // 404 sayfası için de parametreleri iletmek isteyebilirsiniz
         }
       }
     }

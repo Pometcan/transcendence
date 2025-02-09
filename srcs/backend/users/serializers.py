@@ -91,14 +91,14 @@ class TwoFAVerifySerializer(serializers.Serializer):
         if not totp.verify(data['otp_code'],valid_window=5):
             raise serializers.ValidationError("Invalid OTP code")
 
-        return {'username': user.username, 'message': "OTP successfully verified"}
+        return {'user_id': user.id, 'message': "OTP successfully verified"}
 
 #USER MOEL SERIALIZERS------------------------------------------------------------
 
 class GetUserSerializer(serializers.ModelSerializer):
     class Meta:
         model = User
-        fields = ['id', 'username', 'email', 'avatar', 'is_active']
+        fields = ['id', 'username', 'email', 'avatar', 'rank', 'is_active']
         read_only_fields = ['id', 'avatar']
 
 
@@ -283,3 +283,8 @@ class BlockUserSerializer(serializers.ModelSerializer):
         blocked_user = self.context['blocked_user']
         request_user.blocked_users.remove(blocked_user)
         return blocked_user
+
+class SearcUserByUsernameSerializer(serializers.ModelSerializer):
+    class Meta:
+        model= User
+        fields= ['username']

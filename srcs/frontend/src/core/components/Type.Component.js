@@ -6,11 +6,12 @@ import { DivComponent } from "./UIComponent.Div";
 import { LabelComponent } from "./UIComponent.Label";
 import { SVGComponent } from "./UIComponent.SVG";
 import { ImageComponent } from "./UIComponent.Image";
+import { CheckboxComponent } from "./UIComponent.Checkbox";
 import { withTransitions, withEventHandlers } from "./UIComponent.Util";
 
 export {
-   ButtonComponent, InputComponent, ImageComponent,
+  ButtonComponent, InputComponent, ImageComponent,
   TextComponent, DivComponent, SVGComponent,
-  UIComponent, LabelComponent,
-   withTransitions, withEventHandlers
+  UIComponent, LabelComponent, CheckboxComponent,
+  withTransitions, withEventHandlers
 };

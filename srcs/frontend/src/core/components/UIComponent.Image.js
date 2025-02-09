@@ -2,11 +2,17 @@ import UIComponent from "./UIComponent";
 
 export class ImageComponent extends UIComponent {
   constructor( id, props = {} ) {
-    super( id, props.styles, props.class);
-    this.src = props.src;
-    this.alt = props.alt;
-    this.styles = props.styles;
+    super( id, props.styles, props.class, props.object );
+    this.src = props.src || '';
+    this.alt = props.alt|| '';
+    this.styles = props.styles || {};
     this.class = props.class || '';
+
+    this.expectedListeners = () => ({
+      click: this.onClick,
+      mouseenter: this.onMouseEnter,
+      mouseleave: this.onMouseLeave,
+    });
   }
 
   render() {
@@ -29,7 +35,7 @@ export class ImageComponent extends UIComponent {
     if ( this.transitionIn ) {
       this.transitionIn( imageElement );
     }
-
+    this.addEventListeners( imageElement, this.expectedListeners() );
     return imageElement;
   }
 

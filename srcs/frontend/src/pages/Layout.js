@@ -18,15 +18,15 @@ const Layout = {
     ];
 
     const homeButton = NavbarButton("home-button", "Home");
-    const aboutButton = NavbarButton("about-button", "About");
     const profileButton = NavbarButton("profile-button", "Profile");
+    const friendsButton = NavbarButton("friends-button", "Friends");
     withEventHandlers(homeButton, { onClick: () => window.router.navigate("/") });
-    withEventHandlers(aboutButton, { onClick: () => window.router.navigate("/about") });
     withEventHandlers(profileButton, { onClick: () => window.router.navigate("/profile") });
+    withEventHandlers(friendsButton, { onClick: () => window.router.navigate("/friends") });
+
+    col.elements = [homeButton, friendsButton, profileButton];
 
     const pageContentContainer = new DivComponent("page-content-container", {});
-    col.elements = [homeButton, aboutButton, profileButton];
-
     layoutContainer.elements = [
       navbar,
       pageContentContainer
