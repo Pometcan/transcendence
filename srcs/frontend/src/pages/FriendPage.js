@@ -39,20 +39,21 @@ const FriendPage = {
       const friendBlock = await userManager.getBlockedUsers()
       const users = await userManager.getAllUsers();
 
-      for (const userId of friendList) {
-        friendListDiv.elements.push(await createRow(userId.id, userManager));
+      for (const user of friendList) {
+        friendListDiv.elements.push(await createRow(user, userManager));
       }
 
-      for (const userId of friendRequests) {
-        friendRequestsDiv.elements.push(await createRow(userId.id, userManager));
+      for (const user of friendRequests) {
+        friendRequestsDiv.elements.push(await createRow(user, userManager));
       }
 
-      for (const userId of friendBlock) {
-        friendBlockDiv.elements.push(await createRow(userId.id, userManager));
+      for (const user of friendBlock) {
+        console.log(user);
+        friendBlockDiv.elements.push(await createRow(user, userManager));
       }
 
-      for (const userId of users) {
-        usersDiv.elements.push(await createRow(userId.id, userManager));
+      for (const user of users) {
+        usersDiv.elements.push(await createRow(user, userManager));
       }
 
       pageContainer.update(pageContainer.elements[0].elements=[
@@ -73,10 +74,19 @@ const FriendPage = {
 export default FriendPage;
 
 
-async function createRow(userId, userManager) {
-  const user = await userManager.getUserById(userId);
-  const userDiv = new DivComponent(`user-${userId}`, { class: "d-flex justify-content-center" });
-  const userImage = new ImageComponent(`user-image-${userId}`, { src: user.avatar  });
+async function createRow(userRe, userManager) {
+  if (userRe === undefined) {
+    return;
+  }
+  let user;
+  if (userRe.id)
+    user = await userManager.getUserById(userRe.id);
+  if (userRe.blocked_user)
+    user = await userManager.getBlockedUserById(userRe.blocked_user.id);
+  console.log(user);
+
+  const userDiv = new DivComponent(`user-${user}`, { class: "d-flex justify-content-center" });
+  const userImage = new ImageComponent(`user-image-${user}`, { src: user.avatar  });
   userImage.styles = {
     //crop image
     overflow: "hidden",
@@ -84,23 +94,23 @@ async function createRow(userId, userManager) {
     width: "10rem",
     opacity: "0.6",
   };
-  const userName = new TextComponent(`user-name-${userId}`, { text: user.username });
-  const rank = new TextComponent(`user-rank-${userId}`, { text: user.rank });
-  const sendFriendRequest = new ButtonComponent(`send-friend-request-${userId}`, { label: "Send Friend Request", isRequest: false });
-  const deleteFriend = new ButtonComponent(`delete-friend-${userId}`, { label: "Delete Friend" });
-  const acceptFriendRequest = new ButtonComponent(`accept-friend-request-${userId}`, { label: "Accept Friend Request" });
-  const blockUser = new ButtonComponent(`block-user-${userId}`, { label: "Block User" });
-  const unblockUser = new ButtonComponent(`unblock-user-${userId}`, { label: "Unblock User" });
+  const userName = new TextComponent(`user-name-${user}`, { text: user.username });
+  const rank = new TextComponent(`user-rank-${user}`, { text: user.rank });
+  const sendFriendRequest = new ButtonComponent(`send-friend-request-${user}`, { label: "Send Friend Request", isRequest: false });
+  const deleteFriend = new ButtonComponent(`delete-friend-${user}`, { label: "Delete Friend" });
+  const acceptFriendRequest = new ButtonComponent(`accept-friend-request-${user}`, { label: "Accept Friend Request" });
+  const blockUser = new ButtonComponent(`block-user-${user}`, { label: "Block User" });
+  const unblockUser = new ButtonComponent(`unblock-user-${user}`, { label: "Unblock User" });
 
   userDiv.elements.push(userImage, userName, rank);
-  if (userManager.isFriend(userId)) {
+  if (userManager.isFriend(user)) {
     userDiv.elements.push(deleteFriend);
     userDiv.elements.push(blockUser);
   }
-  else if (userManager.isBlocked(userId)) {
+  else if (userManager.isBlocked(user)) {
     userDiv.elements.push(unblockUser);
   }
-  else if (userManager.isRequestSent(userId)) {
+  else if (userManager.isRequestSent(user)) {
     userDiv.elements.push(acceptFriendRequest);
   }
   else {
@@ -111,26 +121,26 @@ async function createRow(userId, userManager) {
   withEventHandlers(sendFriendRequest, { onClick: async() => {
     if (sendFriendRequest.isRequest)
     {
-      await userManager.sendFriendRequestReject(userId);
+      await userManager.sendFriendRequestReject(user);
       sendFriendRequest.update({label: "x", isRequest: false})
     }
     else
     {
-      await userManager.sendFriendRequestAccept(userId);
+      await userManager.sendFriendRequestAccept(user);
       sendFriendRequest.update({label: "Send Friend Request", isRequest: true})
     }
   }});
   withEventHandlers(deleteFriend, { onClick: async() => {
-    await userManager.deleteFriend(userId);
+    await userManager.deleteFriend(user);
   }});
   withEventHandlers(acceptFriendRequest, { onClick: async() => {
-    await userManager.acceptFriendRequest(userId);
+    await userManager.acceptFriendRequest(user);
   }});
   withEventHandlers(blockUser, { onClick: async() => {
-    await userManager.getBlockedUserById(userId);
+    await userManager.getBlockedUserById(user);
   }});
   withEventHandlers(unblockUser, { onClick: async() => {
-    await userManager.unblockUser(userId);
+    await userManager.unblockUser(user);
   }});
 
   return userDiv;

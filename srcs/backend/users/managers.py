@@ -7,14 +7,14 @@ class UserManager(DefaultUserManager):
     use_in_migrations =True
 
     def get_friend_validation(self, requestUser, friend):
-               
+
         if not friend \
                 or not self.filter(id=friend.id).exists() \
                 or not friend.is_active :
             raise ValidationError("Kullanıcı bulunamadı.")
         if not requestUser.friends.filter(id = friend.id).exists():
             raise ValidationError("Kullanıcı zaten arkadaşınız değil.")
-         
+
     def block_user_validation(self, requestUser, userToBlock):
         if not userToBlock \
                 or not self.filter(id=userToBlock.id).exists() \
@@ -31,7 +31,6 @@ class UserManager(DefaultUserManager):
         if  not blockedUser \
                 or not self.filter(id=blockedUser.id).exists() \
                 or not blockedUser.is_active \
-                or not requestUser.blocked_users.filter(id = blockedUser.id).exists() \
                 or requestUser.blocked_by.filter(id = blockedUser.id).exists():
             raise ValidationError("Kullanıcı bulunamadı.")
 
@@ -40,8 +39,8 @@ class FriendshipRequestManager(models.Manager):
     use_in_migrations = True
 
     def create_friendship_request_validation(self, sender, receiver, status):
-        
-        User = apps.get_model('users', 'User') 
+
+        User = apps.get_model('users', 'User')
         if not receiver \
                 or not User.objects.filter(id=receiver.id).exists() \
                 or not receiver.is_active \

@@ -1,6 +1,5 @@
-// GameP2Page.js (Kullanım örneği)
 import {MenuElement} from "../core/elements/Type.Element";
-import { TextComponent,ButtonComponent } from "../core/components/Type.Component";
+import { TextComponent,ButtonComponent, withEventHandlers } from "../core/components/Type.Component";
 import Game3D from "../core/game/Game3D";
 import { getCsrfToken } from "../core/Cookie";
 
@@ -15,6 +14,7 @@ const GameP2Page = {
             transform: "translateX(-50%)",
             zIndex: 10,
         };
+        let hostButton;
         if (params.get("id") === null)
         {
           hostButton = new ButtonComponent("hostButton", { label: "Oda Aç", class: "btn btn-primary" });
@@ -44,7 +44,7 @@ const GameP2Page = {
 
 export default GameP2Page;
 
-async function hostGame() {
+async function hostGame(userID) {
   const csrfToken = getCsrfToken();
     const response = await fetch(`https://${window.location.host}/api/game/host`, {
         method: "POST",
