@@ -55,7 +55,7 @@ const HomePage = {
     }});
 
     withEventHandlers(multiPlayerButton, { onClick: () => {
-      window.router.navigate("/gamemp");
+      window.router.navigate("/gamep2");
     }});
 
     return pageContainer.render();

@@ -1,5 +1,5 @@
 // App.js
-import { HomePage, AuthPage, ProfilePage, IntraPage, VerifyPage, FriendPage, Page404, Layout } from "./pages/Type.Page.js";
+import { HomePage, AuthPage, ProfilePage, GameP2Page, IntraPage, VerifyPage, FriendPage, Page404, Layout } from "./pages/Type.Page.js";
 import { PageManager } from "./core/managers/PageManager";
 import { getCookie,setCookie } from "./core/Cookie";
 import { init, changeLanguage} from "./i42n.js";
@@ -27,6 +27,7 @@ export class App extends HTMLElement {
       "/intra-auth": "IntraPage",
       "/verify": "VerifyPage",
       "/friends": "friendPage",
+      "/gamep2": "gamep2Page",
       "/404": "/404"
     };
     for (const [key, value] of Object.entries(routesConfig)) {
@@ -42,6 +43,7 @@ export class App extends HTMLElement {
       "IntraPage": IntraPage,
       "VerifyPage": VerifyPage,
       "friendPage": FriendPage,
+      "gamep2Page": GameP2Page,
       "/404": Page404
     }
     for (const [key, value] of Object.entries(pageComponents)) {
