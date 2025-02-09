@@ -16,6 +16,8 @@ export class DivComponent extends UIComponent {
 
   render() {
     if ( this.element ) {
+      // Mevcut element varsa, çocukları yeniden render etmeden önce temizle
+      this.clearDOMChildren(); // Mevcut DOM çocuklarını temizle
       this.elements.forEach( ( child ) => {
         this.element.appendChild( child.render() );
       });
@@ -60,12 +62,27 @@ export class DivComponent extends UIComponent {
     this.elements = this.elements?.filter( ( e ) => e !== element );
   }
 
+  clearElements() {
+    this.elements = []; // JavaScript dizisini temizle
+    this.clearDOMChildren(); // DOM çocuklarını temizle
+  }
+
+  clearDOMChildren() {
+    if (this.element) {
+      while (this.element.firstChild) {
+        this.element.removeChild(this.element.firstChild);
+      }
+    }
+  }
+
+
   update(newProps) {
     super.update(newProps);
     if (newProps) {
       if (newProps.elements) {
         this.elements = newProps.elements;
         if (this.element) {
+          this.clearDOMChildren(); // Mevcut DOM çocuklarını temizle
           this.elements.forEach( ( child ) => {
             this.element.appendChild( child.render() );
           });

@@ -1,170 +1,130 @@
 import {MenuElement, SearchInput} from "../core/elements/Type.Element";
 import { DivComponent, TextComponent, ImageComponent, ButtonComponent, withEventHandlers } from "../core/components/Type.Component";
-import { getCsrfToken, getCookie } from "../core/Cookie";
+import UserManager from "../core/managers/UserManager";
+import { getCookie, setCookie } from "../core/Cookie";
+
 const FriendPage = {
   layoutVisibility: true,
   render: () => {
     const pageContainer = MenuElement("FriendPage");
-    const searchInput = SearchInput("searchInput", "Sea");
-    withEventHandlers(searchInput.elements[0].elements[2], {onClick: async () => {
-     await findUser(searchInput.elements[0].elements[0].value).then((data) => {
-      for (let i = 0; i < data.length; i++) {
-        const row = new DivComponent(data[i].id, {class: ""});
-        row.elements = [
-          new TextComponent("username", { text: data[i].username }),
-          new ImageComponent("avatar", { src: data[i].avatar }),
-          new ButtonComponent(`addFriend${data[i].id}`, { label: "add Friend ", class: "btn btn-primary" })
-        ];
-        withEventHandlers(row.elements[0], {onClick: () => {
-          window.router.navigate(`/profile`, {id: data[i].id});
-        }});
-        withEventHandlers(row.elements[1], {onClick: () => {
-          window.router.navigate(`/profile`, {id: data[i].id});
-        }});
-        withEventHandlers(row.elements[2], {onClick: async () => {
-          const csrfToken = await getCsrfToken();
-          await fetch(`https://${window.location.host}/api/auth/sent-friendship-request/`, {
-            method: "POST",
-            credentials: "include",
-            headers: {
-              Accept: "application/json",
-              "Content-Type": "application/json",
-              "X-CSRFToken": csrfToken,
-              "Authorization": `Bearer ${getCookie('accessToken')}`
-            },
-            body: JSON.stringify({receiver: data[i].id})
-          })
-          .then((response) => {
-            console.log("addFriend Yanıt Durumu:", response.status, response.statusText);
-            if (!response.ok) {
-              const message = `HTTP error! status: ${response.status}`;
-              throw new Error(message);
-            }
-            console.log("Friend request sent");
-            window.router.navigate("/friends");
-          })
-          .catch((error) => {
-            console.error("addFriend Hatası:", error);
-          });
-        }})
-        userListDiv.elements.push(row);
-
-      userListDiv.update( {elements: userListDiv.elements} );
-      }})}});
-
-
-    const userListDiv= new DivComponent("userListDiv", {class: "", style: {overflowY: "scroll"}});
-    getAllUser()
-      .then((data) => {
-      for (let i = 0; i < data.length; i++) {
-        const row = new DivComponent(data[i].id, {class: ""});
-        row.elements = [
-          new TextComponent("username", { text: data[i].username }),
-          new ImageComponent("avatar", { src: data[i].avatar }),
-          new ButtonComponent(`addFriend${data[i].id}`, { label: "add Friend ", class: "btn btn-primary" })
-        ];
-        withEventHandlers(row.elements[0], {onClick: () => {
-          window.router.navigate(`/profile`, {id: data[i].id});
-        }});
-        withEventHandlers(row.elements[1], {onClick: () => {
-          window.router.navigate(`/profile`, {id: data[i].id});
-        }});
-        withEventHandlers(row.elements[2], {onClick: async () => {
-          const csrfToken = await getCsrfToken();
-          await fetch(`https://${window.location.host}/api/auth/sent-friendship-request/`, {
-            method: "POST",
-            credentials: "include",
-            headers: {
-              Accept: "application/json",
-              "Content-Type": "application/json",
-              "X-CSRFToken": csrfToken,
-              "Authorization": `Bearer ${getCookie('accessToken')}`
-            },
-            body: JSON.stringify({receiver: data[i].id})
-          })
-          .then((response) => {
-            console.log("addFriend Yanıt Durumu:", response.status, response.statusText);
-            if (!response.ok) {
-              const message = `HTTP error! status: ${response.status}`;
-              throw new Error(message);
-            }
-            console.log("Friend request sent");
-            window.router.navigate("/friends");
-          })
-          .catch((error) => {
-            console.error("addFriend Hatası:", error);
-          });
-        }});
-        userListDiv.elements.push(row);
-      }
-      userListDiv.update( {elements: userListDiv.elements} );
-      })
-      .catch((error) => {
-        console.error("getAllUser Hatası:", error); // Hata durumunda logla
+    pageContainer.elements[0].class += "container text-center";
+    pageContainer.elements[0].styles.overflow = "auto";
+    pageContainer.elements[0].styles.maxHeight = "60vh";
+    const userManager = new UserManager();
+    userManager.initialize().then(async() => {
+      const friendListDiv = new DivComponent("friend-list", {
+        elements: [
+          new TextComponent("friend-list-title", { text: "Friend List", class: "text-center element-h2" }),
+        ],
       });
+      const friendRequestsDiv = new DivComponent("friend-requests", {
+        elements: [
+          new TextComponent("friend-requests-title", { text: "Friend Requests", class: "text-center element-h2" }),
+        ],
+      });
+      const friendBlockDiv = new DivComponent("friend-block", {
+        elements: [
+          new TextComponent("friend-block-title", { text: "Blocked Users", class: "text-center element-h2" }),
+        ],
+      });
+      const usersDiv = new DivComponent("users", {
+        elements: [
+          new TextComponent("users-title", { text: "Users", class: "text-center element-h2" }),
+        ],
+      });
+      const searchInput = SearchInput("Search Users", "Search");
 
-    pageContainer.elements[0].elements = [
-      searchInput,
-      userListDiv
-    ];
+      const friendList = await userManager.getAllFriends();
+      const friendRequests = await userManager.getReceivedFriendRequests();
+      const friendBlock = await userManager.getBlockedUsers()
+      const users = await userManager.getAllUsers();
+
+      for (const userId of friendList) {
+        friendListDiv.elements.push(await createRow(userId.id, userManager));
+      }
+
+      for (const userId of friendRequests) {
+        friendRequestsDiv.elements.push(await createRow(userId.id, userManager));
+      }
+
+      for (const userId of friendBlock) {
+        friendBlockDiv.elements.push(await createRow(userId.id, userManager));
+      }
+
+      for (const userId of users) {
+        usersDiv.elements.push(await createRow(userId.id, userManager));
+      }
+
+      pageContainer.update(pageContainer.elements[0].elements=[
+        searchInput,
+        friendListDiv,
+        friendRequestsDiv,
+        friendBlockDiv,
+        usersDiv,
+      ]);
+
+      return pageContainer.render();
+    })
+
     return pageContainer.render();
   }
 }
 
 export default FriendPage;
 
-async function getAllUser() {
-  try {
-    const csrfToken = await getCsrfToken();
 
-    const response =await fetch(`https://${window.location.host}/api/auth/user-list/`, {
-      method: "GET",
-      credentials: "include",
-      headers: {
-          "X-CSRFToken": csrfToken,
-          "Authorization": `Bearer ${getCookie('accessToken')}`
-      }
-    });
+async function createRow(userId, userManager) {
+  const user = await userManager.getUserById(userId);
+  const userDiv = new DivComponent(`user-${userId}`);
+  const userImage = new ImageComponent(`user-image-${userId}`, { src: user.avatar });
+  const userName = new TextComponent(`user-name-${userId}`, { text: user.username });
+  const rank = new TextComponent(`user-rank-${userId}`, { text: user.rank });
+  const sendFriendRequest = new ButtonComponent(`send-friend-request-${userId}`, { label: "Send Friend Request", isRequest: false });
+  const deleteFriend = new ButtonComponent(`delete-friend-${userId}`, { label: "Delete Friend" });
+  const acceptFriendRequest = new ButtonComponent(`accept-friend-request-${userId}`, { label: "Accept Friend Request" });
+  const blockUser = new ButtonComponent(`block-user-${userId}`, { label: "Block User" });
+  const unblockUser = new ButtonComponent(`unblock-user-${userId}`, { label: "Unblock User" });
 
-    console.log("getAllUser Yanıt Durumu:", response.status, response.statusText); // Yanıt durumunu logla
-
-    if (!response.ok) {
-      const message = `HTTP error! status: ${response.status}`;
-      throw new Error(message);
-    }
-
-    const data = await response.json();
-    return data;
-  } catch (error) {
-      console.error("getAllUser Hatası:", error);
+  userDiv.elements.push(userImage, userName, rank);
+  if (userManager.isFriend(userId)) {
+    userDiv.elements.push(deleteFriend);
+    userDiv.elements.push(blockUser);
   }
-}
-
-async function findUser(username) {
-  try {
-    const csrfToken = await getCsrfToken();
-
-    const response = await fetch(`https://${window.location.host}/api/auth/search-user?search=${username}`, {
-      method: "GET",
-      credentials: "include",
-      headers: {
-          Accapt: "application/json",
-          "Content-Type": "application/json",
-          "X-CSRFToken": csrfToken,
-          "Authorization": `Bearer ${getCookie('accessToken')}`
-      }
-    });
-
-    console.log("findUser Yanıt Durumu:", response.status, response.statusText); // Yanıt durumunu logla
-
-    if (!response.ok) {
-      const message = `HTTP error! status: ${response.status}`;
-      throw new Error(message);
-    }
-
-    const data = await response.json();
-    return data;
-  } catch (error) {
-      console.error("findUser Hatası:", error);
+  else if (userManager.isBlocked(userId)) {
+    userDiv.elements.push(unblockUser);
   }
+  else if (userManager.isRequestSent(userId)) {
+    userDiv.elements.push(acceptFriendRequest);
+  }
+  else {
+    userDiv.elements.push(sendFriendRequest);
+    userDiv.elements.push(blockUser);
+  }
+
+  withEventHandlers(sendFriendRequest, { onClick: async() => {
+    if (sendFriendRequest.isRequest)
+    {
+      await userManager.sendFriendRequestReject(userId);
+      sendFriendRequest.update({label: "x", isRequest: false})
+    }
+    else
+    {
+      await userManager.sendFriendRequestAccept(userId);
+      sendFriendRequest.update({label: "Send Friend Request", isRequest: true})
+    }
+  }});
+  withEventHandlers(deleteFriend, { onClick: async() => {
+    await userManager.deleteFriend(userId);
+  }});
+  withEventHandlers(acceptFriendRequest, { onClick: async() => {
+    await userManager.acceptFriendRequest(userId);
+  }});
+  withEventHandlers(blockUser, { onClick: async() => {
+    await userManager.getBlockedUserById(userId);
+  }});
+  withEventHandlers(unblockUser, { onClick: async() => {
+    await userManager.unblockUser(userId);
+  }});
+
+  return userDiv;
 }
