@@ -11,6 +11,8 @@ import VerifyPage from "./pages/VerifyPage";
 import { getCookie,setCookie } from "./core/Cookie";
 import { init, changeLanguage} from "./i42n.js";
 import FriendPage from "./pages/FriendPage.js";
+import DashboardPage from "./pages/Dashboard.js";
+
 
 export class App extends HTMLElement {
   constructor() {
@@ -34,6 +36,7 @@ export class App extends HTMLElement {
     this.router.addRoute("/intra-auth", "IntraPage");
     this.router.addRoute("/verify", "VerifyPage");
     this.router.addRoute("/friends", "friendPage");
+    this.router.addRoute("/dashboard","dashboard" )
     this.router.addRoute("/404", "/404");
   }
 
@@ -43,7 +46,8 @@ export class App extends HTMLElement {
     this.pageManager.addPage("profilePage", ProfilePage);
     this.pageManager.addPage("IntraPage", IntraPage);
     this.pageManager.addPage("VerifyPage", VerifyPage);
-    this.pageManager.addPage("friendPage", FriendPage)
+    this.pageManager.addPage("friendPage", FriendPage);
+    this.pageManager.addPage("dashboard", DashboardPage)
     this.pageManager.addPage("/404", Page404);
   }
 
