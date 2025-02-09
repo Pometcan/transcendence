@@ -1,4 +1,4 @@
-// HomePage.js
+// VerifyPage.js
 import { ButtonComponent, DivComponent, TextComponent,ImageComponent, withEventHandlers } from '../core/components/Type.Component.js';
 import MenuElement from '../core/elements/Element.Menu.js';
 import {getCookie,setCookie} from '../core/Cookie.js';
