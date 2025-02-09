@@ -1,41 +1,66 @@
-// HomePage.js
-import { ButtonComponent, DivComponent, TextComponent, withEventHandlers } from '../core/components/Type.Component.js';
-import MenuElement from '../core/elements/Element.Menu.js';
-import {eraseCookie} from '../core/Cookie.js';
+import {MenuElement, SubmitButton} from "../core/elements/Type.Element";
+import {withEventHandlers} from "../core/components/Type.Component";
+function singleMenu()
+{
+  const vs11 = SubmitButton("vs11", "1 vs 1");
+  vs11.styles = {
+    margin: "10px 10px 10px 0",
+    backgroundColor: "Olive",
+  }
+  const vs22 = SubmitButton("vs22", "2 vs 2");
+  vs22.styles = {
+    margin: "10px 10px 10px 0",
+    backgroundColor: "green",
+  }
+  const tournament = SubmitButton("tournament", "Tournament");
+  tournament.styles = {
+    margin: "10px 10px 10px 0",
+    backgroundColor: "Navy",
+  }
+  const back = SubmitButton("back", "Back");
+  back.styles = {
+    margin: "10px 10px 10px 0",
+  }
+  withEventHandlers(vs11, { onClick: () => window.router.navigate("/gamep11") });
+  withEventHandlers(vs22, { onClick: () => window.router.navigate("/gamep22") });
+  withEventHandlers(tournament, { onClick: () => window.router.navigate("/gamest") });
+  withEventHandlers(back, { onClick: () => window.router.navigate("/") });
 
-let sayac = 0; // Örnek bir değişken
+  return [vs11, vs22, tournament, back];
+}
 
 const HomePage = {
   layoutVisibility: true,
-  render: () => {
-    const pageContainer = MenuElement("homePage");
-    const title = new TextComponent("homeTitle", { text: "Ana Sayfa" });
-    const content = new TextComponent("homeContent", { text: `Sayaç Değeri: ${sayac}` }); // Değişkeni içeriğe yansıt
+  render:  () => {
+    const pageContainer = MenuElement("FriendPage");
 
-    const arttirBtn = new ButtonComponent("arttirBtn", { label: "Sayacı Arttır", class: "btn btn-primary" });
-    const exitBtn = new ButtonComponent("exitBtn", { label: "Çıkış", class: "btn btn-primary" });
+    const singlePlayerButton = SubmitButton("singlePlayerButton",  "Single Player" );
+    singlePlayerButton.styles = {
+      margin: "10px 10px 10px 0",
+    };
+
+    const multiPlayerButton = SubmitButton("multiPlayerButton", "Multi Player" );
+    multiPlayerButton.styles = {
+      margin: "10px 10px 10px 0",
+      backgroundColor: "green",
+    };
+
     pageContainer.elements[0].elements = [
-      title,
-      content,
-      arttirBtn,
-      exitBtn
+      singlePlayerButton,
+      multiPlayerButton,
     ];
 
-    withEventHandlers(exitBtn, { onClick: () => {
-        eraseCookie("login");
-        window.router.navigate("/auth");
-      }
-    });
+    withEventHandlers(singlePlayerButton, { onClick: () => {
+      pageContainer.elements[0].update({elements: singleMenu()});
+    }});
 
-    withEventHandlers(arttirBtn, { onClick: () => {
-        sayac++;
-        content.update({text: `Sayaç Değeri: ${sayac}`});
-      }
-    });
+    withEventHandlers(multiPlayerButton, { onClick: () => {
+      window.router.navigate("/gamemp");
+    }});
 
-    const renderedPage = pageContainer.render();
-    return renderedPage;
+    return pageContainer.render();
   }
-};
+}
+
 
 export default HomePage;
