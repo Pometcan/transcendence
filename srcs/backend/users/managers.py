@@ -13,7 +13,7 @@ class UserManager(DefaultUserManager):
                 or not friend.is_active :
             raise ValidationError("Kullanıcı bulunamadı.")
         if not requestUser.friends.filter(id = friend.id).exists():
-            raise ValidationError("Kullanıcı zaten arkadaşınız değil.")
+            raise ValidationError("Kullanıcı arkadaşınız değil.")
 
     def block_user_validation(self, requestUser, userToBlock):
         if not userToBlock \

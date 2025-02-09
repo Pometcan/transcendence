@@ -3,7 +3,7 @@ from django.conf import settings
 from django.shortcuts import render
 from django.urls import path
 from rest_framework.generics import ListAPIView
-from rest_framework.decorators import action
+from rest_framework.exceptions import NotFound
 from rest_framework import mixins, status, permissions
 from rest_framework.viewsets import GenericViewSet, ModelViewSet
 from rest_framework.permissions import IsAuthenticated, AllowAny
@@ -184,6 +184,7 @@ class ReceivedFriendshipRequestViewSet(
     serializer_class = ReceivedFriendshipRequestSerializer
     permission_classes = [IsAuthenticated]
 
+    lookup_field = "sender_id"
     def get_queryset(self):
         user = self.request.user
         return FriendshipRequest.objects.select_related('sender').filter(receiver=user, is_active=True, status='P') \
@@ -191,6 +192,24 @@ class ReceivedFriendshipRequestViewSet(
                                         .exclude(sender__in=user.blocked_by.all()) \
                                         .exclude(sender__in=user.blocked_users.all())
 
+    def get_object(self):
+        sender_id = self.kwargs.get('sender_id') 
+        if not sender_id:
+            raise NotFound("Sender ID belirtilmedi.")
+
+        user = self.request.user
+        try:
+            friendship_request = FriendshipRequest.objects.get(
+                sender=sender_id,
+                receiver=user,
+                is_active=True,
+                status='P'
+            )
+            serializer = self.get_serializer(instance=friendship_request)
+            return serializer.instance  
+        except FriendshipRequest.DoesNotExist:
+            raise NotFound("Bu kullanıcıdan aktif bir arkadaşlık isteği bulunamadı.")
+        
 class SentFriendshipRequestViewSet(
                 mixins.CreateModelMixin,
                 mixins.RetrieveModelMixin,
@@ -201,12 +220,32 @@ class SentFriendshipRequestViewSet(
     serializer_class = SentFriendshipRequestSerializer
     permission_classes = [IsAuthenticated]
 
+    lookup_field = "receiver_id"
+
     def get_queryset(self):
         user = self.request.user
         return FriendshipRequest.objects.select_related('receiver').filter(sender=user, is_active=True, status='P') \
                                         .exclude(receiver__in=User.objects.filter(is_active=False)) \
                                         .exclude(receiver__in=user.blocked_by.all()) \
                                         .exclude(receiver__in=user.blocked_users.all())
+
+    def get_object(self):
+        receiver_id = self.kwargs.get('receiver_id') 
+        if not receiver_id:
+            raise NotFound("Receiver ID belirtilmedi.")
+
+        user = self.request.user
+        try:
+            friendship_request = FriendshipRequest.objects.get(
+                sender=user,
+                receiver=receiver_id,
+                is_active=True,
+                status='P'
+            )
+            serializer = self.get_serializer(instance=friendship_request)
+            return serializer.instance 
+        except FriendshipRequest.DoesNotExist:
+            raise NotFound("Bu kullanıcıya gönderilen aktif arkadaşlık isteği bulunamadı.")
 
 class FriendsViewSet(
                 mixins.RetrieveModelMixin,

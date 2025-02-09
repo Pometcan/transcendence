@@ -144,8 +144,8 @@ class AvatarSerializer(serializers.ModelSerializer):
 class ReceivedFriendshipRequestSerializer(serializers.ModelSerializer):
     class Meta:
         model = FriendshipRequest
-        fields = ['id', 'sender', 'receiver', 'status', 'is_active', 'created_date']
-        read_only_fields = ['id', 'sender', 'receiver', 'is_active', 'created_date']
+        fields = ['sender', 'status', 'is_active', 'created_date']
+        read_only_fields = ['sender', 'is_active', 'created_date']
     
     def to_representation(self, instance):
         representation = super().to_representation(instance)
@@ -167,8 +167,8 @@ class SentFriendshipRequestSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = FriendshipRequest
-        fields = ['id', 'sender', 'receiver', 'status', 'is_active', 'created_date']
-        read_only_fields = ['id', 'sender', 'status', 'created_date']
+        fields = ['receiver', 'status', 'is_active', 'created_date']
+        read_only_fields = ['status', 'created_date']
 
 
     def to_representation(self, instance):
