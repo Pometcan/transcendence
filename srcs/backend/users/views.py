@@ -162,7 +162,8 @@ class AvatarViewSet(mixins.UpdateModelMixin,
         try:
             serializer.delete(user)
             return Response(
-                {"detail": "Avatar kaldırıldı."},
+                {"detail": "Avatar kaldırıldı.",
+                "avatar" : user.avatar.url},
                 status=status.HTTP_200_OK
             )
         except Exception as e:
@@ -231,6 +232,11 @@ class FriendsViewSet(
             )
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
+    def get(self, request, *args, **kwargs):
+        users = self.get_queryset()
+        response_data = UserBasicInfoSerializer(users, many=True).data
+        return Response(response_data)
+
 class BlockUserViewSet(ModelViewSet):
 
     serializer_class = BlockUserSerializer
@@ -250,6 +256,13 @@ class BlockUserViewSet(ModelViewSet):
                 status=status.HTTP_200_OK
             )
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+    def get(self, request, *args, **kwargs):
+        users = self.get_queryset()
+        response_data = UserBasicInfoSerializer(users, many=True).data
+        return Response(response_data)
+
+
 
 class SearchUserByUsernameViewSet(ListAPIView):
     permission_classes = [IsAuthenticated]

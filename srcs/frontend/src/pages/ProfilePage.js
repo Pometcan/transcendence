@@ -92,8 +92,8 @@ const ProfilePage = {
                 "Authorization": `Bearer ${getCookie('accessToken')}`
             },
             body: formData
-          }).then(response => {
-            photo.elements[0].update({ src: user.avatar  });
+          }).then(response => response.json()).then(data => {
+             photo.elements[0].update({ src: `${data.avatar}?t=${new Date().getTime()}`});
           })
         }
       };
@@ -102,14 +102,20 @@ const ProfilePage = {
 
     withEventHandlers(deletePhotoBtn, { onClick: async() => {
       const csrfToken = await getCsrfToken();
+      const formData = new FormData();
       await fetch(`https://${window.location.host}/api/auth/avatar/`, {
         method: "DELETE",
         credentials: "include",
         headers: {
             "X-CSRFToken": csrfToken,
             "Authorization": `Bearer ${getCookie('accessToken')}`
-        }});
-    }});
+        },
+        body: formData
+      }).then(response => response.json()).then(data => {
+         photo.elements[0].update({ src: `${data.avatar}?t=${new Date().getTime()}`});
+      })
+      }});
+
 
     withEventHandlers(deleteBtn, { onClick: async() => {
       const csrfToken = await getCsrfToken();
