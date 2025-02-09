@@ -135,7 +135,7 @@ class UserManager {
   }
 
   async getBlockedUserById(userId) {
-    return await this._fetchApi(`/api/auth/block-users/${userId}/`);
+    return await this._fetchApi(`/api/auth/block-users/`, "POST", {blocked_user_id: userId});
   }
 
   async unblockUser(userId) {

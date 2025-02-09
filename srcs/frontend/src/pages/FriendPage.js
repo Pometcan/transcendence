@@ -29,7 +29,7 @@ const FriendPage = {
       });
       const usersDiv = new DivComponent("users", {
         elements: [
-          new TextComponent("users-title", { text: "Users", class: "text-center element-h2" }),
+          new TextComponent("users-title", { text: "Users List", class: "text-center element-h2" }),
         ],
       });
       const searchInput = SearchInput("Search Users", "Search");
@@ -57,10 +57,10 @@ const FriendPage = {
 
       pageContainer.update(pageContainer.elements[0].elements=[
         searchInput,
-        friendListDiv,
         friendRequestsDiv,
-        friendBlockDiv,
+        friendListDiv,
         usersDiv,
+        friendBlockDiv,
       ]);
 
       return pageContainer.render();
@@ -75,8 +75,15 @@ export default FriendPage;
 
 async function createRow(userId, userManager) {
   const user = await userManager.getUserById(userId);
-  const userDiv = new DivComponent(`user-${userId}`);
-  const userImage = new ImageComponent(`user-image-${userId}`, { src: user.avatar });
+  const userDiv = new DivComponent(`user-${userId}`, { class: "d-flex justify-content-center" });
+  const userImage = new ImageComponent(`user-image-${userId}`, { src: user.avatar  });
+  userImage.styles = {
+    //crop image
+    overflow: "hidden",
+    borderRadius: "1%",
+    width: "10rem",
+    opacity: "0.6",
+  };
   const userName = new TextComponent(`user-name-${userId}`, { text: user.username });
   const rank = new TextComponent(`user-rank-${userId}`, { text: user.rank });
   const sendFriendRequest = new ButtonComponent(`send-friend-request-${userId}`, { label: "Send Friend Request", isRequest: false });
