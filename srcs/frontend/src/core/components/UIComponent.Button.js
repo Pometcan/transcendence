@@ -6,6 +6,7 @@ export class ButtonComponent extends UIComponent {
     this.label = props.label;
     this.styles = props.styles;
     this.class = props.class || '';
+    this.props = props;
 
     this.expectedListeners = () => ({
       click: this.onClick,
