@@ -74,18 +74,7 @@ class UserManager {
     }
   }
 
-  isFriend(userId) {
-    return this.friends && this.friends.includes(userId);
-  }
-
-  isBlocked(userId) {
-    return this.blockedUsers && this.blockedUsers.includes(userId);
-  }
-
-  isRequestSent(userId) {
-    return this.sentFriendRequests && this.sentFriendRequests.includes(userId);
-  }
-
+  //USER
   async getAllUsers() {
     return await this._fetchApi(`/api/auth/user-list/`);
   }
@@ -94,6 +83,7 @@ class UserManager {
     return await this._fetchApi(`/api/auth/user-list/${userId}/`);
   }
 
+  //FRIEND
   async getAllFriends() {
     return await this._fetchApi(`/api/auth/friends/`);
   }
@@ -102,39 +92,52 @@ class UserManager {
     return await this._fetchApi(`/api/auth/friends/${userId}/`);
   }
 
-  async deleteFriend(userId) {
+  async deleteFriendById(userId) {
     return await this._fetchApi(`/api/auth/friends/${userId}/`, "DELETE");
   }
 
+  //SEARCH-USER
   async searchUsers(username) {
     return await this._fetchApi(`/api/auth/search-user?search=${username}`);
   }
 
-  async getSentFriendRequests() {
+  //SENT-FRIENDSHIP-REQUEST
+  async getSentFriendshipRequests() {
     return await this._fetchApi(`/api/auth/sent-friendship-request/`);
   }
 
-  async sendFriendRequestAccept(userId) {
-    return await this._fetchApi(`/api/auth/sent-friendship-request/${userId}/`, "POST", {receiver:userId, is_active: true});
+  async sentFriendshipRequest(userId) {
+    return await this._fetchApi(`/api/auth/sent-friendship-request/`, "POST", {receiver: userId});
   }
 
-  async sendFriendRequestReject (userId) {
-    return await this._fetchApi(`/api/auth/sent-friendship-request/${userId}/`, "POST", {receiver:userId, is_active: false});
+  async cancelSentFriendshipRequest() {
+    return await this.__fetchApi(`/api/auth/sent-friendship-request/${userId}/`, "PUT", {is_active : false});
   }
 
-  async getReceivedFriendRequests() {
+  //RECEIVED-FRIENDSHIP-REQUEST
+  async getReceivedFriendshipRequests() {
     return await this._fetchApi(`/api/auth/received-friendship-request/`);
   }
 
-  async acceptFriendRequest(userId) {
-    return await this._fetchApi(`/api/auth/received-friendship-request/${userId}/`);
+  async getReceivedFriendshipRequestById(requestId) {
+    return await this._fetchApi(`/api/auth/received-friendship-request/${requestId}/`);
   }
 
+
+  async acceptReceivedFriendshipRequest(senderId) {
+    return await this._fetchApi(`/api/auth/received-friendship-request/${senderId}/`, "PUT", {is_active: false, status: 'A'});
+  }
+
+  async rejectReceivedFriendshipRequest (senderId) {
+    return await this._fetchApi(`/api/auth/received-friendship-request/${senderId}/`, "PUT", {is_active: false, status: 'R'});
+  }
+
+  //BLOCK-USER
   async getBlockedUsers() {
     return await this._fetchApi(`/api/auth/block-users/`);
   }
 
-  async postBlockedUserById(userId) {
+  async blockUserById(userId) {
     return await this._fetchApi(`/api/auth/block-users/`, "POST", {blocked_user_id: userId});
   }
 
@@ -142,9 +145,11 @@ class UserManager {
     return await this._fetchApi(`/api/auth/block-users/${userId}/`);
   }
 
-  async unblockUser(userId) {
+  async unblockUserByUserId(userId) {
     return await this._fetchApi(`/api/auth/block-users/${userId}/`, "DELETE");
   }
+  
 }
+
 
 export default UserManager;
