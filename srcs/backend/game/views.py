@@ -181,3 +181,34 @@ def reset_db(request):
         logger.error(f"reset_db Error: {e}")
         return JsonResponse({"status": "error", "message": f"{e}"}, status=400)
     return JsonResponse({"status": "error", "message": "Unknown Error"}, status=400)
+
+def get_db(request):
+    try:
+        if request.method == "GET":
+            gameobjs = GameDB.objects.all()
+            gameobjs_count = gameobjs.count()
+            games = []
+            if gameobjs_count > 0:
+                for game in gameobjs:
+                    games.append({
+                        "player1_id": game.player1_id,
+                        "player2_id": game.player2_id,
+                        "player1_score": game.player1_score,
+                        "player2_score": game.player2_score,
+                        "create_date": game.create_date, # Tarih objesini stringe çeviriyoruz
+                        "end_date": game.end_date, # Tarih objesini stringe çeviriyoruz
+                        "winner_id": game.winner_id,
+                    })
+            ret = {
+                "status": "success",
+                "message": games,
+            }
+            logger.error(ret) # Log kaydı JSON formatında olacak
+            return JsonResponse(ret)
+        else:
+            return JsonResponse(
+                {"status": "error", "message": "only GET method allowed"}, status=400
+            )
+    except Exception as e:
+        logger.error(f"reset_db Error: {e}")
+        return JsonResponse({"status": "error", "message": f"{e}"}, status=400)

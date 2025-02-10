@@ -1,18 +1,12 @@
 // App.js
-import HomePage from "./pages/HomePage";
-import Page404 from "./pages/404Page";
-import Layout from "./pages/Layout";
-import AuthPage from "./pages/AuthPage";
-import ProfilePage from "./pages/ProfilePage";
+import { HomePage, AuthPage, ProfilePage, IntraPage, VerifyPage, FriendPage, Page404, Layout } from "./pages/Type.Page.js";
 import { PageManager } from "./core/managers/PageManager";
-import IntraPage from "./pages/IntraPage";
-import Router from "./core/Router";
-import VerifyPage from "./pages/VerifyPage";
 import { getCookie,setCookie } from "./core/Cookie";
 import { init, changeLanguage} from "./i42n.js";
 import FriendPage from "./pages/FriendPage.js";
 import DashboardPage from "./pages/Dashboard.js";
 
+import Router from "./core/Router";
 
 export class App extends HTMLElement {
   constructor() {
@@ -20,35 +14,45 @@ export class App extends HTMLElement {
     this.attachShadow({ mode: 'open' });
     this.pageManager = new PageManager(this.shadowRoot, Layout);
     this.router = new Router(this.pageManager);
-
-    window.pageManager = this.pageManager;
-    window.router = this.router;
-    window.app = this;
     this.loadPages();
     this.initRouter();
     this.loadCSS();
+    window.pageManager = this.pageManager;
+    window.router = this.router;
+    window.app = this;
   }
 
+ 
   initRouter() {
-    this.router.addRoute("/", "homePage");
-    this.router.addRoute("/auth", "authPage");
-    this.router.addRoute("/profile", "profilePage");
-    this.router.addRoute("/intra-auth", "IntraPage");
-    this.router.addRoute("/verify", "VerifyPage");
-    this.router.addRoute("/friends", "friendPage");
-    this.router.addRoute("/dashboard","dashboard" )
-    this.router.addRoute("/404", "/404");
+    const routesConfig = {
+      "/": "homePage",
+      "/auth": "authPage",
+      "/profile": "profilePage",
+      "/intra-auth": "IntraPage",
+      "/verify": "VerifyPage",
+      "/friends": "friendPage",
+      "/dashboard":"dashboard"
+      "/404": "/404"
+    };
+    for (const [key, value] of Object.entries(routesConfig)) {
+      this.router.addRoute(key, value);
+    }
   }
 
   loadPages() {
-    this.pageManager.addPage("homePage", HomePage);
-    this.pageManager.addPage("authPage", AuthPage);
-    this.pageManager.addPage("profilePage", ProfilePage);
-    this.pageManager.addPage("IntraPage", IntraPage);
-    this.pageManager.addPage("VerifyPage", VerifyPage);
-    this.pageManager.addPage("friendPage", FriendPage);
-    this.pageManager.addPage("dashboard", DashboardPage)
-    this.pageManager.addPage("/404", Page404);
+    const pageComponents = {
+      "homePage": HomePage,
+      "authPage": AuthPage,
+      "profilePage": ProfilePage,
+      "IntraPage": IntraPage,
+      "VerifyPage": VerifyPage,
+      "friendPage": FriendPage,
+      "dashboard": DashboardPage,
+      "/404": Page404
+    }
+    for (const [key, value] of Object.entries(pageComponents)) {
+      this.pageManager.addPage(key, value);
+    }
   }
 
   loadCSS() {
@@ -89,21 +93,21 @@ export class App extends HTMLElement {
   }
 
   async initLanguage() {
+    try {
       const translations = {};
-
-      try {
-          const enResponse = await fetch('../assets/locales/en.json');
-          translations.en = await enResponse.json();
-          const trResponse = await fetch('../assets/locales/tr.json');
-          translations.tr = await trResponse.json();
-          const jaResponse = await fetch('../assets/locales/ja.json');
-          translations.ja = await jaResponse.json();
-          init({ translations: translations, defaultLanguage: ["en",  "ja", "tr"]});
-          setCookie("lang", navigator.language.split("-")[0], 1);
-          changeLanguage(getCookie("lang"));
-      } catch (error) {
-          console.error("Language files could not be loaded:", error);
-      }
+      const enResponse = await fetch('../assets/locales/en.json');
+      translations.en = await enResponse.json();
+      const trResponse = await fetch('../assets/locales/tr.json');
+      translations.tr = await trResponse.json();
+      const jaResponse = await fetch('../assets/locales/ja.json');
+      translations.ja = await jaResponse.json();
+      init({ translations: translations, defaultLanguage: ["en",  "ja", "tr"]});
+      if (!getCookie("lang"))
+        setCookie("lang", navigator.language.split("-")[0], 1);
+      changeLanguage(getCookie("lang"));
+    } catch (error) {
+      console.error("Language files could not be loaded:", error);
+    }
   }
 }
 
