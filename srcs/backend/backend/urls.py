@@ -38,7 +38,11 @@ urlpatterns = [
     #SENEM: swagger için
     path('api/schema/', SpectacularAPIView.as_view(), name='schema'),  # OpenAPI schema
     path('api/swagger/', SpectacularSwaggerView.as_view(url_name='schema'), name='swagger-ui'),
-    path('api/game/', include('game.urls'))
+    path('api/game/', include('game.urls')),
+
+    #serkan: dashboard icin
+    path('api/dashboard/', include('dashboard.urls')),
+
 ]
 
 urlpatterns += static(settings.STATIC_URL, document_root=settings.STATIC_ROOT)

@@ -122,3 +122,13 @@ class FriendshipRequest(models.Model):
 
     def __str__(self):
         return f"{self.sender.username} sent friendship request to the {self.receiver.username}"
+
+class UserStats(models.Model):
+    user = models.OneToOneField(User, on_delete=models.CASCADE, related_name='stats')
+    games_played = models.IntegerField(default=0)
+    games_won = models.IntegerField(default=0)
+    games_lost = models.IntegerField(default=0)
+    highest_score = models.IntegerField(default=0)
+
+    def __str__(self):
+        return f"{self.user.username} - Stats"
