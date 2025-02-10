@@ -3,6 +3,9 @@ import { HomePage, AuthPage, ProfilePage, GameP2Page, IntraPage, VerifyPage, Fri
 import { PageManager } from "./core/managers/PageManager";
 import { getCookie,setCookie } from "./core/Cookie";
 import { init, changeLanguage} from "./i42n.js";
+import FriendPage from "./pages/FriendPage.js";
+import DashboardPage from "./pages/Dashboard.js";
+
 import Router from "./core/Router";
 
 export class App extends HTMLElement {
@@ -19,6 +22,7 @@ export class App extends HTMLElement {
     window.app = this;
   }
 
+ 
   initRouter() {
     const routesConfig = {
       "/": "homePage",
@@ -27,6 +31,7 @@ export class App extends HTMLElement {
       "/intra-auth": "IntraPage",
       "/verify": "VerifyPage",
       "/friends": "friendPage",
+      "/dashboard":"dashboard"
       "/gamep2": "gamep2Page",
       "/gamelocal": "GameLocalPage",
       "/404": "/404"
@@ -44,6 +49,7 @@ export class App extends HTMLElement {
       "IntraPage": IntraPage,
       "VerifyPage": VerifyPage,
       "friendPage": FriendPage,
+      "dashboard": DashboardPage,
       "gamep2Page": GameP2Page,
       "GameLocalPage": GameLocalPage,
       "/404": Page404
