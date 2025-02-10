@@ -51,7 +51,9 @@ const GameP2Page = {
             console.error("WebSocket URL bulunamadı. Oyun başlatılamıyor.");
             window.router.navigate("/gamep2");
           }
-          const game = new Game3D({inputMode: "websocket", websocketURL: websocketURL, playerRole: playerRole});
+          const inputConfig = {inputMode: "websocket", websocketURL: websocketURL, playerRole: playerRole};
+          console.log("Game3D inputConfig:", inputConfig); // Debug logu: inputConfig
+          const game = new Game3D(inputConfig);
           game.onScoreChange = (scoreText) => {
               skor.update({ text: scoreText });
           };
@@ -72,7 +74,9 @@ const GameP2Page = {
           const userId = params.get("userId");
           const websocketURL = `wss://${window.location.host}/api/pong/${roomId}/${userId}`;
           const playerRole = "p2";
-          const game = new Game3D({inputMode: "websocket", websocketURL: websocketURL, playerRole: playerRole});
+          const inputConfig = {inputMode: "websocket", websocketURL: websocketURL, playerRole: playerRole};
+          console.log("Game3D inputConfig:", inputConfig); // Debug logu: inputConfig
+          const game = new Game3D(inputConfig);
           pageContainer.elements[0].elements = [
             new TextComponent("gameTitle", { text: "Game", class: "text-center element-h2" }),
             new DivComponent("gameContainer", { class: "d-flex justify-content-center", elements: [game.canvas] }),
@@ -107,13 +111,10 @@ async function hostGame(userId) {
 }
 
 async function joinGame(userId, roomId) {
-  if (!roomId)
+  if (!roomId || !userId)
     return;
   const response = await sendPostRequest(`https://${window.location.host}/api/game/join/`, {user_id: userId, room_id: roomId});
   if (response.status === "success") {
-    console.log(response );
-    if (!roomId)
-      return;
     localStorage.setItem('playerRole', "p2");
     localStorage.setItem('websocketURL', `wss://${window.location.host}/api/pong/${roomId}/${userId}`);
   window.router.navigate(`/gamep2`, {roomId: roomId, userId: userId});
