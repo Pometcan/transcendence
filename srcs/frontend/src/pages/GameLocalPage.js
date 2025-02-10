@@ -26,6 +26,7 @@ const GameLocalPage = {
       console.log("Kazanan: ", winner);
       skor.update({ text: `${game.score.p1} - ${game.score.p2} Kazanan: ${winner}` });
       game.gameStop();
+      game.gameDestroy();
     }
     pageContainer.elements = [
       skor

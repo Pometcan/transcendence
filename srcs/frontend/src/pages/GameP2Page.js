@@ -59,6 +59,7 @@ const GameP2Page = {
           };
           game.onGameEnd = (winner) => {
               game.gameStop();
+              game.gameDestroy()
           }
           pageContainer.elements[0].elements = [
             skor,
@@ -81,6 +82,9 @@ const GameP2Page = {
             new TextComponent("gameTitle", { text: "Game", class: "text-center element-h2" }),
             new DivComponent("gameContainer", { class: "d-flex justify-content-center", elements: [game.canvas] }),
           ];
+          game.gameEnd = (winner) => {
+            game.gameDestroy()
+          }
           pageContainer.update();
           return pageContainer
         }
