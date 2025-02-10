@@ -184,17 +184,17 @@ class GameConsumer(AsyncWebsocketConsumer):
                     direction = text_data_json["direction"]
                     if direction == "up":
                         if self.user_id == self.game_state["host_id"] and self.game_state["p1_y"] > 0 and self.game_state["p1_y"] <= 100:
-                            self.game_state["p1_y"] -= 10
+                            self.game_state["p1_y"] -= 1
                             await self.send_msg({"type": "move", "p1_y": self.game_state["p1_y"], "user_id": self.user_id})
                         elif self.user_id != self.game_state["host_id"] and self.game_state["p2_y"] > 0 and self.game_state["p2_y"] <= 100:
-                            self.game_state["p2_y"] -= 10
+                            self.game_state["p2_y"] -= 1
                             await self.send_msg({"type": "move", "p2_y": self.game_state["p2_y"], "user_id": self.user_id})
                     elif direction == "down":
                          if self.user_id == self.game_state["host_id"] and self.game_state["p1_y"] >= 0 and self.game_state["p1_y"] < 100:
-                            self.game_state["p1_y"] += 10
+                            self.game_state["p1_y"] += 1
                             await self.send_msg({"type": "move", "p1_y": self.game_state["p1_y"], "user_id": self.user_id})
                          elif self.user_id != self.game_state["host_id"] and self.game_state["p2_y"] >= 0 and self.game_state["p2_y"] < 100:
-                            self.game_state["p2_y"] += 10
+                            self.game_state["p2_y"] += 1
                             await self.send_msg({"type": "move", "p2_y": self.game_state["p2_y"], "user_id": self.user_id})
                     logger.error(f"p1_y ={self.game_state['p1_y']} p2_y {self.game_state['p2_y']}")
         except Exception as e:

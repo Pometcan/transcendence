@@ -16,7 +16,6 @@ class Game3D {
       this.setPaddle1Position.bind(this),
       this.setPaddle2Position.bind(this)
     );
-    this.setBallPosition = this.setBallPosition.bind(this);
     this.setPaddle1Position = this.setPaddle1Position.bind(this);
     this.setPaddle2Position = this.setPaddle2Position.bind(this);
 
@@ -176,10 +175,12 @@ class Game3D {
   }
 
   setPaddle1Position(y) {
+    console.log("Paddle 1 position set to", y);
     this.paddle1.mesh.position.y = this.backendYtoFrontendY(y);
   }
 
   setPaddle2Position(y) {
+    console.log("Paddle 2 position set to", y);
     this.paddle2.mesh.position.y = this.backendYtoFrontendY(y);
   }
 

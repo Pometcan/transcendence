@@ -18,7 +18,6 @@ const GameP2Page = {
         pageContainer.elements[0].class += "container d-flex flex-column    p-4";
         pageContainer.elements[0].elements = [];
 
-        console.log(params);
         if (params.size == 0)
         {
           const hostBtn = new ButtonComponent("hostBtn", { label: "Host Game", class: "btn btn-primary" });
@@ -77,7 +76,6 @@ const GameP2Page = {
           const websocketURL = `wss://${window.location.host}/api/pong/${roomId}/${userId}`;
           const playerRole = "p2";
           const inputConfig = {inputMode: "websocket", websocketURL: websocketURL, playerRole: playerRole};
-          console.log("Game3D inputConfig:", inputConfig); // Debug logu: inputConfig
           const game = new Game3D(inputConfig);
           pageContainer.elements[0].elements = [
             new TextComponent("gameTitle", { text: "Game", class: "text-center element-h2" }),

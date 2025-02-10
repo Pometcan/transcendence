@@ -1,41 +1,39 @@
 import WebSocketManager from "../managers/WebSocketManager.js";
 
 class InputManager {
-constructor(inputMode = "local", websocketURL = null, playerRole = "p2", onBallUpdate) {
+constructor(inputMode = "local", websocketURL = null, playerRole = "p2", onBallUpdate, onPaddle1Update, onPaddle2Update) {
 this.keys = {
-p1: { "w": false, "s": false },
-p2: { "ArrowUp": false, "ArrowDown": false },
-camera: {"c": false, "c_pressed": false}
+  p1: { "w": false, "s": false },
+  p2: { "ArrowUp": false, "ArrowDown": false },
+  camera: {"c": false, "c_pressed": false}
 };
 this.inputMode = inputMode;
 this.websocketManager = null;
 this.playerRole = playerRole;
 this.onBallUpdate = onBallUpdate;
+this.onPaddle1Update = onPaddle1Update;
+this.onPaddle2Update = onPaddle2Update;
 
 
 if (this.inputMode === "websocket") {
-        if (!websocketURL) {
-            console.error("WebSocket modu seçildi, ancak websocketURL belirtilmedi!");
-            this.inputMode = "local";
-            this.setupLocalKeyboard();
-        } else {
-            this.setupWebSocket(websocketURL, this.playerRole);
-        }
-    } else if (this.inputMode === "local") {
-        this.setupLocalKeyboard();
-    } else {
-        console.warn(`Bilinmeyen giriş modu: ${inputMode}. Yerel klavye modu kullanılıyor.`);
-        this.inputMode = "local";
-        this.setupLocalKeyboard();
-    }
+  if (!websocketURL) {
+      this.inputMode = "local";
+      this.setupLocalKeyboard();
+  } else {
+      this.setupWebSocket(websocketURL, this.playerRole);
+  }
+  } else if (this.inputMode === "local") {
+    this.setupLocalKeyboard();
+  } else {
+    this.inputMode = "local";
+    this.setupLocalKeyboard();
+  }
 }
 
 setupWebSocket(websocketURL, playerRole) {
-    console.log("setupWebSocket çağrıldı. websocketURL:", websocketURL, "playerRole:", playerRole);
     this.websocketManager = new WebSocketManager(websocketURL, (data) => {
         this.handleWebSocketMessage(data, playerRole);
     });
-    console.log("WebSocketManager oluşturuldu:", this.websocketManager);
     this.websocketManager.connect();
     this.setupWebSocketKeyboard();
 }
@@ -49,20 +47,37 @@ setupLocalKeyboard() {
     window.addEventListener("keydown", (event) => this.setKey(event, true));
     window.addEventListener("keyup", (event) => this.setKey(event, false));
 }
-
+backendYtoFrontendY(backendY) {
+  // Backend Y (0-100) -> Frontend Y (-4 - 4)
+  return (backendY / 100) * 8 - 4;
+}
 handleWebSocketMessage(data, playerRole) {
-    console.log("WebSocket mesajı alındı:", data, "Oyuncu Rolü:", playerRole);
     if (data.type === 'move') {
-        const targetPlayer = data.player;
-        if (targetPlayer === 'p1' || targetPlayer === 'p2') {
-            if (data.key && this.keys[targetPlayer] && this.keys[targetPlayer][data.key] !== undefined) {
-                this.keys[targetPlayer][data.key] = data.pressed;
-            }
+      console.log("WebSocket mesajı alındı:", data, playerRole);
+      if (data.p1_y)
+      {
+        if (this.onPaddle1Update) {
+          this.onPaddle1Update(data.p1_y);
         }
+        else {
+          console.warn("onPaddle1Update callback fonksiyonu tanımlı değil!");
+        }
+      }
+      if (data.p2_y)
+      {
+        if (this.onPaddle2Update) {
+          this.onPaddle2Update(data.p2_y);
+        }
+        else {
+          console.warn("onPaddle2Update callback fonksiyonu tanımlı değil!");
+        }
+      }
+
     } else if (data.type === 'update_ball') {
         if (this.onBallUpdate) {
             this.onBallUpdate(data.ball_x, data.ball_y);
-        } else {
+        }
+        else {
             console.warn("onBallUpdate callback fonksiyonu tanımlı değil!");
         }
     }
@@ -83,16 +98,24 @@ setWebSocketKey(event, isPressed) {
     let player = this.playerRole;
     let key = event.key;
 
+        if (key === 'ArrowUp') {
+            key = 'up'
+        } else if (key === 'ArrowDown') {
+            key = 'down';
+        } else if (key === 'w') {
+            key = 'up';
+        }
+        else if (key === 's') {
+            key = 'down';
+        }
+    console.log("Key pressed:", key, isPressed);
     const message = {
         type: 'move',
-        player: player,
-        key: key,
-        pressed: isPressed
+        direction: key,
     };
     this.sendWebSocketMessage(message);
 
-    // Yerel olarak tuş durumunu güncelle
-    if (this.keys[player] && this.keys[player][key] !== undefined) { // player ve key tanımlı mı kontrolü eklendi
+    if (this.keys[player] && this.keys[player][key] !== undefined) {
         this.keys[player][key] = isPressed;
     }
 }
@@ -102,13 +125,21 @@ resetCameraKeyPressed() {
 }
 
 
-sendWebSocketMessage(message) {
+  sendWebSocketMessage(message) {
     if (this.websocketManager) {
         this.websocketManager.send(message);
     } else {
         console.warn("WebSocketManager başlatılmamış. Mesaj gönderilemedi.");
     }
-}
+  }
+
+  send(message) {
+    if (this.websocketManager) {
+        this.websocketManager.send(message);
+    } else {
+        console.warn("WebSocketManager başlatılmamış. Mesaj gönderilemedi.");
+    }
+  }
 
   closeWebSocket() {
     if (this.websocketManager) {
