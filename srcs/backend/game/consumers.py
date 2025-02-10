@@ -6,6 +6,7 @@ from .models import GameDB
 from .models import TMPGameDB
 from datetime import datetime
 from asgiref.sync import sync_to_async
+from users.models import UserStats
 
 logger = logging.getLogger(__name__)
 
@@ -225,6 +226,8 @@ class GameConsumer(AsyncWebsocketConsumer):
                         room.end_date = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
                         await sync_to_async(room.save)()
 
+                        
+
                         await sync_to_async(GameDB.objects.create)(
                             room_id=room.room_id,
                             player1_id=room.player1_id,
@@ -235,6 +238,10 @@ class GameConsumer(AsyncWebsocketConsumer):
                             create_date=room.create_date,
                             end_date=room.end_date,
                         )
+                        p1_win = self.game_state["p1_score"] > self.game_state["p2_score"]
+                        winner_id = room.player1_id if p1_win else room.player2_id
+                        loser_id = room.player2_id if p1_win else room.player1_id
+
                         logger.error(f"{self.user_id} Oyun verileri kayit edildi.")
                         if p1_win:
                             logger.error(f"{room.winner_id} oyunu kazandi score {self.game_state['p1_score']} {self.game_state['p2_score']}")
@@ -268,3 +275,16 @@ class GameConsumer(AsyncWebsocketConsumer):
 
         except Exception as e:
             logger.error(f"endOfGame metodunda hata: {e}")
+            
+def update_user_stats(self, winner_id, loser_id):
+    # Kazananın istatistiklerini güncelle
+    winner_stats = UserStats.objects.get(user_id=winner_id)
+    winner_stats.games_played += 1
+    winner_stats.games_won += 1
+    winner_stats.save()
+
+    # Kaybedenin istatistiklerini güncelle
+    loser_stats = UserStats.objects.get(user_id=loser_id)
+    loser_stats.games_played += 1
+    loser_stats.games_lost += 1
+    loser_stats.save()

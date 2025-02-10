@@ -18,12 +18,14 @@ os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'backend.settings')
 django_asgi_app = get_asgi_application()
 
 import game.routing
+import users.routing
 
 application = ProtocolTypeRouter({
     'http': get_asgi_application(),
     'websocket': AuthMiddlewareStack(
         URLRouter(
-            game.routing.websocket_urlpatterns
+            game.routing.websocket_urlpatterns +
+            users.routing.websocket_urlpatterns
         )
     ),
 })

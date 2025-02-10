@@ -99,7 +99,7 @@ class GetUserSerializer(serializers.ModelSerializer):
     class Meta:
         model = User
         fields = ['id', 'username', 'email', 'avatar', 'rank', 'is_active']
-        read_only_fields = ['id', 'avatar']
+        read_only_fields = ['id', 'avatar', 'rank', 'is_active']
 
 
 class AvatarSerializer(serializers.ModelSerializer):

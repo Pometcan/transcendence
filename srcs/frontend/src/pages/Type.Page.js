@@ -8,9 +8,10 @@ import FriendPage from "./FriendPage.js";
 import VerifyPage from "./VerifyPage";
 import GameP2Page from "./GameP2Page";
 import GameLocalPage from "./GameLocalPage";
+import DashboardPage from "./Dashboard.js";
 
 export {
   HomePage, Page404, Layout, AuthPage, ProfilePage,
   IntraPage, FriendPage, VerifyPage, GameP2Page,
-  GameLocalPage
+  GameLocalPage, DashboardPage
 }
