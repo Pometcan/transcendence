@@ -48,7 +48,7 @@ class Ball {
   }
 
   reset() {
-    this.mesh.position.set(0, 0, 0);
+    this.mesh.position.set(0, Math.random(-2,2) , 0);
     this.velocity.x *= -1; // Yönü değiştir
   }
 }

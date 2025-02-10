@@ -33,6 +33,7 @@ const GameP2Page = {
           ];
 
           withEventHandlers(hostBtn, { onClick: async () =>  await hostGame(getCookie("userId"))});
+          console.log(getCookie("userId"), roomIdInput.elements[0].value);
           withEventHandlers(joinBtn, { onClick: async () =>  await joinGame(getCookie("userId"), roomIdInput.elements[0].value)});
           withEventHandlers(backbtn, { onClick: () => window.router.navigate("/") });
 
@@ -100,9 +101,9 @@ const GameP2Page = {
 export default GameP2Page;
 
 async function hostGame(userId) {
-  console.log("hostGame");
   const renponse = await sendPostRequest(`https://${window.location.host}/api/game/host/`, {user_id: userId});
   if (renponse.status === "success") {
+    console.log
     const roomId = renponse.room_id;
     if (!roomId)
       return;
@@ -115,10 +116,12 @@ async function hostGame(userId) {
 }
 
 async function joinGame(userId, roomId) {
+  console.log("Join Game:", userId, roomId);
   if (!roomId || !userId)
     return;
   const response = await sendPostRequest(`https://${window.location.host}/api/game/join/`, {user_id: userId, room_id: roomId});
   if (response.status === "success") {
+    console.log("Join Game Response:", response);
     localStorage.setItem('playerRole', "p2");
     localStorage.setItem('websocketURL', `wss://${window.location.host}/api/pong/${roomId}/${userId}`);
   window.router.navigate(`/gamep2`, {roomId: roomId, userId: userId});

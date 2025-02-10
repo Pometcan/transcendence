@@ -37,6 +37,7 @@ class Game3D {
     this.paddle1.mesh.position.set(-10, 0, 0);
     this.paddle2.mesh.position.set(10, 0, 0);
 
+
     this.cameraDefualtPosition = {
       top: { x: 0, y: 0, z: 10 },
       p1: { x: -10, y: 0, z: 10 },
@@ -193,6 +194,17 @@ class Game3D {
       if (this.inputManager.keys.p2["ArrowUp"]) this.paddle2.move(1);
       if (this.inputManager.keys.p2["ArrowDown"]) this.paddle2.move(-1);
     }
+    else if (this.gameType == "websocket"){
+      if (this.playerRole === "p1") {
+        if (this.inputManager.keys.p1["w"]) this.inputManager.send({ type: "move", player: "p1", key: "w", pressed: true });
+        if (this.inputManager.keys.p1["s"]) this.inputManager.send({ type: "move", player: "p1", key: "s", pressed: true });
+      }
+      if (this.playerRole === "p2") {
+        if (this.inputManager.keys.p2["ArrowUp"]) this.inputManager.send({ type: "move", player: "p2", key: "ArrowUp", pressed: true });
+        if (this.inputManager.keys.p2["ArrowDown"]) this.inputManager.send({ type: "move", player: "p2", key: "ArrowDown", pressed: true });
+      }
+    }
+    else {console.log("Invalid game type")}
 
   }
 
