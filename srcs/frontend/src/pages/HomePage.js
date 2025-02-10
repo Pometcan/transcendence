@@ -21,7 +21,7 @@ function singleMenu()
   back.styles = {
     margin: "10px 10px 10px 0",
   }
-  withEventHandlers(vs11, { onClick: () => window.router.navigate("/gamep11") });
+  withEventHandlers(vs11, { onClick: () => window.router.navigate("/gamelocal") });
   withEventHandlers(vs22, { onClick: () => window.router.navigate("/gamep22") });
   withEventHandlers(tournament, { onClick: () => window.router.navigate("/gamest") });
   withEventHandlers(back, { onClick: () => window.router.navigate("/") });
@@ -55,7 +55,7 @@ const HomePage = {
     }});
 
     withEventHandlers(multiPlayerButton, { onClick: () => {
-      window.router.navigate("/gamemp");
+      window.router.navigate("/gamep2");
     }});
 
     return pageContainer.render();

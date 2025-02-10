@@ -54,6 +54,10 @@ export class DivComponent extends UIComponent {
     return menuElement;
   }
 
+  addStyle( style ) {
+    this.styles = { ...this.styles, ...style };
+  }
+
   addElement( element ) {
     this.elements.push( element );
   }

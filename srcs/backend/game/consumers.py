@@ -161,7 +161,6 @@ class GameConsumer(AsyncWebsocketConsumer):
         logger.error("receive cagrildi")
         try:
             text_data_json = json.loads(text_data)
-
             if "type" not in text_data_json:
                 await self.send(
                     json.dumps(

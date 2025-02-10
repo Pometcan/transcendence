@@ -99,7 +99,7 @@ class GetUserSerializer(serializers.ModelSerializer):
     class Meta:
         model = User
         fields = ['id', 'username', 'email', 'avatar', 'rank', 'is_active']
-        read_only_fields = ['id', 'avatar']
+        read_only_fields = ['id', 'avatar', 'rank', 'is_active']
 
 
 class AvatarSerializer(serializers.ModelSerializer):
@@ -112,8 +112,10 @@ class AvatarSerializer(serializers.ModelSerializer):
         old_avatar_path = os.path.abspath(old_avatar.path)
         default_avatar_path = os.path.abspath(os.path.join(settings.MEDIA_ROOT, instance._meta.get_field('avatar').get_default()))
 
-        if old_avatar_path != default_avatar_path and os.path.exists(old_avatar_path):
+        if os.path.exists(old_avatar_path) and old_avatar_path != default_avatar_path:
             os.remove(old_avatar_path)
+            return 1
+        return 0 
 
     def update(self, instance, validated_data):
         new_avatar = validated_data.get('avatar')
@@ -130,10 +132,10 @@ class AvatarSerializer(serializers.ModelSerializer):
     
     def delete(self, instance):
         old_avatar = instance.avatar
-        instance.avatar = instance._meta.get_field('avatar').get_default()
-        instance.save()
         if old_avatar:
-            self.delete_old_avatar(instance, old_avatar)
+            if (self.delete_old_avatar(instance, old_avatar)):
+                instance.avatar = instance._meta.get_field('avatar').get_default()
+                instance.save()
         return instance
 
 
@@ -142,8 +144,8 @@ class AvatarSerializer(serializers.ModelSerializer):
 class ReceivedFriendshipRequestSerializer(serializers.ModelSerializer):
     class Meta:
         model = FriendshipRequest
-        fields = ['id', 'sender', 'receiver', 'status', 'is_active', 'created_date']
-        read_only_fields = ['id', 'sender', 'receiver', 'is_active', 'created_date']
+        fields = ['sender', 'status', 'is_active', 'created_date']
+        read_only_fields = ['sender', 'is_active', 'created_date']
     
     def to_representation(self, instance):
         representation = super().to_representation(instance)
@@ -165,8 +167,8 @@ class SentFriendshipRequestSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = FriendshipRequest
-        fields = ['id', 'sender', 'receiver', 'status', 'is_active', 'created_date']
-        read_only_fields = ['id', 'sender', 'status', 'created_date']
+        fields = ['receiver', 'status', 'is_active', 'created_date']
+        read_only_fields = ['status', 'created_date']
 
 
     def to_representation(self, instance):
