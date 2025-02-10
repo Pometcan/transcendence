@@ -12,9 +12,9 @@ class Game3D {
       inputConfig.inputMode,
       inputConfig.websocketURL,
       inputConfig.playerRole,
-      this.setBallPosition.bind(this), // onBallUpdate callback'ini InputManager'a geçir
-      this.setPaddle1Position.bind(this), // Paddle 1 pozisyon güncelleme callback'i
-      this.setPaddle2Position.bind(this)  // Paddle 2 pozisyon güncelleme callback'i
+      this.setBallPosition.bind(this),
+      this.setPaddle1Position.bind(this),
+      this.setPaddle2Position.bind(this)
     );
     this.setBallPosition = this.setBallPosition.bind(this);
     this.setPaddle1Position = this.setPaddle1Position.bind(this);
@@ -23,8 +23,8 @@ class Game3D {
     this.gameType = inputConfig.inputMode;
     this.playerRole = inputConfig.playerRole;
     this.ball = new Ball();
-    this.paddle1 = new Paddle(0x00ff00, -Math.PI / 2); // Yeşil ve 90° döndürülmüş
-    this.paddle2 = new Paddle(0xff0000, Math.PI / 2); // Mavi ve -90° döndürülmüş
+    this.paddle1 = new Paddle(0x00ff00, -Math.PI / 2);
+    this.paddle2 = new Paddle(0xff0000, Math.PI / 2);
 
     this.bounds = {
       xMin: -10,  // Sol duvar
@@ -185,73 +185,13 @@ class Game3D {
   update() {
     if (this.gameEnded) return;
 
-    console.log("Game3D.update() çalıştı. gameType:", this.gameType, "playerRole:", this.playerRole); // Debug logu: update fonksiyonu başlangıcı
-
-    if (this.gameType == "local") {
+    if (this.gameType == "local")
+    {
       this.ball.update(this.paddle1, this.paddle2, this);
-
-      // **P1 ise paddle1, P2 ise paddle2 kontrol eder**
       if (this.inputManager.keys.p1["w"]) this.paddle1.move(1);
       if (this.inputManager.keys.p1["s"]) this.paddle1.move(-1);
       if (this.inputManager.keys.p2["ArrowUp"]) this.paddle2.move(1);
       if (this.inputManager.keys.p2["ArrowDown"]) this.paddle2.move(-1);
-      if (this.inputManager.keys.camera.c_pressed) { // c tuşu basıldıysa ve henüz işlenmediyse
-        console.log("Kamera değiştiriliyor...");
-        this.cameraPosition++;
-        if (this.cameraPosition > 3) this.cameraPosition = 1;
-
-        switch (this.cameraPosition) { // switch ifadesi ile daha okunabilir kamera pozisyonu ayarlama
-          case 1:
-            this.changeCameraPosition(this.cameraDefualtPosition.p1);
-            this.changeCameraLookAt(this.cameraDefualtLookAt.p1);
-            break;
-          case 2:
-            this.changeCameraPosition(this.cameraDefualtPosition.p2);
-            this.changeCameraLookAt(this.cameraDefualtLookAt.p2);
-            break;
-          case 3:
-            this.changeCameraPosition(this.cameraDefualtPosition.top);
-            this.changeCameraLookAt(this.cameraDefualtLookAt.top);
-            break;
-        }
-        this.inputManager.keys.camera.c_pressed = false; // c_pressed'i sıfırla, böylece tuşa basılı tutulsa bile sadece bir kere çalışır
-      }
-      //change camera position
-
-    } else if (this.gameType == "network") {
-      console.log("Game3D.update() - NETWORK MODU. playerRole:", this.playerRole); // Debug logu: network modu
-
-      // Network oyununda toplu hareket backend'den gelecek, inputManager zaten handle ediyor
-      // Sadece kendi raketimizi kontrol edebiliriz (eğer oyuncu rolümüz varsa)
-      console.log("inputManager.keys:", this.inputManager.keys); // Debug logu: inputManager.keys değerleri
-
-      if (this.playerRole === "p1") {
-        if (this.inputManager.keys.p1["w"]) {
-          console.log("P1 yukarı hareket öncesi paddle1.mesh.position.y:", this.paddle1.mesh.position.y); // Debug logu: hareket öncesi pozisyon
-          this.paddle1.move(1);
-          console.log("P1 yukarı hareket sonrası paddle1.mesh.position.y:", this.paddle1.mesh.position.y); // Debug logu: hareket sonrası pozisyon
-        }
-        if (this.inputManager.keys.p1["s"]) {
-          console.log("P1 aşağı hareket öncesi paddle1.mesh.position.y:", this.paddle1.mesh.position.y); // Debug logu: hareket öncesi pozisyon
-          this.paddle1.move(-1);
-          console.log("P1 aşağı hareket sonrası paddle1.mesh.position.y:", this.paddle1.mesh.position.y); // Debug logu: hareket sonrası pozisyon
-        }
-      } else if (this.playerRole === "p2") {
-        if (this.inputManager.keys.p2["ArrowUp"]) {
-          console.log("P2 yukarı hareket öncesi paddle2.mesh.position.y:", this.paddle2.mesh.position.y); // Debug logu: hareket öncesi pozisyon
-          this.paddle2.move(1);
-          console.log("P2 yukarı hareket sonrası paddle2.mesh.position.y:", this.paddle2.mesh.position.y); // Debug logu: hareket sonrası pozisyon
-        }
-        if (this.inputManager.keys.p2["ArrowDown"]) {
-          console.log("P2 aşağı hareket öncesi paddle2.mesh.position.y:", this.paddle2.mesh.position.y); // Debug logu: hareket öncesi pozisyon
-          this.paddle2.move(-1);
-          console.log("P2 aşağı hareket sonrası paddle2.mesh.position.y:", this.paddle2.mesh.position.y); // Debug logu: hareket sonrası pozisyon
-        }
-      }
-      if (this.inputManager.keys.camera.c_pressed) {
-        // ... kamera değiştirme kodu ...
-        this.inputManager.keys.camera.c_pressed = false; // c_pressed'i sıfırla
-      }
     }
 
   }

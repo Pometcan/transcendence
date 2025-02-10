@@ -46,6 +46,10 @@ class Paddle {
     this.mesh.position.y += direction * 0.2;
     this.mesh.position.y = Math.max(this.bounds.yMin, Math.min(this.bounds.yMax, this.mesh.position.y));
   }
+
+  update(position) {
+    this.mesh.position.y = position
+  }
 }
 
 export default Paddle;
