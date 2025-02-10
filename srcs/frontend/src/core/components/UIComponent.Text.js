@@ -5,6 +5,7 @@ export class TextComponent extends UIComponent {
     super(id, props.styles);
     this.text = props.text;
     this.class = props.class || '';
+    this.props = props;
   }
 
   render() {
