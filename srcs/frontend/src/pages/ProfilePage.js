@@ -3,6 +3,9 @@ import {MenuElement, ProfilePhoto, SwitchBox} from '../core/elements/Type.Elemen
 import {eraseCookie, getCookie, getCsrfToken} from '../core/Cookie.js';
 import { t } from '../i42n.js';
 
+import DashboardPage from './Dashboard.js';
+
+
 // TextComponent örneklerini saklamak için değişkenler
 let emailComponent;
 let usernameComponent;
@@ -10,7 +13,7 @@ let usernameComponent;
 const ProfilePage = {
   layoutVisibility: true,
   render: (params) => {
-    const getId = params.get("id");
+    const getId = params.get("userId");
     const anotherProfile = getId ? true : false;
     const pageContainer = MenuElement("ProfilePage");
 
@@ -21,10 +24,15 @@ const ProfilePage = {
     const photo = ProfilePhoto("profilePhoto" );
     const changePhotoBtn = new ButtonComponent("changePhotoBtn", { label: "Fotoğrafı Değiştir", class: "btn btn-primary" });
     const deletePhotoBtn = new ButtonComponent("deletePhotoBtn", { label: "Fotoğrafı Sil", class: "btn btn-danger" });
+    const dashboardBtn =  new ButtonComponent("dashboardBtn", {isActive: true, label: "Dashboard", class: "btn btn-primary" });
     emailComponent = new TextComponent("email", { text: "E-posta: Yükleniyor..." });
     usernameComponent = new TextComponent("username", { text: "Kullanıcı Adı: Yükleniyor..." });
     
     const editForm = new DivComponent("Edit");
+    const editFormBtns = new DivComponent("EditBtns");
+    const dashboardBtnDiv = new DivComponent("dashboard");
+    const dashboardDiv = new DivComponent("dashboard");
+    dashboardBtnDiv.elements = [dashboardBtn];
     const usernameLabel = new TextComponent("userNameLabel", { text: "Kullanıcı Adı:", class: "form-label" });
     const usernameInput = new InputComponent("usernameInput");
     const emailLabel = new TextComponent("emailLabel", { text: "E-posta:", class: "form-label" });
@@ -33,6 +41,27 @@ const ProfilePage = {
     //const SwitchBox2FA = SwitchBox("FA2","2FA Etkinlestir");
     const fa2btnEnable = new ButtonComponent("fa2btnEnable", { label: t("friendPage.2Enable"), class: "btn btn-primary" });
     const fa2btnDisable = new ButtonComponent("fa2btnDisable", { label: t("friendPage.2Disable"), class: "btn btn-danger" });
+
+    const status = new TextComponent("DashboardPageStatus", {text: "agla"});
+    const websocket = new WebSocket(`wss://` + window.location.host + `/api/auth/${getId}/`); // Sunucu adresinizi ve portunuzu güncelleyin
+    console.log("id: " + getId);
+    if (websocket && websocket.readyState === WebSocket.OPEN) {
+        return;
+    }
+
+    websocket.onopen = function() {
+        status.update({text: "Connected"})
+    };
+
+    websocket.onclose = function() {
+        status.update({text: "Disconnected"})
+    };
+
+    websocket.onerror = function(error) {
+        console.error("WebSocket error:", error);
+        status.update({text: error})
+    };
+
     if (anotherProfile) {
       exitBtn.styles = { display: "none" };
       deleteBtn.styles = { display: "none" };
@@ -40,6 +69,7 @@ const ProfilePage = {
       deletePhotoBtn.styles = { display: "none" };
       fa2btnEnable.styles = { display: "none" };
       fa2btnDisable.styles = { display: "none" };
+      editBtn.styles = { display: "none"};
     }
     let rank;
     let is_active;
@@ -68,11 +98,9 @@ const ProfilePage = {
       editBtn,
       emailComponent,
       usernameComponent,
+      status,
       photo,
-      changePhotoBtn,
-      deletePhotoBtn,
-      fa2btnEnable,
-      fa2btnDisable,
+      dashboardBtnDiv
     ];
 
    
@@ -81,13 +109,18 @@ const ProfilePage = {
       console.log(editBtn);
       if (editBtn.props.isActive == true){
         editForm.elements = [usernameLabel, usernameInput, emailLabel, emailInput, saveFormBtn];
-        pageContainer.elements[0].elements.push(editForm);
+        editFormBtns.elements = [changePhotoBtn, deletePhotoBtn, fa2btnEnable, fa2btnDisable];
+        pageContainer.elements[0].elements.push(editForm, editFormBtns);
+        dashboardBtnDiv.update({elements : []})
         pageContainer.elements[0].update({elements: pageContainer.elements[0].elements});
         editBtn.props.isActive = false;
       }
       else if (editBtn.props.isActive == false)
       {
         editForm.update({elements : []})
+        editFormBtns.update({elements : []});
+        dashboardBtnDiv.elements = [dashboardBtn];
+        pageContainer.elements[0].update({elements: pageContainer.elements[0].elements});
         editBtn.props.isActive = true;
       }} 
     });
@@ -127,6 +160,8 @@ const ProfilePage = {
           console.log(usernameComponent);
           pageContainer.elements[0].update({elements: pageContainer.elements[0].elements});
           editForm.update({elements : []})
+          editFormBtns.update({elements : []});
+          
           editBtn.props.isActive = true;
 
         });
@@ -134,6 +169,20 @@ const ProfilePage = {
 
     });
 
+        
+    withEventHandlers(dashboardBtn, { onClick: async() => {
+      if (dashboardBtn.props.isActive == true){
+        dashboardDiv.elements = [DashboardPage];
+        pageContainer.elements[0].elements.push(dashboardDiv);
+        pageContainer.elements[0].update({elements: pageContainer.elements[0].elements});
+        dashboardBtn.props.isActive = false;
+      }
+      else if (dashboardBtn.props.isActive == false)
+      {
+        dashboardDiv.update({elements : []})
+        dashboardBtn.props.isActive = true;
+      }} 
+    });
 
 
 
