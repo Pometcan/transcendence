@@ -89,7 +89,6 @@ const LoginElement = () => {
           setCookie('accessToken', data.access, 1);
           if (data.mfa_enabled)
           {
-            setCookie("qrCode", data.qr_code, 1);
             window.router.navigate("/verify");
           }
           else

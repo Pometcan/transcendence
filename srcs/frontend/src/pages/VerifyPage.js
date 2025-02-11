@@ -11,18 +11,21 @@ const VerifyPage = {
   layoutVisibility: false,
   render: () => {
     const pageContainer = MenuElement("homePage");
-    const qrCode = getCookie("qrCode");
-    if (!qrCode) {
-      window.router.navigate("/auth");
-      return;
-    }
-    const qrImage = new ImageComponent("qrImage", {src: `data:image/png;base64,${qrCode}`, alt: "qrImage"});
+
+    // const qrCode = getCookie("qrCode");
+    // if (!qrCode) {
+    //   window.router.navigate("/auth");
+    //   return;
+    // }
+    // const qrImage = new ImageComponent("qrImage", {src: `data:image/png;base64,${qrCode}`, alt: "qrImage"});
+  
     const input = InputElement("input", t("verifyPage.kod"), "text");
     const submitButton = SubmitButton("submitButton", t("verifyPage.verify"));
 
 
+
     pageContainer.elements[0].elements = [
-      qrImage,
+ 
       input,
       submitButton,
       errorDiv
