@@ -1,4 +1,3 @@
-
 import { DivComponent } from "../core/components/UIComponent.Div.js";
 import { TextComponent } from "../core/components/UIComponent.Text";
 import { withEventHandlers } from "../core/components/UIComponent.Util.js";
@@ -6,58 +5,77 @@ import { SubmitButton, InputElement } from "../core/elements/Type.Element.js";
 import Game3D from "../core/game/Game3D.js";
 import confetti from 'https://cdn.skypack.dev/canvas-confetti';
 import Router from "../core/Router.js";
+import GameTournamentPage from "./GameTournamentPage.js";
 
-const GameTournamentPage = {
+const GameLocalPage = {
   layoutVisibility: false,
-  game:null,
-  Players: [],
-  gamePlayNmes: [],
-  /*
-    ornek
-    {
-      "game1": [
-        "player7",
-        "player2"
-      ],
-      "game2": [
-        "player5",
-        "player6"
-      ],
-      "game3": [
-        "player8"
-      ],
-    }
-  */
-  rounds: {},
-  /*
-    ornek
-    {
-      rounds1: {
-        game: {
-          plater:[player1, player2]
-          skor:[1, 2]
-          winner: player2
-        }
-      }
-    }
-  */
+  gameRound1: null,
+  gameRound2: null,
+  gameRound3: null,
+  player1Name: "",
+  player2Name: "",
+  player3Name: "",
+  player4Name: "",
+  winner1: "",
+  winner2: "",
+  finalWinner: "",
+  currentGameRound: 0, // To track the current game round
+
   pageLoad: () => {
- },
+  },
 
   pageLeave: () => {
     console.log("GameLocalPage.pageLeave");
-    GameTournamentPage.destroyGame();
+    GameLocalPage.destroyGame();
   },
 
   destroyGame: () => {
-    if (GameTournamentPage.game) {
-      GameTournamentPage.game.gameDestroy();
-      GameTournamentPage.game = null;
+    if (GameLocalPage.gameRound1) {
+      GameLocalPage.gameRound1.gameDestroy();
+      GameLocalPage.gameRound1 = null;
+    }
+    if (GameLocalPage.gameRound2) {
+      GameLocalPage.gameRound2.gameDestroy();
+      GameLocalPage.gameRound2 = null;
+    }
+    if (GameLocalPage.gameRound3) {
+      GameLocalPage.gameRound3.gameDestroy();
+      GameLocalPage.gameRound3 = null;
     }
   },
 
-  render:  () => {
-    const pageContainer = new   DivComponent("FriendPage", {
+  startGameRound: (roundNumber) => {
+    GameLocalPage.currentGameRound = roundNumber;
+    let currentGame = null;
+    let p1Name = "";
+    let p2Name = "";
+
+    if (roundNumber === 1) {
+      currentGame = GameLocalPage.gameRound1;
+      p1Name = GameLocalPage.player1Name;
+      p2Name = GameLocalPage.player2Name;
+    } else if (roundNumber === 2) {
+      currentGame = GameLocalPage.gameRound2;
+      p1Name = GameLocalPage.player3Name;
+      p2Name = GameLocalPage.player4Name;
+    } else if (roundNumber === 3) {
+      currentGame = GameLocalPage.gameRound3;
+      p1Name = GameLocalPage.winner1;
+      p2Name = GameLocalPage.winner2;
+    }
+
+    if (currentGame) {
+      currentGame.gameStart();
+      const p1nameElem = document.getElementById("p1name");
+      const p2nameElem = document.getElementById("p2name");
+      if (p1nameElem) p1nameElem.innerText = p1Name;
+      if (p2nameElem) p2nameElem.innerText = p2Name;
+    }
+  },
+
+
+  render: () => {
+    const pageContainer = new DivComponent("FriendPage", {
       class: "d-flex flex-column",
       styles: {
         alignItems: "center",
@@ -66,10 +84,15 @@ const GameTournamentPage = {
         borderRadius: "10px",
       }
     });
-    const startBtn = SubmitButton("startBtn", "Start Game");
-    startBtn.styles = { display: "none", margin: "10px", backgroundColor: "red" };
+
+    const startBtn = SubmitButton("startBtn", "Start Tournament");
     const skor = new TextComponent("skor", { text: "0 - 0", class: "text-center element-h2", styles: { display: "none" } });
-    const p1name = new TextComponent("p1name", { text: "Player 1", class: "text-center element-h2",
+    const p1Input = InputElement("p1Input", "1 Player Name", "text");
+    const p2Input = InputElement("p2Input", "2 Player Name", "text");
+    const p3Input = InputElement("p3Input", "3 Player Name", "text");
+    const p4Input = InputElement("p4Input", "4 Player Name", "text");
+    const p1name = new TextComponent("p1name", {
+      text: "Player 1", class: "text-center element-h2",
       styles: {
         display: "none",
         position: "absolute",
@@ -77,7 +100,8 @@ const GameTournamentPage = {
         left: "30px"
       }
     });
-    const p2name = new  TextComponent("p2name", { text: "Player 2", class: "text-center element-h2",
+    const p2name = new TextComponent("p2name", {
+      text: "Player 2", class: "text-center element-h2",
       styles: {
         display: "none",
         position: "absolute",
@@ -86,87 +110,143 @@ const GameTournamentPage = {
       }
     });
     const winnerText = new TextComponent("winnerText", { text: "", class: "text-center element-h2", styles: { display: "none" } });
-    const restartBtn = SubmitButton("restartBtn", "Restart Game");
+    const restartBtn = SubmitButton("restartBtn", "Restart Tournament");
     restartBtn.styles = { display: "none", margin: "10px", backgroundColor: "green" };
     const backBtn = SubmitButton("backBtn", "Back");
     backBtn.styles = { margin: "10px", backgroundColor: "gray" };
-    const createInputsDiv = new DivComponent("createInputsDiv", {styles: {display: "none", class: "d-flex flex-column"}});
-    const createInput = InputElement("createInput", "Create Players", "text");
-    const createInputs =  SubmitButton("createInputs", "Create Players");
-    createInputs.styles = { margin: "10px", backgroundColor: "green" };
-
-
-    withEventHandlers(createInputs, { onClick: () => {
-      const playerCount = createInput.elements[0].value;
-      if (playerCount < 2 || playerCount > 8 || isNaN(playerCount)) {
-        createInputs.update({styles: {backgroundColor: "red"}, label:"Invalid Entry" });
-        return;
-      }
-      const playerNames = getPlayerNamesInputs(playerCount);
-      createInputsDiv.update({elements: playerNames, styles: {display: "block"}});
-      startBtn.update({styles: {display: "block", backgroundColor: "blue"}});
-      GameTournamentPage.Players = playerNames;
-      createInputs.update({styles: {backgroundColor: "green"}, label:"Create Players" });
-
-    }});
 
     withEventHandlers(startBtn, {
       onClick: () => {
-        const playerNames = GameTournamentPage.Players.map(player => player.elements[0].value);
-        GameTournamentPage.gamePlayNmes = createRandomGameMatches(playerNames);
-        const inputElements = Array.from(createInputsDiv.elements);
-        for (const inputElement of inputElements) {
-          if (inputElement.elements[0].value.trim() === "") {
-            startBtn.update({ label: "Name Please", styles: { backgroundColor: "red" } });
-            return;
-          }
+        if (p1Input.elements[0].value === "" || p2Input.elements[0].value === "" || p3Input.elements[0].value === "" || p4Input.elements[0].value === "") {
+          startBtn.update({ label: "Enter All Names" });
+          return;
         }
-        startBtn.update({ label: "Start Game", styles: { backgroundColor: "green" } });
-        pageContainer.update({styles: {
-          position: "absolute",
-          top: "30px",
-          width: "100%",
-          justifyContent: "between",
-          transform: "translate(-50%, 0)",
-          backgroundColor: "rgba(0, 0, 0, 0)"
-        }})
-        createInputsDiv.update({styles: {display: "none"}});
-        createInput.update({styles: {display: "none"}});
-        createInputs.update({styles: {display: "none"}});
-        startBtn.update({styles: {display: "none"}});
-        backBtn.update({styles: {display: "none"}});
-        winnerText.update({styles: {display: "none"}});
-        skor.update({styles: {display: "block" }});
-        console.log (turnuvaAsamasiEkle(GameTournamentPage.gamePlayNmes, GameTournamentPage.rounds))
-      }
-    })
+        GameLocalPage.player1Name = p1Input.elements[0].value;
+        GameLocalPage.player2Name = p2Input.elements[0].value;
+        GameLocalPage.player3Name = p3Input.elements[0].value;
+        GameLocalPage.player4Name = p4Input.elements[0].value;
 
-    GameTournamentPage.game = new Game3D({inputMode: "local"});
-    GameTournamentPage.game.onScoreChange = (score) => {
-      skor.update({ text: `${score.p1} - ${score.p2}` });
+        GameLocalPage.startGameRound(1); // Start the first game
+
+        pageContainer.update({
+          styles: {
+            position: "absolute",
+            top: "30px",
+            width: "100%",
+            justifyContent: "space-between", // Changed to space-between for better name positioning
+            transform: "translate(-50%, 0)",
+            backgroundColor: "rgba(0, 0, 0, 0)"
+          }
+        });
+        startBtn.update({ styles: { display: "none" } });
+        p1Input.update({ styles: { display: "none" } });
+        p2Input.update({ styles: { display: "none" } });
+        p3Input.update({ styles: { display: "none" } });
+        p4Input.update({ styles: { display: "none" } });
+        backBtn.update({ styles: { display: "none" } });
+        winnerText.update({ styles: { display: "none" } });
+        skor.update({ styles: { display: "block" } });
+        p1name.update({ text: GameLocalPage.player1Name, styles: { display: "block" } });
+        p2name.update({ text: GameLocalPage.player2Name, styles: { display: "block" } });
+      }
+    });
+
+    GameLocalPage.gameRound1 = new Game3D({ inputMode: "local" });
+    GameLocalPage.gameRound2 = new Game3D({ inputMode: "local" });
+    GameLocalPage.gameRound3 = new Game3D({ inputMode: "local" });
+
+    const commonGameHandlers = (gameInstance) => {
+      gameInstance.onScoreChange = (score) => {
+        skor.update({ text: `${score.p1} - ${score.p2}` });
+      };
     };
-    GameTournamentPage.game.onGameEnd = (winner) => {
-      skor.update({ text: `${GameLocalPage.game.score.p1} - ${GameLocalPage.game.score.p2}`});
+
+    commonGameHandlers(GameLocalPage.gameRound1);
+    commonGameHandlers(GameLocalPage.gameRound2);
+    commonGameHandlers(GameLocalPage.gameRound3);
+
+
+    GameLocalPage.gameRound1.onGameEnd = (winner) => {
+      skor.update({ text: `${GameLocalPage.gameRound1.score.p1} - ${GameLocalPage.gameRound1.score.p2}` });
       confetti();
-      winnerText.update({text: `${winner} wins`, styles: {display: "block"}});
-      pageContainer.update({styles: {
-        backgroundColor: "rgba(0, 0, 0, 0.8)",
-      }})
-      restartBtn.update({styles: {display: "block"}});
-      backBtn.update({styles: {display: "block"}});
-    }
+      GameLocalPage.winner1 = winner;
+      GameLocalPage.gameRound1.gameDestroy();
+
+      // Start Game 2 after Game 1 ends
+      p1name.update({ text: GameLocalPage.player3Name });
+      p2name.update({ text: GameLocalPage.player4Name });
+      GameLocalPage.startGameRound(2);
+
+    };
+
+    GameLocalPage.gameRound2.onGameEnd = (winner) => {
+      skor.update({ text: `${GameLocalPage.gameRound2.score.p1} - ${GameLocalPage.gameRound2.score.p2}` });
+      confetti();
+      GameLocalPage.winner2 = winner;
+      GameLocalPage.gameRound2.gameDestroy();
+
+      // Start Game 3 after Game 2 ends
+      p1name.update({ text: GameLocalPage.winner1 });
+      p2name.update({ text: GameLocalPage.winner2 });
+      GameLocalPage.startGameRound(3);
+
+    };
+
+    GameLocalPage.gameRound3.onGameEnd = (winner) => {
+      skor.update({ text: `${GameLocalPage.gameRound3.score.p1} - ${GameLocalPage.gameRound3.score.p2}` });
+      confetti();
+      p
+      GameLocalPage.finalWinner = winner;
+      winnerText.update({ text: `${GameLocalPage.finalWinner} Wins the Tournament!`, styles: { display: "block" } });
+      pageContainer.update({
+        styles: {
+          backgroundColor: "rgba(0, 0, 0, 0.8)",
+        }
+      });
+      restartBtn.update({ styles: { display: "block" } });
+      backBtn.update({ styles: { display: "block" } });
+      GameLocalPage.gameRound3.gameDestroy();
+    };
+
 
     withEventHandlers(restartBtn, {
       onClick: () => {
-        GameTournamentPage.game.gameRestart();
-        pageContainer.update({styles: {
-          backgroundColor: "rgba(0, 0, 0, 0)",
-          position: "fixed",
+        GameLocalPage.destroyGame();
+        GameLocalPage.gameRound1 = new Game3D({ inputMode: "local" });
+        GameLocalPage.gameRound2 = new Game3D({ inputMode: "local" });
+        GameLocalPage.gameRound3 = new Game3D({ inputMode: "local" });
+        commonGameHandlers(GameLocalPage.gameRound1);
+        commonGameHandlers(GameLocalPage.gameRound2);
+        commonGameHandlers(GameLocalPage.gameRound3);
+        GameLocalPage.gameRound1.onGameEnd = GameLocalPage.gameRound1.onGameEnd; // reattach handlers
+        GameLocalPage.gameRound2.onGameEnd = GameLocalPage.gameRound2.onGameEnd;
+        GameLocalPage.gameRound3.onGameEnd = GameLocalPage.gameRound3.onGameEnd;
 
-        }})
-        restartBtn.update({styles: {display: "none"}});
-        backBtn.update({styles: {display: "none"}});
-        GameTournamentPage.game.gameStart();
+
+        pageContainer.update({
+          styles: {
+            backgroundColor: "rgba(0, 0, 0, 0.8)", // Revert to initial background for input
+            position: "relative", // Reset position to relative for input display
+            top: "auto",
+            transform: "none",
+            justifyContent: "center"
+          }
+        });
+        restartBtn.update({ styles: { display: "none" } });
+        backBtn.update({ styles: { display: "none" } });
+        winnerText.update({ text: "", styles: { display: "none" } });
+        startBtn.update({ styles: { display: "block", label: "Start Tournament" } });
+        p1Input.update({ styles: { display: "block", value: "" } });
+        p2Input.update({ styles: { display: "block", value: "" } });
+        p3Input.update({ styles: { display: "block", value: "" } });
+        p4Input.update({ styles: { display: "block", value: "" } });
+        skor.update({ styles: { display: "none", text: "0 - 0" } });
+        p1name.update({ styles: { display: "none" } });
+        p2name.update({ styles: { display: "none" } });
+        GameLocalPage.currentGameRound = 0;
+        GameLocalPage.winner1 = "";
+        GameLocalPage.winner2 = "";
+        GameLocalPage.finalWinner = "";
       }
     });
 
@@ -177,13 +257,13 @@ const GameTournamentPage = {
     });
 
     pageContainer.elements = [
-      createInputsDiv,
-      createInput,
-      createInputs,
+      p1Input,
+      p2Input,
+      p3Input,
+      p4Input,
       p1name,
       skor,
       winnerText,
-      p1name,
       p2name,
       startBtn,
       restartBtn,
@@ -192,86 +272,4 @@ const GameTournamentPage = {
     return pageContainer.render();
   }
 }
-
-export default GameTournamentPage;
-
-function getPlayerNamesInputs(count)
-{
-  const playerNames = [];
-  for (let i = 0; i < count; i++) {
-    const input = InputElement(`playerInput${i}`, `Player Name ${i+1}`, "text");
-    playerNames.push(input);
-  }
-  return playerNames;
-}
-
-function createRandomGameMatches(players) {
-  if (!players || players.length === 0) {
-    return {}; // Boş oyuncu listesi
-  }
-
-  const shuffledPlayers = [...players].sort(() => Math.random() - 0.5);
-  const gameMatches = {};
-  let gameCounter = 1;
-
-  while (shuffledPlayers.length > 0) {
-    const player1 = shuffledPlayers.shift();
-    const player2 = shuffledPlayers.length > 0 ? shuffledPlayers.shift() : null;
-    const gameName = `game${gameCounter}`;
-    gameMatches[gameName] = player2 ? [player1, player2] : [player1];
-
-    gameCounter++;
-  }
-
-  return gameMatches;
-}
-
-function turnuvaAsamasiEkle(gamePlayNmes, mevcutRounds) {
-  const asamaNumaralari = Object.keys(mevcutRounds)
-    .map(key => parseInt(key.replace("rounds", "")))
-    .filter(num => !isNaN(num));
-
-  const yeniAsamaNumarasi = asamaNumaralari.length > 0 ? Math.max(...asamaNumaralari) + 1 : 1;
-  const yeniAsamaKey = `rounds${yeniAsamaNumarasi}`;
-
-  const oyuncuSayisi = gamePlayNmes.length;
-  if (oyuncuSayisi === 0) {
-    console.warn("Oyuncu listesi boş. Yeni aşama eklenmedi.");
-    return mevcutRounds;
-  }
-
-  const eslesmeler = [];
-
-  if (oyuncuSayisi % 2 === 0) {
-      // Oyuncuları eşleştir (ikişerli gruplar halinde)
-      for (let i = 0; i < oyuncuSayisi; i += 2) {
-          eslesmeler.push([gamePlayNmes[i], gamePlayNmes[i + 1]]);
-      }
-  } else {
-      // Tek sayıda oyuncu varsa, son oyuncuyu otomatik olarak bir sonraki aşamaya geçir.
-      for (let i = 0; i < oyuncuSayisi - 1; i += 2) {
-          eslesmeler.push([gamePlayNmes[i], gamePlayNmes[i + 1]]);
-      }
-      eslesmeler.push([gamePlayNmes[oyuncuSayisi - 1]]); // Son oyuncuyu tek başına ekle
-  }
-
-  // Yeni aşamayı oluştur
-  const yeniAsama = {
-    game: {} // Oyun detayları buraya gelecek (oyuncular, skorlar, kazanan vb.)
-  };
-
-  // Eşleşmeleri yeni aşamaya ekle
-  eslesmeler.forEach((eslesme, index) => {
-      const oyunAdi = `oyun${index + 1}`; // oyun1, oyun2, ...
-      yeniAsama.game[oyunAdi] = {
-          players: eslesme,
-          skor: [], // Skorlar henüz belli değil
-          winner: null // Kazanan henüz belli değil
-      };
-  });
-
-  // Yeni aşamayı mevcut aşamalara ekle
-  mevcutRounds[yeniAsamaKey] = yeniAsama;
-
-  return mevcutRounds;
-}
+export default GameLocalPage;
