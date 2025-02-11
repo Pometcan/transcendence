@@ -27,7 +27,7 @@ const ProfilePage = {
     const dashboardBtn =  new ButtonComponent("dashboardBtn", {isActive: true, label: "Dashboard", class: "btn btn-primary" });
     emailComponent = new TextComponent("email", { text: "E-posta: Yükleniyor..." });
     usernameComponent = new TextComponent("username", { text: "Kullanıcı Adı: Yükleniyor..." });
-    
+
     const editForm = new DivComponent("Edit");
     const editFormBtns = new DivComponent("EditBtns");
     const dashboardBtnDiv = new DivComponent("dashboard");
@@ -45,21 +45,34 @@ const ProfilePage = {
     const fa2btnDisable = new ButtonComponent("fa2btnDisable", { label: t("friendPage.2Disable"), class: "btn btn-danger" });
 
     const status = new TextComponent("DashboardPageStatus", {text: "agla"});
-    const websocket = new WebSocket(`wss://` + window.location.host + `/api/auth/${getId}/`); // Sunucu adresinizi ve portunuzu güncelleyin
     console.log("id: " + getId);
-    if (websocket && websocket.readyState === WebSocket.OPEN) {
+    if (window.WebSocketManager  && window.WebSocketManager .readyState === WebSocket.OPEN) {
         return;
     }
 
-    websocket.onopen = function() {
-        status.update({text: "Connected"})
-    };
-
-    websocket.onclose = function() {
+    window.WebSocketManager .onclose = function() {
         status.update({text: "Disconnected"})
     };
 
-    websocket.onerror = function(error) {
+    window.WebSocketManager .onmessage = function(event) {
+      const data = JSON.parse(event.data);
+      if (data.type === 'online_user_list')
+      {
+        console.log('online_user_list');
+        for (let i = 0; i < data.users.length; i++)
+        {
+          if (getId === data.users[i].id) {
+            status.update({text: "Connected"})
+          }
+
+        }
+      } else {
+          console.log("unknown data = " + data);
+      }
+    };
+
+
+    window.WebSocketManager .onerror = function(error) {
         console.error("WebSocket error:", error);
         status.update({text: error})
     };
@@ -112,16 +125,31 @@ const ProfilePage = {
       dashboardBtnDiv,
     ];
 
-   
-    
+    const langEn = new ButtonComponent("langEn", { label: "EN", class: "btn btn-primary" });
+    const langTr = new ButtonComponent("langTr", { label: "TR", class: "btn btn-primary" });
+    const langJa = new ButtonComponent("langJa", { label: "JA", class: "btn btn-primary" });
+
+    withEventHandlers(langEn, { onClick: async() => {
+      setCookie("lang", "en", 1);
+    }});
+
+    withEventHandlers(langTr, { onClick: async() => {
+      setCookie("lang", "tr", 1);
+    }});
+
+    withEventHandlers(langJa, { onClick: async() => {
+      setCookie("lang", "ja", 1);
+    }});
+
     withEventHandlers(editBtn, { onClick: async() => {
       console.log(editBtn);
       if (editBtn.props.isActive == true){
-        editForm.elements = [usernameLabel, usernameInput, emailLabel, emailInput, saveFormBtn];
+        editForm.elements = [usernameLabel, usernameInput, emailLabel, emailInput, saveFormBtn, langEn, langTr, langJa];
         editFormBtns.elements = [changePhotoBtn, deletePhotoBtn, fa2btnEnable, fa2btnDisable];
         pageContainer.elements[0].elements.push(editForm, editFormBtns);
         dashboardBtnDiv.update({elements : []})
         pageContainer.elements[0].update({elements: pageContainer.elements[0].elements});
+
         editBtn.props.isActive = false;
         dashboardBtnDiv.elements = [dashboardBtn];
       }
@@ -132,10 +160,10 @@ const ProfilePage = {
         dashboardBtnDiv.elements = [dashboardBtn];
         pageContainer.elements[0].update({elements: pageContainer.elements[0].elements});
         editBtn.props.isActive = true;
-      }} 
+      }}
     });
 
-        
+
     withEventHandlers(saveFormBtn, { onClick: async() => {
       console.log(saveFormBtn);
       const csrfToken = await getCsrfToken();
@@ -181,7 +209,7 @@ const ProfilePage = {
 
     });
 
-        
+
     withEventHandlers(dashboardBtn, { onClick: async() => {
       if (dashboardBtn.props.isActive == true){
         dashboardDiv.elements = [DashboardPage];
@@ -193,7 +221,7 @@ const ProfilePage = {
       {
         dashboardDiv.update({elements : []})
         dashboardBtn.props.isActive = true;
-      }} 
+      }}
     });
 
 
@@ -208,7 +236,7 @@ const ProfilePage = {
           setCookie("qrCode", data.qr_code, 1);
         });
         }});
-        
+
     const qrImage = new ImageComponent("qrImage", {src: `data:image/png;base64`, alt: "qrImage"});
     withEventHandlers(qrBtn, {onClick: async() => {
       const qrCode = getCookie("qrCode");
@@ -222,7 +250,7 @@ const ProfilePage = {
       }
       else{
 
-      qrImage.update({styles: {display:"block"}})  
+      qrImage.update({styles: {display:"block"}})
            qrBtn.props.is_active = true;}
     }})
 

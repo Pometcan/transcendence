@@ -1,59 +1,60 @@
 {
+  "Layout": {
+    "home": "Home",
+    "Profile": "Profile",
+    "Friends": "Friends",
+    "Dashboard": "Dashboard"
+  },
   "auth": {
     "login": "Login",
     "register": "Register",
     "username": "Username",
     "password": "Password",
     "password2": "Confirm Password",
-    "email": "E-mail",
+    "email": "Email",
     "loginSubmitButton": "Login",
     "registerSubmitButton": "Register"
-
   },
-  "homePage":{
-    "tournament":"Tournament",
-    "back":"Back",
-    "single":"Single Player",
-    "multiplayer":"Multiplayer"
-
+  "homePage": {
+    "tournament": "Tournament",
+    "back": "Back",
+    "single": "Single Player",
+    "multiplayer": "Multiplayer"
   },
-  "verifyPage":{
-    "verify":"Verify",
-    "kod":"2FA Kodu"
+  "verifyPage": {
+    "verify": "Verify",
+    "kod": "2FA Code"
   },
-
   "friendPage": {
-    "friendListTitle":"Friend List",
-    "friendRequestsTitle":"Friend Requests",
-    "friendBlockTitle":"Blocked Users",
-    "usersTitle":"Users",
-    "sendFriend":"Send Friend Request",
-    "deleteFriend":"Delete Friend",
-    "accept":"Accept Friend Request",
-    "block":"Block User",
-    "unblock":"Unblock User"
+    "friendListTitle": "Friend List",
+    "friendRequestsTitle": "Friend Requests",
+    "friendBlockTitle": "Blocked Users",
+    "usersTitle": "Users",
+    "sendFriend": "Send Friend Request",
+    "deleteFriend": "Delete Friend",
+    "accept": "Accept Friend Request",
+    "block": "Block User",
+    "unblock": "Unblock User",
+    "cPhotoBtn": "Change Photo",
+    "exitBtn": "Exit",
+    "deleteBtn": "Delete Account",
+    "2Enable": "Enable 2FA",
+    "2Disable": "Disable 2FA"
   },
-  "profilePage":{
-    "email":"E-posta: Yükleniyor...",
-    "username":"Kullanıcı Adı: Yükleniyor...",
-    "email2":"Email:",
-    "user":"Kullanıcı Adı:",
-    "eposta":"E-posta: Hata oluştu.",
-    "usererror":"Kullanıcı Adı: Hata oluştu.",
-    "exitBtn":"Çıkış",
-    "deleteBtn":"Hesabı Sil",
-    "cPhotoBtn":"Fotoğrafı Değiştir",
-    "dPhotoBtn":"Fotoğrafı Sil",
-    "2Enable":"2FA Etkinleştir",
-    "2Disable":"2FA Devre Dışı Bırak"
+  "profilePage": {
+    "email": "Email: Loading...",
+    "username": "Username: Loading...",
+    "email2": "Email:",
+    "user": "Username:",
+    "eposta": "Email: Error occurred.",
+    "usererror": "Username: Error occurred.",
+    "exitBtn": "Exit",
+    "deleteBtn": "Delete Account",
+    "cPhotoBtn": "Change Photo",
+    "dPhotoBtn": "Delete Photo",
+    "2Enable": "Enable 2FA",
+    "2Disable": "Disable 2FA"
   },
-  "Layout":{
-    "Home":"Home",
-    "Profile":"Profile",
-    "Friends":"Friends"
-
-  },
-
   "error": {
     "LoginFailed": "Login failed. Please try again.",
     "serverError": "Server error. Please try again.",

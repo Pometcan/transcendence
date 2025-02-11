@@ -17,9 +17,10 @@ const Layout = {
       row,
     ];
 
-    const homeButton = NavbarButton("home-button", t("Layout.Home"));
+    const homeButton = NavbarButton("home-button", t("Layout.home"));
     const profileButton = NavbarButton("profile-button", t("Layout.Profile"));
     const friendsButton = NavbarButton("friends-button", t("Layout.Friends"));
+    const dashboardButton = NavbarButton("dashboard-button", t("Layout.Dashboard"));
     withEventHandlers(homeButton, { onClick: () => window.router.navigate("/") });
     withEventHandlers(profileButton, { onClick: () => window.router.navigate("/profile") });
     withEventHandlers(friendsButton, { onClick: () => window.router.navigate("/friends") });

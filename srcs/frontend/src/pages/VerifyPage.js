@@ -18,14 +18,14 @@ const VerifyPage = {
     //   return;
     // }
     // const qrImage = new ImageComponent("qrImage", {src: `data:image/png;base64,${qrCode}`, alt: "qrImage"});
-  
+
     const input = InputElement("input", t("verifyPage.kod"), "text");
     const submitButton = SubmitButton("submitButton", t("verifyPage.verify"));
 
 
 
     pageContainer.elements[0].elements = [
- 
+
       input,
       submitButton,
       errorDiv
@@ -59,6 +59,8 @@ const VerifyPage = {
           // Başarılı giriş
           setCookie('login', 'true', 1);
           window.router.navigate("/");
+          window.WebSocketManager = new WebSocket(`wss://` + window.location.host + `/api/auth/${getCookie("userID")}/`);
+
         } catch (error) {
 
           // Hata mesajını göster

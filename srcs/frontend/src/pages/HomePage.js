@@ -1,5 +1,7 @@
 import {MenuElement, SubmitButton} from "../core/elements/Type.Element";
 import {withEventHandlers} from "../core/components/Type.Component";
+import {t} from "../i42n";
+
 function singleMenu()
 {
   const vs11 = SubmitButton("vs11", "1 vs 1");

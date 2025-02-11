@@ -38,6 +38,8 @@ const LoginElement = () => {
           return;
         }
         setCookie('login', 'true', 1);
+        window.WebSocketManager = new WebSocket(`wss://` + window.location.host + `/api/auth/${getCookie("userID")}/`);
+
         setCookie('userId', data.user_id, 1);
         window.location.href = data.auth_url;
       })
@@ -94,6 +96,8 @@ const LoginElement = () => {
           else
           {
             setCookie('login', 'true', 1);
+            window.WebSocketManager = new WebSocket(`wss://` + window.location.host + `/api/auth/${getCookie("userID")}/`);
+
             window.router.navigate("/");
           }
         }
@@ -128,7 +132,7 @@ const RegisterElement = () => {
     errorDiv
   ];
 
-  withEventHandlers(intraButton, {
+  withEventHandlers(authButton, {
     onClick: () => {
       fetch(`https://${window.location.host}/api/auth/intra/login`, {
         method: "GET",
@@ -145,6 +149,10 @@ const RegisterElement = () => {
           setCookie('login', 'false', 1);
           return;
         }
+        setCookie('login', 'true', 1);
+        window.WebSocketManager = new WebSocket(`wss://` + window.location.host + `/api/auth/${getCookie("userID")}/`);
+
+        setCookie('userId', data.user_id, 1);
         window.location.href = data.auth_url;
       })
       .catch((error) => {

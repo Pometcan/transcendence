@@ -63,7 +63,7 @@ function createSection(title) {
 
 function createFriendRow(user, userManager) {
   const userDiv = createUserBaseRow(user.friend);
-  const deleteFriend = new ButtonComponent(`delete-friend-${user.id}`, { label: t("friendPage.deleteFriend" });
+  const deleteFriend = new ButtonComponent(`delete-friend-${user.id}`, { label: t("friendPage.deleteFriend") });
   const blockUser = new ButtonComponent(`block-user-${user.id}`, { label: t("friendPage.block") });
 
   userDiv.elements.push(deleteFriend, blockUser);

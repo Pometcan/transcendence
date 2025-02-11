@@ -19,6 +19,7 @@ export class App extends HTMLElement {
     window.pageManager = this.pageManager;
     window.router = this.router;
     window.app = this;
+    window.WebSocketManager = {};
   }
 
 
@@ -86,9 +87,10 @@ export class App extends HTMLElement {
 
   async connectedCallback() {
     await this.initLanguage();
-    //await new Promise(resolve => setTimeout(resolve, 3000));
+    await new Promise(resolve => setTimeout(resolve, 3000));
     if (getCookie("login") === "true")
     {
+      window.WebSocketManager = new WebSocket(`wss://` + window.location.host + `/api/auth/${getCookie("userID")}/`);
       const path = window.location.pathname;
       if (path === "/auth")
         this.router.navigate("/");
