@@ -136,15 +136,23 @@ function createUserRow(user, userManager) {
 /**
  * ✅ Kullanıcı için Genel UI Oluşturur
 */
+
+
+
+
 function createUserBaseRow(user) {
   const userDiv = new DivComponent(`user-${user.id}`, { class: "d-flex justify-content-center" });
   const userImage = new ImageComponent(`user-image-${user.id}`, { src: user.avatar });
+
   userImage.styles = {
     overflow: "hidden",
     borderRadius: "1%",
     width: "10rem",
     opacity: "0.6",
   };
+  userImage.addEventListener("onClick", () => {
+    window.router.navigate("/profile", {userId: user.id});
+  }) ;
   const userName = new TextComponent(`user-name-${user.id}`, { text: user.username });
   const rank = new TextComponent(`user-rank-${user.id}`, { text: user.rank });
 
