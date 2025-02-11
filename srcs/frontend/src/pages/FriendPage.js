@@ -2,6 +2,7 @@ import {MenuElement, SearchInput} from "../core/elements/Type.Element";
 import { DivComponent, TextComponent, ImageComponent, ButtonComponent, withEventHandlers } from "../core/components/Type.Component";
 import UserManager from "../core/managers/UserManager";
 import { getCookie, setCookie } from "../core/Cookie";
+import { t } from "../i42n";
 
 const FriendPage = {
   layoutVisibility: true,
@@ -14,22 +15,22 @@ const FriendPage = {
     userManager.initialize().then(async() => {
       const friendListDiv = new DivComponent("friend-list", {
         elements: [
-          new TextComponent("friend-list-title", { text: "Friend List", class: "text-center element-h2" }),
+          new TextComponent("friend-list-title", { text: t("friendPage.friendListTitle"), class: "text-center element-h2" }),
         ],
       });
       const friendRequestsDiv = new DivComponent("friend-requests", {
         elements: [
-          new TextComponent("friend-requests-title", { text: "Friend Requests", class: "text-center element-h2" }),
+          new TextComponent("friend-requests-title", { text: t("friendPage.friendRequestsTitle"), class: "text-center element-h2" }),
         ],
       });
       const friendBlockDiv = new DivComponent("friend-block", {
         elements: [
-          new TextComponent("friend-block-title", { text: "Blocked Users", class: "text-center element-h2" }),
+          new TextComponent("friend-block-title", { text :  t("friendPage.friendBlockTitle"), class: "text-center element-h2" }),
         ],
       });
       const usersDiv = new DivComponent("users", {
         elements: [
-          new TextComponent("users-title", { text: "Users", class: "text-center element-h2" }),
+          new TextComponent("users-title", { text: t("friendPage.Users"), class: "text-center element-h2" }),
         ],
       });
       const searchInput = SearchInput("Search Users", "Search");
@@ -79,11 +80,11 @@ async function createRow(userId, userManager) {
   const userImage = new ImageComponent(`user-image-${userId}`, { src: user.avatar });
   const userName = new TextComponent(`user-name-${userId}`, { text: user.username });
   const rank = new TextComponent(`user-rank-${userId}`, { text: user.rank });
-  const sendFriendRequest = new ButtonComponent(`send-friend-request-${userId}`, { label: "Send Friend Request", isRequest: false });
-  const deleteFriend = new ButtonComponent(`delete-friend-${userId}`, { label: "Delete Friend" });
-  const acceptFriendRequest = new ButtonComponent(`accept-friend-request-${userId}`, { label: "Accept Friend Request" });
-  const blockUser = new ButtonComponent(`block-user-${userId}`, { label: "Block User" });
-  const unblockUser = new ButtonComponent(`unblock-user-${userId}`, { label: "Unblock User" });
+  const sendFriendRequest = new ButtonComponent(`send-friend-request-${userId}`, { label: t("friendPage.sendFriend"), isRequest: false });
+  const deleteFriend = new ButtonComponent(`delete-friend-${userId}`, { label: t("friendPage.deleteFriend") });
+  const acceptFriendRequest = new ButtonComponent(`accept-friend-request-${userId}`, { label:  t("friendPage.accept")});
+  const blockUser = new ButtonComponent(`block-user-${userId}`, { label: t("friendPage.block") });
+  const unblockUser = new ButtonComponent(`unblock-user-${userId}`, { label: t("friendPage.unblock") });
 
   userDiv.elements.push(userImage, userName, rank);
   if (userManager.isFriend(userId)) {

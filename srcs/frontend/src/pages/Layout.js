@@ -1,7 +1,7 @@
 // pages/Layout.js
 import { DivComponent, ButtonComponent, withEventHandlers } from '../core/components/Type.Component.js';
 import { Navbar, NavbarButton} from '../core/elements/Type.Element.js';
-
+import { t } from "../i42n";
 
 const Layout = {
   render: () => {
@@ -17,9 +17,9 @@ const Layout = {
       row,
     ];
 
-    const homeButton = NavbarButton("home-button", "Home");
-    const profileButton = NavbarButton("profile-button", "Profile");
-    const friendsButton = NavbarButton("friends-button", "Friends");
+    const homeButton = NavbarButton("home-button", t("Layout.Home"));
+    const profileButton = NavbarButton("profile-button", t("Layout.Profile"));
+    const friendsButton = NavbarButton("friends-button", t("Layout.Friends"));
     withEventHandlers(homeButton, { onClick: () => window.router.navigate("/") });
     withEventHandlers(profileButton, { onClick: () => window.router.navigate("/profile") });
     withEventHandlers(friendsButton, { onClick: () => window.router.navigate("/friends") });

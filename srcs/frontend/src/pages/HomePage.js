@@ -12,12 +12,12 @@ function singleMenu()
     margin: "10px 10px 10px 0",
     backgroundColor: "green",
   }
-  const tournament = SubmitButton("tournament", "Tournament");
+  const tournament = SubmitButton("tournament", t("homePage.Tournament"));
   tournament.styles = {
     margin: "10px 10px 10px 0",
     backgroundColor: "Navy",
   }
-  const back = SubmitButton("back", "Back");
+  const back = SubmitButton("back", t("homePage.back"));
   back.styles = {
     margin: "10px 10px 10px 0",
   }
@@ -34,12 +34,12 @@ const HomePage = {
   render:  () => {
     const pageContainer = MenuElement("FriendPage");
 
-    const singlePlayerButton = SubmitButton("singlePlayerButton",  "Single Player" );
+    const singlePlayerButton = SubmitButton("singlePlayerButton",  t("homePage.single") );
     singlePlayerButton.styles = {
       margin: "10px 10px 10px 0",
     };
 
-    const multiPlayerButton = SubmitButton("multiPlayerButton", "Multi Player" );
+    const multiPlayerButton = SubmitButton("multiPlayerButton", t("homePage.multiplayer") );
     multiPlayerButton.styles = {
       margin: "10px 10px 10px 0",
       backgroundColor: "green",
