@@ -6,6 +6,7 @@ export class ButtonComponent extends UIComponent {
     this.label = props.label;
     this.styles = props.styles;
     this.class = props.class || '';
+    this.props = props;
 
     this.expectedListeners = () => ({
       click: this.onClick,
@@ -46,6 +47,16 @@ export class ButtonComponent extends UIComponent {
         if (this.element)
           this.element.innerText = this.label;
       }
+    }
+    if (newProps.class !== undefined) {
+      this.class = newProps.class;
+      if (this.element)
+        this.element.className = this.class;
+    }
+    if (newProps.styles !== undefined) {
+      this.styles = newProps.styles;
+      if (this.element)
+        this.applyStyles(this.element);
     }
   }
 }

@@ -61,21 +61,21 @@ export class InputComponent extends UIComponent {
 
   update(newProps) {
     super.update(newProps);
-
-    if (newProps)
-    {
-      if (newProps.value !== undefined)
+    if (newProps) {
+      if (newProps.value !== undefined) {
         this.value = newProps.value;
-      if (newProps.placeholder !== undefined) {
-        this.placeholder = newProps.placeholder;
         if (this.element)
-          this.element.placeholder = this.placeholder;
+          this.element.innerText = this.text;
       }
-      if (newProps.type !== undefined)
-      {
-        this.type = newProps.type;
+      if (newProps.class !== undefined) {
+        this.class = newProps.class;
         if (this.element)
-          this.element.type = this.type;
+          this.element.className = this.class;
+      }
+      if (newProps.styles !== undefined) {
+        this.styles = newProps.styles;
+        if (this.element)
+          this.applyStyles(this.element);
       }
     }
   }
