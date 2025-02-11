@@ -23,7 +23,7 @@ function singleMenu()
   }
   withEventHandlers(vs11, { onClick: () => window.router.navigate("/gamelocal") });
   withEventHandlers(vs22, { onClick: () => window.router.navigate("/gamelocal4p") });
-  withEventHandlers(tournament, { onClick: () => window.router.navigate("/gamest") });
+  withEventHandlers(tournament, { onClick: () => window.router.navigate("/gametournament") });
   withEventHandlers(back, { onClick: () => window.router.navigate("/") });
 
   return [vs11, vs22, tournament, back];

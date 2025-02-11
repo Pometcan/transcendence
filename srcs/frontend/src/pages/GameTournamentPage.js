@@ -14,13 +14,13 @@ const GameTournamentPage = {
 
   pageLeave: () => {
     console.log("GameLocalPage.pageLeave");
-    GameLocalPage.destroyGame();
+    GameTournamentPage.destroyGame();
   },
 
   destroyGame: () => {
-    if (GameLocalPage.game) {
-      GameLocalPage.game.gameDestroy();
-      GameLocalPage.game = null;
+    if (GameTournamentPage.game) {
+      GameTournamentPage.game.gameDestroy();
+      GameTournamentPage.game = null;
     }
   },
   render:  () => {
@@ -88,11 +88,11 @@ const GameTournamentPage = {
       }
     })
 
-    GameLocalPage.game = new Game3D({inputMode: "local"});
-    GameLocalPage.game.onScoreChange = (score) => {
+    GameTournamentPage.game = new Game3D({inputMode: "local"});
+    GameTournamentPage.game.onScoreChange = (score) => {
       skor.update({ text: `${score.p1} - ${score.p2}` });
     };
-    GameLocalPage.game.onGameEnd = (winner) => {
+    GameTournamentPage.game.onGameEnd = (winner) => {
       skor.update({ text: `${GameLocalPage.game.score.p1} - ${GameLocalPage.game.score.p2}`});
       confetti();
       winnerText.update({text: `${winner} wins`, styles: {display: "block"}});
@@ -105,7 +105,7 @@ const GameTournamentPage = {
 
     withEventHandlers(restartBtn, {
       onClick: () => {
-        GameLocalPage.game.gameRestart();
+        GameTournamentPage.game.gameRestart();
         pageContainer.update({styles: {
           backgroundColor: "rgba(0, 0, 0, 0)",
           position: "fixed",
@@ -113,7 +113,7 @@ const GameTournamentPage = {
         }})
         restartBtn.update({styles: {display: "none"}});
         backBtn.update({styles: {display: "none"}});
-        GameLocalPage.game.gameStart();
+        GameTournamentPage.game.gameStart();
       }
     });
 
