@@ -22,7 +22,7 @@ function singleMenu()
     margin: "10px 10px 10px 0",
   }
   withEventHandlers(vs11, { onClick: () => window.router.navigate("/gamelocal") });
-  withEventHandlers(vs22, { onClick: () => window.router.navigate("/gamep22") });
+  withEventHandlers(vs22, { onClick: () => window.router.navigate("/gamelocal4p") });
   withEventHandlers(tournament, { onClick: () => window.router.navigate("/gamest") });
   withEventHandlers(back, { onClick: () => window.router.navigate("/") });
 
@@ -32,14 +32,8 @@ function singleMenu()
 const HomePage = {
   layoutVisibility: true,
   pageBack: () => {
-    console.log("HomePage.pageBack");
-    //if (GameLocalPage.game)
-      //GameLocalPage.game.gameDestroy();
   },
   pageNext: () => {
-    console.log("HomePage.pageNext");
-    //if (GameLocalPage.game)
-      //GameLocalPage.game.gameDestroy();
   },
   render:  () => {
     const pageContainer = MenuElement("FriendPage");

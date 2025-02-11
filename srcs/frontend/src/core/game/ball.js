@@ -1,17 +1,17 @@
+//ball.js
 import * as THREE from "https://cdn.skypack.dev/three@0.136.0";
 
 class Ball {
-  constructor() {
+  constructor(gameType) {
     const geometry = new THREE.SphereGeometry(0.3, 32, 32);
     const material = new THREE.MeshStandardMaterial({
       color: 0xffffff,
       metalness: 0.5,
       roughness: 0.3
     });
+    this.gameType = gameType;
     this.mesh = new THREE.Mesh(geometry, material);
-
     this.velocity = { x: 0.1, y: 0.1 };
-
     this.bounds = {
       xMin: -10,
       xMax: 10,
@@ -20,7 +20,7 @@ class Ball {
     };
   }
 
-  update(paddle1, paddle2, game) {
+  update(paddle1, paddle2, paddle3, paddle4, game) { // Paddle 3 ve 4 eklendi
     this.mesh.position.x += this.velocity.x;
     this.mesh.position.y += this.velocity.y;
 
@@ -31,7 +31,12 @@ class Ball {
 
     // Paddle'lar ile çarpışma
     if (this.checkCollision(paddle1) || this.checkCollision(paddle2)) {
-      this.velocity.x *= -1; // X yönünü tersine çevir
+      if (this.gameType === "local-4p" )
+      {
+        if (this.checkCollision(paddle3) || this.checkCollision(paddle4))
+          this.velocity.x *= -1;
+      }
+      this.velocity.x *= -1;
     }
 
     // Skor kontrolü

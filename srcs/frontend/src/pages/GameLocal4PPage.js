@@ -35,8 +35,8 @@ const GameLocalPage = {
 
     const startBtn = SubmitButton("startBtn", "Start Game");
     const skor = new TextComponent("skor", { text: "0 - 0", class: "text-center element-h2", styles: { display: "none" } });
-    const p1Input = InputElement("p1Input", "1 Player Name", "text");
-    const p2Input = InputElement("p2Input", "2 Player Name", "text");
+    const p1Input = InputElement("p1Input", "1 Player Team", "text");
+    const p2Input = InputElement("p2Input", "2 Player Team", "text");
     const p1name = new TextComponent("p1name", { text: "Player 1", class: "text-center element-h2",
       styles: {
         display: "none",
@@ -53,7 +53,6 @@ const GameLocalPage = {
         right: "30px"
       }
     });
-    const winnerText = new TextComponent("winnerText", { text: "", class: "text-center element-h2", styles: { display: "none" } });
     const restartBtn = SubmitButton("restartBtn", "Restart Game");
     restartBtn.styles = { display: "none", margin: "10px", backgroundColor: "green" };
     const backBtn = SubmitButton("backBtn", "Back");
@@ -86,7 +85,7 @@ const GameLocalPage = {
       }
     })
 
-    GameLocalPage.game = new Game3D({inputMode: "local"});
+    GameLocalPage.game = new Game3D({inputMode: "local-4p"});
     GameLocalPage.game.onScoreChange = (score) => {
       skor.update({ text: `${score.p1} - ${score.p2}` });
     };
