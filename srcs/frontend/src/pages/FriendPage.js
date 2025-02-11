@@ -88,12 +88,12 @@ function createFriendRequestRow(user, userManager) {
   const userDiv = createUserBaseRow(user.sender);
   const acceptFriendRequest = new ButtonComponent(`accept-friend-request-${user.sender.id}`, { label: "Accept" });
   const rejectFriendRequest = new ButtonComponent(`reject-friend-request-${user.sender.id}`, { label: "Reject" });
-  
+
   userDiv.elements.push(acceptFriendRequest, rejectFriendRequest);
-  
+
   withEventHandlers(acceptFriendRequest, { onClick: async () => await userManager.acceptReceivedFriendshipRequest(user.sender.id) });
   withEventHandlers(rejectFriendRequest, { onClick: async () => await userManager.rejectReceivedFriendshipRequest(user.sender.id) });
-  
+
   return userDiv;
 }
 
@@ -118,19 +118,18 @@ function createBlockedUserRow(user, userManager) {
  * ✅ Genel Kullanıcı Listesi için Eleman Oluşturur
  */
 function createUserRow(user, userManager) {
-  console.log(user)
   const userDiv = createUserBaseRow(user);
   const sendFriendRequest = new ButtonComponent(`send-friend-request-${user.id}`, { label: "Add Friend" });
   const blockUser = new ButtonComponent(`block-user-${user.id}`, { label: "Block" });
-  
+
   userDiv.elements.push(sendFriendRequest, blockUser);
-  
+
   withEventHandlers(sendFriendRequest, { onClick: async () => {
     await userManager.sentFriendshipRequest(user.id);
     pageContainer.elements[0].update();
   }});
   withEventHandlers(blockUser, { onClick: async () => await userManager.blockUserById(user.id) });
-  
+
   return userDiv;
 }
 

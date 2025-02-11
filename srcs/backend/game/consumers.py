@@ -6,6 +6,7 @@ from .models import GameDB
 from .models import TMPGameDB
 from datetime import datetime
 from asgiref.sync import sync_to_async
+from users.models import UserStats
 
 logger = logging.getLogger(__name__)
 
@@ -127,7 +128,7 @@ class GameConsumer(AsyncWebsocketConsumer):
             self.game_state["ball_dx"] *= -1
 
         # Skor kontrolü
-        if self.game_state["p1_score"] >= 10 or self.game_state["p2_score"] >= 10:
+        if self.game_state["p1_score"] >= 5 or self.game_state["p2_score"] >= 5:
             self.game_over = True
             self.game_state["gameRunning"] = False
             logger.error("OYUN BITTI")
@@ -160,7 +161,6 @@ class GameConsumer(AsyncWebsocketConsumer):
         logger.error("receive cagrildi")
         try:
             text_data_json = json.loads(text_data)
-
             if "type" not in text_data_json:
                 await self.send(
                     json.dumps(
@@ -185,17 +185,17 @@ class GameConsumer(AsyncWebsocketConsumer):
                     direction = text_data_json["direction"]
                     if direction == "up":
                         if self.user_id == self.game_state["host_id"] and self.game_state["p1_y"] > 0 and self.game_state["p1_y"] <= 100:
-                            self.game_state["p1_y"] -= 10
+                            self.game_state["p1_y"] -= 2
                             await self.send_msg({"type": "move", "p1_y": self.game_state["p1_y"], "user_id": self.user_id})
                         elif self.user_id != self.game_state["host_id"] and self.game_state["p2_y"] > 0 and self.game_state["p2_y"] <= 100:
-                            self.game_state["p2_y"] -= 10
+                            self.game_state["p2_y"] -= 2
                             await self.send_msg({"type": "move", "p2_y": self.game_state["p2_y"], "user_id": self.user_id})
                     elif direction == "down":
                          if self.user_id == self.game_state["host_id"] and self.game_state["p1_y"] >= 0 and self.game_state["p1_y"] < 100:
-                            self.game_state["p1_y"] += 10
+                            self.game_state["p1_y"] += 2
                             await self.send_msg({"type": "move", "p1_y": self.game_state["p1_y"], "user_id": self.user_id})
                          elif self.user_id != self.game_state["host_id"] and self.game_state["p2_y"] >= 0 and self.game_state["p2_y"] < 100:
-                            self.game_state["p2_y"] += 10
+                            self.game_state["p2_y"] += 2
                             await self.send_msg({"type": "move", "p2_y": self.game_state["p2_y"], "user_id": self.user_id})
                     logger.error(f"p1_y ={self.game_state['p1_y']} p2_y {self.game_state['p2_y']}")
         except Exception as e:
@@ -236,6 +236,10 @@ class GameConsumer(AsyncWebsocketConsumer):
                             create_date=room.create_date,
                             end_date=room.end_date,
                         )
+                        p1_win = self.game_state["p1_score"] > self.game_state["p2_score"]
+                        winner_id = room.player1_id if p1_win else room.player2_id
+                        loser_id = room.player2_id if p1_win else room.player1_id
+
                         logger.error(f"{self.user_id} Oyun verileri kayit edildi.")
                         if p1_win:
                             logger.error(f"{room.winner_id} oyunu kazandi score {self.game_state['p1_score']} {self.game_state['p2_score']}")
@@ -269,3 +273,16 @@ class GameConsumer(AsyncWebsocketConsumer):
 
         except Exception as e:
             logger.error(f"endOfGame metodunda hata: {e}")
+
+def update_user_stats(self, winner_id, loser_id):
+    # Kazananın istatistiklerini güncelle
+    winner_stats = UserStats.objects.get(user_id=winner_id)
+    winner_stats.games_played += 1
+    winner_stats.games_won += 1
+    winner_stats.save()
+
+    # Kaybedenin istatistiklerini güncelle
+    loser_stats = UserStats.objects.get(user_id=loser_id)
+    loser_stats.games_played += 1
+    loser_stats.games_lost += 1
+    loser_stats.save()

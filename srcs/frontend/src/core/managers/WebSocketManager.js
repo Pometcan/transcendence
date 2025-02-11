@@ -1,45 +1,34 @@
-// WebSocketManager.js
 class WebSocketManager {
-    constructor(websocketURL, onInputMessage) {
+    constructor(websocketURL, onMessageCallback) {
         this.websocketURL = websocketURL;
-        this.onInputMessage = onInputMessage; // Callback function to handle input messages
+        this.onMessageCallback = onMessageCallback;
         this.websocket = null;
     }
 
     connect() {
-        if (!this.websocketURL) {
-            console.error("WebSocket URL is not provided.");
-            return;
-        }
-
         this.websocket = new WebSocket(this.websocketURL);
 
         this.websocket.onopen = () => {
-            console.log("WebSocket bağlantısı açıldı:", this.websocketURL);
-            // You can add any on open logic here if needed, e.g., sending a "join" message
+            console.log("WebSocket bağlantısı açıldı.");
         };
 
         this.websocket.onmessage = (event) => {
             try {
                 const data = JSON.parse(event.data);
-                console.log("WebSocket Gelen Mesaj:", data);
-                if (this.onInputMessage) {
-                    this.onInputMessage(data); // Call the callback with the received data
+                if (this.onMessageCallback) {
+                    this.onMessageCallback(data);
                 }
             } catch (error) {
-                console.error("WebSocket mesajı işlenirken hata:", error);
-                console.error("Alınan mesaj:", event.data);
+                console.error("WebSocket mesajı ayrıştırılamadı:", error, event.data);
             }
         };
 
         this.websocket.onerror = (error) => {
             console.error("WebSocket hatası:", error);
-            // Handle error, maybe try to reconnect or notify user
         };
 
         this.websocket.onclose = () => {
             console.log("WebSocket bağlantısı kapandı.");
-            // Handle connection close, maybe try to reconnect or notify user
         };
     }
 
@@ -47,14 +36,21 @@ class WebSocketManager {
         if (this.websocket && this.websocket.readyState === WebSocket.OPEN) {
             this.websocket.send(JSON.stringify(message));
         } else {
-            console.error("WebSocket bağlantısı açık değil. Mesaj gönderilemedi:", message);
+            console.warn("WebSocket bağlantısı açık değil. Mesaj gönderilemedi:", message);
         }
     }
 
     close() {
-        if (this.websocket && this.websocket.readyState === WebSocket.OPEN) {
+        if (this.websocket) {
             this.websocket.close();
         }
+    }
+
+    get readyState() {
+        if (this.websocket) {
+            return this.websocket.readyState;
+        }
+        return WebSocket.CLOSED; // WebSocket henüz oluşturulmamışsa kapalı olarak kabul et
     }
 }
 

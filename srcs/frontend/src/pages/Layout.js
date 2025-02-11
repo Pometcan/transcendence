@@ -20,11 +20,12 @@ const Layout = {
     const homeButton = NavbarButton("home-button", "Home");
     const profileButton = NavbarButton("profile-button", "Profile");
     const friendsButton = NavbarButton("friends-button", "Friends");
+    const dashboardButton = NavbarButton("dashboard-button", "Dashboard")
     withEventHandlers(homeButton, { onClick: () => window.router.navigate("/") });
     withEventHandlers(profileButton, { onClick: () => window.router.navigate("/profile") });
     withEventHandlers(friendsButton, { onClick: () => window.router.navigate("/friends") });
-
-    col.elements = [homeButton, friendsButton, profileButton];
+    withEventHandlers(dashboardButton, {onClick: () => window.router.navigate("/dashboard")})
+    col.elements = [homeButton, friendsButton, profileButton, dashboardButton];
 
     const pageContentContainer = new DivComponent("page-content-container", {});
     layoutContainer.elements = [
