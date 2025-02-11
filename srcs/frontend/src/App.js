@@ -3,7 +3,8 @@ import { HomePage, AuthPage, ProfilePage, GameP2Page, IntraPage, VerifyPage, Fri
 import { PageManager } from "./core/managers/PageManager";
 import { getCookie,setCookie } from "./core/Cookie";
 import { init, changeLanguage} from "./i42n.js";
-
+import WebSocketManager from "./core/managers/WebSocketManager.js";
+import UserManager from "./core/managers/UserManager.js";
 import Router from "./core/Router";
 
 export class App extends HTMLElement {

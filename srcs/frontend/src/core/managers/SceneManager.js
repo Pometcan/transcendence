@@ -37,9 +37,10 @@ class SceneManager {
   destroy() {
     this.renderer.domElement.remove();
     this.renderer.forceContextLoss();
-    this.renderer.context = null;
-    this.renderer.domElement = null;
-    this.renderer = null;
+    if (this.renderer.domElement)
+      this.renderer.domElement = null;
+    if (this.renderer)
+      this.renderer = null;
   }
 
   onWindowResize() {

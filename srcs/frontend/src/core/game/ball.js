@@ -3,17 +3,20 @@ import * as THREE from "https://cdn.skypack.dev/three@0.136.0";
 class Ball {
   constructor() {
     const geometry = new THREE.SphereGeometry(0.3, 32, 32);
-    const material = new THREE.MeshBasicMaterial({ color: 0xffffff });
+    const material = new THREE.MeshStandardMaterial({
+      color: 0xffffff,
+      metalness: 0.5,
+      roughness: 0.3
+    });
     this.mesh = new THREE.Mesh(geometry, material);
 
     this.velocity = { x: 0.1, y: 0.1 };
 
-    // Pong sahası sınırları
     this.bounds = {
-      xMin: -10,  // Sol duvar
-      xMax: 10,   // Sağ duvar
-      yMin: -4,  // Alt duvar
-      yMax: 4,   // Üst duvar
+      xMin: -10,
+      xMax: 10,
+      yMin: -4,
+      yMax: 4,
     };
   }
 

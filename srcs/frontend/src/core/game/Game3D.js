@@ -2,8 +2,15 @@ import SceneManager from "../managers/SceneManager.js";
 import Ball from "./ball.js";
 import Paddle from "./paddle.js";
 import InputManager from "../managers/InputManager.js";
-import confetti from 'https://cdn.skypack.dev/canvas-confetti';
 import * as THREE from 'https://cdn.jsdelivr.net/npm/three@0.136.0/build/three.module.js';
+
+const GameState = {
+  IDLE: "idle",        // Initial state, waiting to start
+  RUNNING: "running",   // Game in progress
+  PAUSED: "paused",     // Game is paused
+  ENDED: "ended",       // Game has ended (win/loss)
+  DESTROYED: "destroyed", // Game is destroyed
+};
 
 class Game3D {
   constructor(inputConfig = {}) {
@@ -33,8 +40,8 @@ class Game3D {
     };
 
     this.ball.mesh.position.set(0, 0, 0);
-    this.paddle1.mesh.position.set(-10, 0, 0);
-    this.paddle2.mesh.position.set(10, 0, 0);
+    this.paddle1.mesh.position.set(-11, 0, 0);
+    this.paddle2.mesh.position.set(11, 0, 0);
 
 
     this.cameraDefualtPosition = {
@@ -49,7 +56,13 @@ class Game3D {
       p2: { x: Math.PI / 2, y: 0, z: 0 },
     };
 
-    this.sceneManager.camera.position.set(this.cameraDefualtPosition.top.x, this.cameraDefualtPosition.top.y, this.cameraDefualtPosition.top.z);
+    this.sceneManager.camera.position.set(
+      new THREE.Vector3(
+        this.cameraDefualtPosition.top.x,
+        this.cameraDefualtPosition.top.y,
+        this.cameraDefualtPosition.top.z
+      )
+    );
     this.sceneManager.camera.lookAt(
       new THREE.Vector3(
         this.cameraDefualtLookAt.top.x,
@@ -57,6 +70,7 @@ class Game3D {
         this.cameraDefualtLookAt.top.z
       )
     );
+
     if (this.playerRole === "p1") {
       this.changeCameraPosition(this.cameraDefualtPosition.p1);
       this.changeCameraLookAt(this.cameraDefualtLookAt.p1);
@@ -68,11 +82,10 @@ class Game3D {
       this.changeCameraLookAt(this.cameraDefualtLookAt.top);
     }
 
-    this.cameraPosition = 1;
     this.score = { p1: 0, p2: 0 };
     this.onScoreChange = (score) => { };
     this.onGameEnd = (winner) => { };
-    this.gameState = "stopped";
+    this._gameState = GameState.IDLE;
     this.gameEnded = false;
 
     this.sceneManager.drawRectangleBorder(this.bounds);
@@ -83,6 +96,7 @@ class Game3D {
 
     this.animate();
   }
+
 
   backendXtoFrontendX(backendX) {
     // Backend X (0-100) -> Frontend X (-10 - 10)
@@ -103,70 +117,91 @@ class Game3D {
     this.sceneManager.camera.lookAt(c.x, c.y, c.z);
   }
 
-  gameStart() {
-    this.gameState = "started";
-    this.score = { p1: 0, p2: 0 };
-    this.onScoreChange(this.score);
+  get gameState() {
+    return this._gameState;
   }
 
-  gameStop() {
-    this.gameState = "stopped";
+  set gameState(newState) {
+    if (this.isValidTransition(this._gameState, newState ) )
+      this._gameState = newState;
+  }
+
+  isValidTransition(currentState, newState) {
+    switch (currentState) {
+      case GameState.IDLE:
+        return newState === GameState.RUNNING;
+      case GameState.RUNNING:
+        return [GameState.PAUSED, GameState.ENDED].includes(newState);
+      case GameState.PAUSED:
+        return newState === GameState.RUNNING;
+      case GameState.ENDED:
+        return newState === GameState.DESTROYED;
+      case GameState.DESTROYED:
+        return false;
+      default:
+        return false;
+    }
+  }
+
+  gameStart() {
+    if (this.gameState === GameState.IDLE || this.gameState === GameState.ENDED) {
+      this.gameState = GameState.RUNNING;
+      this.score = { p1: 0, p2: 0 };
+      this.onScoreChange(this.score);
+    } else {
+      console.warn("Cannot start game from current state: " + this.gameState);
+    }
   }
 
   gameRestart() {
-    this.gameState = "started";
-    this.score = { p1: 0, p2: 0 };
-    this.onScoreChange(this.score);
+    if (this.gameState === GameState.ENDED || this.gameState === GameState.PAUSED)
+      this.gameStart();
   }
 
-  gameEnd() {
-    this.gameState = "ended";
-    this.gameEnded = true;
+  gameEnd(winner) {
+    if (this.gameState === GameState.RUNNING){
+      if (winner)
+        this.onGameEnd(winner);
+      this.gameState = GameState.ENDED;
+      this.gameEnded = true;
+    }
   }
 
   gameDestroy() {
-    console.log("Oyun tamamen siliniyor...");
+    if (this.gameState !== GameState.DESTROYED) {
+      console.log("Oyun tamamen siliniyor...");
 
-    this.gameState = "destroyed";
-    this.gameEnded = true;
+      this.gameState = GameState.DESTROYED;
+      this.gameEnded = true;
 
-    // 🚀 1. `requestAnimationFrame()` döngüsünü durdur
-    cancelAnimationFrame(this.animationFrameId);
+      cancelAnimationFrame(this.animationFrameId);
 
-    // 🚀 2. Sahnedeki tüm nesneleri temizle
-    while (this.sceneManager.scene.children.length > 0) {
-      let child = this.sceneManager.scene.children[0];
-      this.sceneManager.scene.remove(child);
+      while (this.sceneManager.scene.children.length > 0) {
+        let child = this.sceneManager.scene.children[0];
+        this.sceneManager.scene.remove(child);
 
-      if (child.geometry) child.geometry.dispose();
-      if (child.material) {
-        if (Array.isArray(child.material)) {
-          child.material.forEach(mat => mat.dispose());
-        } else {
-          child.material.dispose();
+        if (child.geometry) child.geometry.dispose();
+        if (child.material) {
+          if (Array.isArray(child.material)) {
+            child.material.forEach(mat => mat.dispose());
+          } else {
+            child.material.dispose();
+          }
         }
+        if (child.texture) child.texture.dispose();
       }
-      if (child.texture) child.texture.dispose();
-    }
-
-    // 🚀 3. SceneManager'ı yok et
-    this.sceneManager.destroy();
-
-    // 🚀 4. Three.js'in HTML `<canvas>` elementini kaldır
-    if (this.sceneManager.renderer && this.sceneManager.renderer.domElement) {
-      this.sceneManager.renderer.domElement.remove();
-    }
-
-    // 🚀 5. Tüm değişkenleri temizle
-    this.sceneManager = null;
-    this.inputManager = null;
-    this.ball = null;
-    this.paddle1 = null;
-    this.paddle2 = null;
-
-    console.log("Oyun başarıyla silindi.");
 
 
+      this.sceneManager.destroy();
+      this.sceneManager = null;
+      this.inputManager = null;
+      this.ball = null;
+      this.paddle1 = null;
+      this.paddle2 = null;
+
+      console.log("Oyun başarıyla silindi.");
+    } else
+      console.warn("Game is already destroyed.");
   }
 
   setBallPosition(x, y) {
@@ -185,10 +220,9 @@ class Game3D {
   }
 
   update() {
-    if (this.gameEnded) return;
+    if (this.gameState !== GameState.RUNNING) return;
 
-    if (this.gameType == "local")
-    {
+    if (this.gameType == "local") {
       this.ball.update(this.paddle1, this.paddle2, this);
       if (this.inputManager.keys.p1["w"]) this.paddle1.move(1);
       if (this.inputManager.keys.p1["s"]) this.paddle1.move(-1);
@@ -204,13 +238,26 @@ class Game3D {
         if (this.inputManager.keys.p2["ArrowUp"]) this.inputManager.send({ type: "move", player: "p2", key: "ArrowUp", pressed: true });
         if (this.inputManager.keys.p2["ArrowDown"]) this.inputManager.send({ type: "move", player: "p2", key: "ArrowDown", pressed: true });
       }
+      if (this.inputManager.keys.p1["1"]) {
+        this.changeCameraPosition(this.cameraDefualtPosition.p1);
+        this.changeCameraLookAt(this.cameraDefualtLookAt.p1);
+      }
+      if (this.inputManager.keys.p1["2"]){
+        this.changeCameraPosition(this.cameraDefualtPosition.p2);
+        this.changeCameraLookAt(this.cameraDefualtLookAt.p2);
+      }
+      else if (this.inputManager.keys.p1["3"]) {
+        this.changeCameraPosition(this.cameraDefualtPosition.top);
+        this.changeCameraLookAt(this.cameraDefualtLookAt.top);
+      }
+
     }
     else {console.log("Invalid game type")}
 
   }
 
   scorePoint(player) {
-    if (this.gameEnded) return;
+    if (this.gameState !== GameState.RUNNING) return;
 
     this.score[player]++;
     let winner = null;
@@ -218,26 +265,20 @@ class Game3D {
     this.onScoreChange(this.score);
     if (this.score.p1 >= 5) {
       winner = "p1";
-      this.gameEnded = true;
-      this.onGameEnd(winner);
+      this.gameEnd(winner)
     } else if (this.score.p2 >= 5) {
       winner = "p2";
-      this.gameEnded = true;
-      this.onGameEnd(winner);
+      this.gameEnd(winner)
     }
-
     return this.score;
   }
 
   animate() {
-    requestAnimationFrame(() => this.animate());
-    this.update();
-    this.sceneManager.render();
-  }
-
-  onGameEnd(winner) {
-    confetti();
-    this.gameDestroy();
+    if (this.gameState !== GameState.DESTROYED) {
+      this.animationFrameId = requestAnimationFrame(() => this.animate());
+      this.update();
+      this.sceneManager.render();
+    }
   }
 }
 

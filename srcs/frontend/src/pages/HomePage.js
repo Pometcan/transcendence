@@ -31,6 +31,16 @@ function singleMenu()
 
 const HomePage = {
   layoutVisibility: true,
+  pageBack: () => {
+    console.log("HomePage.pageBack");
+    //if (GameLocalPage.game)
+      //GameLocalPage.game.gameDestroy();
+  },
+  pageNext: () => {
+    console.log("HomePage.pageNext");
+    //if (GameLocalPage.game)
+      //GameLocalPage.game.gameDestroy();
+  },
   render:  () => {
     const pageContainer = MenuElement("FriendPage");
 
