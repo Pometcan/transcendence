@@ -79,6 +79,7 @@ const GameLocalPage = {
         p1Input.update({styles: {display: "none"}});
         p2Input.update({styles: {display: "none"}});
         backBtn.update({styles: {display: "none"}});
+        winnerText.update({styles: {display: "none"}});
         skor.update({styles: {display: "block" }});
         p1name.update({text: p1Input.elements[0].value, styles: {display: "block"}});
         p2name.update({text: p2Input.elements[0].value, styles: {display: "block"}});
@@ -93,6 +94,7 @@ const GameLocalPage = {
     GameLocalPage.game.onGameEnd = (winner) => {
       skor.update({ text: `${GameLocalPage.game.score.p1} - ${GameLocalPage.game.score.p2}`});
       confetti();
+      winnerText.update({text: `${winner} wins`, styles: {display: "block"}});
       pageContainer.update({styles: {
         backgroundColor: "rgba(0, 0, 0, 0.8)",
       }})
@@ -125,6 +127,7 @@ const GameLocalPage = {
       p2Input,
       p1name,
       skor,
+      winnerText,
       p2name,
       startBtn,
       restartBtn,

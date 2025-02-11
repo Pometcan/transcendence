@@ -128,7 +128,7 @@ class GameConsumer(AsyncWebsocketConsumer):
             self.game_state["ball_dx"] *= -1
 
         # Skor kontrolü
-        if self.game_state["p1_score"] >= 10 or self.game_state["p2_score"] >= 10:
+        if self.game_state["p1_score"] >= 5 or self.game_state["p2_score"] >= 5:
             self.game_over = True
             self.game_state["gameRunning"] = False
             logger.error("OYUN BITTI")
@@ -185,17 +185,17 @@ class GameConsumer(AsyncWebsocketConsumer):
                     direction = text_data_json["direction"]
                     if direction == "up":
                         if self.user_id == self.game_state["host_id"] and self.game_state["p1_y"] > 0 and self.game_state["p1_y"] <= 100:
-                            self.game_state["p1_y"] -= 1
+                            self.game_state["p1_y"] -= 2
                             await self.send_msg({"type": "move", "p1_y": self.game_state["p1_y"], "user_id": self.user_id})
                         elif self.user_id != self.game_state["host_id"] and self.game_state["p2_y"] > 0 and self.game_state["p2_y"] <= 100:
-                            self.game_state["p2_y"] -= 1
+                            self.game_state["p2_y"] -= 2
                             await self.send_msg({"type": "move", "p2_y": self.game_state["p2_y"], "user_id": self.user_id})
                     elif direction == "down":
                          if self.user_id == self.game_state["host_id"] and self.game_state["p1_y"] >= 0 and self.game_state["p1_y"] < 100:
-                            self.game_state["p1_y"] += 1
+                            self.game_state["p1_y"] += 2
                             await self.send_msg({"type": "move", "p1_y": self.game_state["p1_y"], "user_id": self.user_id})
                          elif self.user_id != self.game_state["host_id"] and self.game_state["p2_y"] >= 0 and self.game_state["p2_y"] < 100:
-                            self.game_state["p2_y"] += 1
+                            self.game_state["p2_y"] += 2
                             await self.send_msg({"type": "move", "p2_y": self.game_state["p2_y"], "user_id": self.user_id})
                     logger.error(f"p1_y ={self.game_state['p1_y']} p2_y {self.game_state['p2_y']}")
         except Exception as e:
@@ -225,8 +225,6 @@ class GameConsumer(AsyncWebsocketConsumer):
                             room.winner_id = room.player2_id
                         room.end_date = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
                         await sync_to_async(room.save)()
-
-                        
 
                         await sync_to_async(GameDB.objects.create)(
                             room_id=room.room_id,
@@ -275,7 +273,7 @@ class GameConsumer(AsyncWebsocketConsumer):
 
         except Exception as e:
             logger.error(f"endOfGame metodunda hata: {e}")
-            
+
 def update_user_stats(self, winner_id, loser_id):
     # Kazananın istatistiklerini güncelle
     winner_stats = UserStats.objects.get(user_id=winner_id)

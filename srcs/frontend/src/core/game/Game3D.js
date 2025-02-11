@@ -258,33 +258,11 @@ class Game3D {
     if (this.gameState !== GameState.RUNNING) return;
 
     if (this.gameType == "local") {
-      this.ball.update(this.paddle1, this.paddle2, this.paddle3, this.paddle4, this); // ball.js hala 4 paddle bekliyor, sorun olmaz
+      this.ball.update(this.paddle1, this.paddle2, this.paddle3, this.paddle4, this);
       if (this.inputManager.keys.p1["w"]) this.paddle1.move(1);
       if (this.inputManager.keys.p1["s"]) this.paddle1.move(-1);
       if (this.inputManager.keys.p2["ArrowUp"]) this.paddle2.move(1);
       if (this.inputManager.keys.p2["ArrowDown"]) this.paddle2.move(-1);
-    }
-    else if (this.gameType == "local-4p"){
-      console.log("4 player game");
-      this.ball.update(this.paddle1, this.paddle2, this.paddle3, this.paddle4, this); // Paddle 3 ve 4 eklendi
-      if (this.inputManager.keys.p1["w"]) this.paddle1.move(1); // Sol üst yukarı
-      if (this.inputManager.keys.p1["s"]) this.paddle1.move(-1); // Sol üst aşağı
-      if (this.inputManager.keys.p3["f"]) this.paddle2.move(1); // Sol alt yukarı (f)
-      if (this.inputManager.keys.p3["v"]) this.paddle2.move(-1); // Sol alt aşağı (v)
-      if (this.inputManager.keys.p2["ArrowUp"]) this.paddle3.move(1); // Sağ üst yukarı
-      if (this.inputManager.keys.p2["ArrowDown"]) this.paddle3.move(-1); // Sağ üst aşağı
-      if (this.inputManager.keys.p4["o"]) this.paddle4.move(1); // Sağ alt yukarı (o)
-      if (this.inputManager.keys.p4["l"]) this.paddle4.move(-1); // Sağ alt aşağı (l)
-    }
-    else if (this.gameType == "websocket"){
-      if (this.playerRole === "p1") {
-        if (this.inputManager.keys.p1["w"]) this.inputManager.send({ type: "move", player: "p1", key: "w", pressed: true });
-        if (this.inputManager.keys.p1["s"]) this.inputManager.send({ type: "move", player: "p1", key: "s", pressed: true });
-      }
-      if (this.playerRole === "p2") {
-        if (this.inputManager.keys.p2["ArrowUp"]) this.inputManager.send({ type: "move", player: "p2", key: "ArrowUp", pressed: true });
-        if (this.inputManager.keys.p2["ArrowDown"]) this.inputManager.send({ type: "move", player: "p2", key: "ArrowDown", pressed: true });
-      }
       if (this.inputManager.keys.p1["1"]) {
         this.changeCameraPosition(this.cameraDefualtPosition.p1);
         this.changeCameraLookAt(this.cameraDefualtLookAt.p1);
@@ -297,7 +275,30 @@ class Game3D {
         this.changeCameraPosition(this.cameraDefualtPosition.top);
         this.changeCameraLookAt(this.cameraDefualtLookAt.top);
       }
-
+    }
+    else if (this.gameType == "local-4p"){
+      console.log("4 player game");
+      this.ball.update(this.paddle1, this.paddle2, this.paddle3, this.paddle4, this);
+      if (this.inputManager.keys.p1["w"]) this.paddle1.move(1);
+      if (this.inputManager.keys.p1["s"]) this.paddle1.move(-1);
+      if (this.inputManager.keys.p3["f"]) this.paddle2.move(1);
+      if (this.inputManager.keys.p3["v"]) this.paddle2.move(-1);
+      if (this.inputManager.keys.p2["ArrowUp"]) this.paddle3.move(1);
+      if (this.inputManager.keys.p2["ArrowDown"]) this.paddle3.move(-1);
+      if (this.inputManager.keys.p4["o"]) this.paddle4.move(1);
+      if (this.inputManager.keys.p4["l"]) this.paddle4.move(-1);
+      if (this.inputManager.keys.p1["1"]) {
+        this.changeCameraPosition(this.cameraDefualtPosition.p1);
+        this.changeCameraLookAt(this.cameraDefualtLookAt.p1);
+      }
+      if (this.inputManager.keys.p1["2"]){
+        this.changeCameraPosition(this.cameraDefualtPosition.p2);
+        this.changeCameraLookAt(this.cameraDefualtLookAt.p2);
+      }
+      else if (this.inputManager.keys.p1["3"]) {
+        this.changeCameraPosition(this.cameraDefualtPosition.top);
+        this.changeCameraLookAt(this.cameraDefualtLookAt.top);
+      }
     }
     else {console.log("Invalid game type")}
 

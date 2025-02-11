@@ -1,5 +1,5 @@
 // App.js
-import { HomePage, AuthPage, ProfilePage, GameP2Page, IntraPage, GameLocal4PPage, VerifyPage, FriendPage, Page404, Layout,GameLocalPage,DashboardPage } from "./pages/Type.Page.js";
+import { HomePage, AuthPage, ProfilePage, GameP2Page, IntraPage, GameLocal4PPage,GameTournamentPage, VerifyPage, FriendPage, Page404, Layout,GameLocalPage,DashboardPage } from "./pages/Type.Page.js";
 import { PageManager } from "./core/managers/PageManager";
 import { getCookie,setCookie } from "./core/Cookie";
 import { init, changeLanguage} from "./i42n.js";
@@ -34,6 +34,7 @@ export class App extends HTMLElement {
       "/gamep2": "gamep2Page",
       "/gamelocal": "GameLocalPage",
       "/gamelocal4p": "gameLocal4PPage",
+      "/gametournament": "GameTournamentPage",
       "/404": "/404"
     };
     for (const [key, value] of Object.entries(routesConfig)) {
@@ -53,6 +54,7 @@ export class App extends HTMLElement {
       "gamep2Page": GameP2Page,
       "gameLocal4PPage": GameLocal4PPage,
       "GameLocalPage": GameLocalPage,
+      "GameTournamentPage":GameTournamentPage,
       "/404": Page404
     }
     for (const [key, value] of Object.entries(pageComponents)) {
