@@ -42,6 +42,16 @@ export class LabelComponent extends UIComponent {
         if (this.element)
           this.element.innerText = this.text;
       }
+      if (newProps.class !== undefined) {
+        this.class = newProps.class;
+        if (this.element)
+          this.element.className = this.class;
+      }
+      if (newProps.styles !== undefined) {
+        this.styles = newProps.styles;
+        if (this.element)
+          this.applyStyles(this.element);
+      }
     }
   }
 }

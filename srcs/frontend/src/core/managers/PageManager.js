@@ -16,7 +16,11 @@ export class PageManager {
     return this.pages.get(this.activePage);
   }
 
-  setActivePage(pageId, urlParams) { // urlParams argümanı eklendi
+  getActivePageId() {
+    return this.activePage;
+  }
+
+  setActivePage(pageId, urlParams) {
     if (this.activePage) {
       const currentPage = this.pages.get(this.activePage);
       if (currentPage && currentPage.element) {

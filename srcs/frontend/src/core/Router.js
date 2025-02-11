@@ -3,6 +3,8 @@ export default class Router {
   constructor(pageManager) {
      this._routes = {};
      this.pageManager = pageManager;
+     this.currentPageId = null;
+
      window.addEventListener("popstate", () =>
        this.handleRoute(window.location.pathname),
      );
@@ -66,17 +68,30 @@ export default class Router {
   }
 
   handleRoute(path) {
-      const fullUrl = window.location.href; // Tam URL'yi al
-      const urlParams = new URLSearchParams(window.location.search); // Query parametrelerini ayrıştır
-
+      const fullUrl = window.location.href;
+      const urlParams = new URLSearchParams(window.location.search);
       const pageId = this._routes[path];
+      const currentPageId = this.pageManager.getActivePageId();
+      const currentPage = this.pageManager.getActivePage();
+
       this.selectedPage = path;
+      this.currentPageId = pageId;
+
       if (pageId) {
-        this.pageManager.setActivePage(pageId, urlParams); // Parametreleri setActivePage'e ilet
+        this.pageManager.setActivePage(pageId, urlParams);
       } else {
         if (this._routes["/404"]) {
-          this.pageManager.setActivePage("/404", urlParams); // 404 sayfası için de parametreleri iletmek isteyebilirsiniz
+          this.pageManager.setActivePage("/404", urlParams);
         }
       }
+
+      const nextPage = this.pageManager.getActivePage();
+      if (currentPage && currentPage.pageLeave && currentPageId !== pageId) {
+         currentPage.pageLeave();
+      }
+
+       if (nextPage && nextPage.pageLoad && currentPageId !== pageId) {
+         nextPage.pageLoad();
+       }
     }
 }

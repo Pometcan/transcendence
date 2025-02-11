@@ -1,8 +1,10 @@
 // App.js
-import { HomePage, AuthPage, ProfilePage, IntraPage, VerifyPage, FriendPage, Page404, Layout } from "./pages/Type.Page.js";
+import { HomePage, AuthPage, ProfilePage, GameP2Page, IntraPage, GameLocal4PPage,GameTournamentPage, VerifyPage, FriendPage, Page404, Layout,GameLocalPage,DashboardPage } from "./pages/Type.Page.js";
 import { PageManager } from "./core/managers/PageManager";
 import { getCookie,setCookie } from "./core/Cookie";
 import { init, changeLanguage} from "./i42n.js";
+import WebSocketManager from "./core/managers/WebSocketManager.js";
+import UserManager from "./core/managers/UserManager.js";
 import Router from "./core/Router";
 
 export class App extends HTMLElement {
@@ -19,6 +21,7 @@ export class App extends HTMLElement {
     window.app = this;
   }
 
+
   initRouter() {
     const routesConfig = {
       "/": "homePage",
@@ -27,6 +30,11 @@ export class App extends HTMLElement {
       "/intra-auth": "IntraPage",
       "/verify": "VerifyPage",
       "/friends": "friendPage",
+      "/dashboard":"dashboard",
+      "/gamep2": "gamep2Page",
+      "/gamelocal": "GameLocalPage",
+      "/gamelocal4p": "gameLocal4PPage",
+      "/gametournament": "GameTournamentPage",
       "/404": "/404"
     };
     for (const [key, value] of Object.entries(routesConfig)) {
@@ -42,6 +50,11 @@ export class App extends HTMLElement {
       "IntraPage": IntraPage,
       "VerifyPage": VerifyPage,
       "friendPage": FriendPage,
+      "dashboard": DashboardPage,
+      "gamep2Page": GameP2Page,
+      "gameLocal4PPage": GameLocal4PPage,
+      "GameLocalPage": GameLocalPage,
+      "GameTournamentPage":GameTournamentPage,
       "/404": Page404
     }
     for (const [key, value] of Object.entries(pageComponents)) {

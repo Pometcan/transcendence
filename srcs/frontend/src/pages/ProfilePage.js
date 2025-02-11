@@ -1,4 +1,4 @@
-import { ButtonComponent, DivComponent, TextComponent, ImageComponent, withEventHandlers } from '../core/components/Type.Component.js';
+import { ButtonComponent, DivComponent, TextComponent, ImageComponent, withEventHandlers, InputComponent } from '../core/components/Type.Component.js';
 import {MenuElement, ProfilePhoto, SwitchBox} from '../core/elements/Type.Element.js';
 import {eraseCookie, getCookie, getCsrfToken} from '../core/Cookie.js';
 
@@ -13,12 +13,22 @@ const ProfilePage = {
     const anotherProfile = getId ? true : false;
     const pageContainer = MenuElement("ProfilePage");
     const exitBtn = new ButtonComponent("exitBtn", { label: "Çıkış", class: "btn btn-primary" });
+    const editBtn = new ButtonComponent("editButon", {isActive: true, label: "Düzenle", class: "btn btn-warning" });
+
     const deleteBtn = new ButtonComponent("deleteBtn", { label: "Hesabı Sil", class: "btn btn-danger" });
     const photo = ProfilePhoto("profilePhoto" );
     const changePhotoBtn = new ButtonComponent("changePhotoBtn", { label: "Fotoğrafı Değiştir", class: "btn btn-primary" });
     const deletePhotoBtn = new ButtonComponent("deletePhotoBtn", { label: "Fotoğrafı Sil", class: "btn btn-danger" });
     emailComponent = new TextComponent("email", { text: "E-posta: Yükleniyor..." });
     usernameComponent = new TextComponent("username", { text: "Kullanıcı Adı: Yükleniyor..." });
+    
+    const editForm = new DivComponent("Edit");
+    const usernameLabel = new TextComponent("userNameLabel", { text: "Kullanıcı Adı:", class: "form-label" });
+    const usernameInput = new InputComponent("usernameInput");
+    const emailLabel = new TextComponent("emailLabel", { text: "E-posta:", class: "form-label" });
+    const emailInput = new InputComponent("emailInput");
+    const saveFormBtn = new ButtonComponent("save", {label: "Save", class: "btn btn-warning"});
+
     //const SwitchBox2FA = SwitchBox("FA2","2FA Etkinlestir");
     const fa2btnEnable = new ButtonComponent("fa2btnEnable", { label: "2FA Etkinleştir", class: "btn btn-primary" });
     const fa2btnDisable = new ButtonComponent("fa2btnDisable", { label: "2FA Devre Dışı Bırak", class: "btn btn-danger" });
@@ -30,11 +40,21 @@ const ProfilePage = {
       fa2btnEnable.styles = { display: "none" };
       fa2btnDisable.styles = { display: "none" };
     }
+    let rank;
+    let is_active;
+    let id;
      getUser(anotherProfile ? getId  : getCookie("userId"))
       .then(user => {
+        console.log(user);
         emailComponent.update({ text: `E-posta: ${user.email}` });
         usernameComponent.update({ text: `Kullanıcı Adı: ${user.username}` });
+        usernameInput.update({value : user.username});
+        emailInput.update({value: user.email});
         photo.elements[0].update({ src: user.avatar });
+        rank = user.rank;
+        is_active = user.is_active;
+        id = user.id;
+
       }).catch(error => {
         console.error("Veri çekme hatası:", error);
         emailComponent.update({ text: `E-posta: Hata oluştu.` });
@@ -44,6 +64,7 @@ const ProfilePage = {
     pageContainer.elements[0].elements = [
       exitBtn,
       deleteBtn,
+      editBtn,
       emailComponent,
       usernameComponent,
       photo,
@@ -52,6 +73,68 @@ const ProfilePage = {
       fa2btnEnable,
       fa2btnDisable,
     ];
+
+   
+    
+    withEventHandlers(editBtn, { onClick: async() => {
+      console.log(editBtn);
+      if (editBtn.props.isActive == true){
+        editForm.elements = [usernameLabel, usernameInput, emailLabel, emailInput, saveFormBtn];
+        pageContainer.elements[0].elements.push(editForm);
+        pageContainer.elements[0].update({elements: pageContainer.elements[0].elements});
+        editBtn.props.isActive = false;
+      }
+      else if (editBtn.props.isActive == false)
+      {
+        editForm.update({elements : []})
+        editBtn.props.isActive = true;
+      }} 
+    });
+
+        
+    withEventHandlers(saveFormBtn, { onClick: async() => {
+      console.log(saveFormBtn);
+      const csrfToken = await getCsrfToken();
+      console.log(usernameComponent);
+      const updatedData = {
+        "id": id,
+        "username": usernameInput.value,
+        "email": emailInput.value,
+        "avatar": photo.elements[0].src,
+        "rank": rank,
+        "is_active": is_active
+      };
+      const formData = new FormData();
+      formData.append("id", updatedData.id);
+      formData.append("username", updatedData.username);
+      formData.append("email", updatedData.email);
+      formData.append("is_active", updatedData.email);
+      if (updatedData.avatar) {
+        formData.append("avatar", updatedData.avatar);
+      }
+      await fetch(`https://${window.location.host}/api/auth/user-list/${id}/`, {
+        method: "PATCH",
+        credentials: "include",
+        headers: {
+          "X-CSRFToken": csrfToken,
+          "Authorization": `Bearer ${getCookie('accessToken')}`
+        },
+        body: formData
+        }).then(response => response.json()).then(data => {
+          emailComponent.update({ text: `E-posta: ${data.email}`});
+          usernameComponent.update({ text: `Kullanıcı Adı: ${data.username}`});
+          console.log(usernameComponent);
+          pageContainer.elements[0].update({elements: pageContainer.elements[0].elements});
+          editForm.update({elements : []})
+          editBtn.props.isActive = true;
+
+        });
+      }
+
+    });
+
+
+
 
     withEventHandlers(fa2btnEnable, { onClick: async() => {
       await fetch(`https://${window.location.host}/api/auth/2fa-enable`, {
@@ -92,8 +175,8 @@ const ProfilePage = {
                 "Authorization": `Bearer ${getCookie('accessToken')}`
             },
             body: formData
-          }).then(response => {
-            photo.elements[0].update({ src: user.avatar  });
+          }).then(response => response.json()).then(data => {
+             photo.elements[0].update({ src: `${data.avatar}`});
           })
         }
       };
@@ -102,14 +185,20 @@ const ProfilePage = {
 
     withEventHandlers(deletePhotoBtn, { onClick: async() => {
       const csrfToken = await getCsrfToken();
+      const formData = new FormData();
       await fetch(`https://${window.location.host}/api/auth/avatar/`, {
         method: "DELETE",
         credentials: "include",
         headers: {
             "X-CSRFToken": csrfToken,
             "Authorization": `Bearer ${getCookie('accessToken')}`
-        }});
-    }});
+        },
+        body: formData
+      }).then(response => response.json()).then(data => {
+         photo.elements[0].update({ src: `${data.avatar}?t=${new Date().getTime()}`});
+      })
+      }});
+
 
     withEventHandlers(deleteBtn, { onClick: async() => {
       const csrfToken = await getCsrfToken();

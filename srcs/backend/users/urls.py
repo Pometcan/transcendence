@@ -41,4 +41,7 @@ urlpatterns = [
     path('avatar/', AvatarViewSet.as_view({'get': 'retrieve', 'put': 'update', 'patch': 'partial_update', 'delete': 'destroy'}), name='avatar'),
     path('search-user', SearchUserByUsernameViewSet.as_view(), name='search-user'),
 
+    path('received-friendship-request/<int:sender_id>/', ReceivedFriendshipRequestViewSet.as_view({'get': 'retrieve'}), name='rec-friendship-req-by-sender'),
+    path('sent-friendship-request/<int:receiver_id>/', SentFriendshipRequestViewSet.as_view({'get': 'retrieve'}), name='sent-friendship-req-by-receiver'),
+
 ]
