@@ -40,8 +40,8 @@ class Game3D {
     };
 
     this.ball.mesh.position.set(0, 0, 0);
-    this.paddle1.mesh.position.set(-11, 0, 0);
-    this.paddle2.mesh.position.set(11, 0, 0);
+    this.paddle1.mesh.position.set(-11.5, 0, 0);
+    this.paddle2.mesh.position.set(11.5, 0, 0);
 
 
     this.cameraDefualtPosition = {
