@@ -16,10 +16,10 @@ const GameLocalPage = {
   player2Name: "",
   player3Name: "",
   player4Name: "",
-  winner1: "",
-  winner2: "",
+  winner1: "", // Store winner name of round 1
+  winner2: "", // Store winner name of round 2
   finalWinner: "",
-  currentGameRound: 0, // To track the current game round
+  currentGameRound: 0,
 
   pageLoad: () => {
   },
@@ -60,8 +60,8 @@ const GameLocalPage = {
       p2Name = GameLocalPage.player4Name;
     } else if (roundNumber === 3) {
       currentGame = GameLocalPage.gameRound3;
-      p1Name = GameLocalPage.winner1;
-      p2Name = GameLocalPage.winner2;
+      p1Name = GameLocalPage.winner1; // Use winner name from round 1
+      p2Name = GameLocalPage.winner2; // Use winner name from round 2
     }
 
     if (currentGame) {
@@ -126,14 +126,14 @@ const GameLocalPage = {
         GameLocalPage.player3Name = p3Input.elements[0].value;
         GameLocalPage.player4Name = p4Input.elements[0].value;
 
-        GameLocalPage.startGameRound(1); // Start the first game
+        GameLocalPage.startGameRound(1);
 
         pageContainer.update({
           styles: {
             position: "absolute",
             top: "30px",
             width: "100%",
-            justifyContent: "space-between", // Changed to space-between for better name positioning
+            justifyContent: "space-between",
             transform: "translate(-50%, 0)",
             backgroundColor: "rgba(0, 0, 0, 0)"
           }
@@ -169,10 +169,14 @@ const GameLocalPage = {
     GameLocalPage.gameRound1.onGameEnd = (winner) => {
       skor.update({ text: `${GameLocalPage.gameRound1.score.p1} - ${GameLocalPage.gameRound1.score.p2}` });
       confetti();
-      GameLocalPage.winner1 = winner;
+      if (winner === "p1") {
+        GameLocalPage.winner1 = GameLocalPage.player1Name; // Store player 1's name if p1 wins
+      } else {
+        GameLocalPage.winner1 = GameLocalPage.player2Name; // Store player 2's name if p2 wins
+      }
       GameLocalPage.gameRound1.gameDestroy();
 
-      // Start Game 2 after Game 1 ends
+
       p1name.update({ text: GameLocalPage.player3Name });
       p2name.update({ text: GameLocalPage.player4Name });
       GameLocalPage.startGameRound(2);
@@ -182,12 +186,16 @@ const GameLocalPage = {
     GameLocalPage.gameRound2.onGameEnd = (winner) => {
       skor.update({ text: `${GameLocalPage.gameRound2.score.p1} - ${GameLocalPage.gameRound2.score.p2}` });
       confetti();
-      GameLocalPage.winner2 = winner;
+      if (winner === "p1") {
+        GameLocalPage.winner2 = GameLocalPage.player3Name; // Store player 3's name if p1 wins
+      } else {
+        GameLocalPage.winner2 = GameLocalPage.player4Name; // Store player 4's name if p2 wins
+      }
       GameLocalPage.gameRound2.gameDestroy();
 
-      // Start Game 3 after Game 2 ends
-      p1name.update({ text: GameLocalPage.winner1 });
-      p2name.update({ text: GameLocalPage.winner2 });
+
+      p1name.update({ text: GameLocalPage.winner1 }); // Set p1name to winner of round 1
+      p2name.update({ text: GameLocalPage.winner2 }); // Set p2name to winner of round 2
       GameLocalPage.startGameRound(3);
 
     };
@@ -195,8 +203,11 @@ const GameLocalPage = {
     GameLocalPage.gameRound3.onGameEnd = (winner) => {
       skor.update({ text: `${GameLocalPage.gameRound3.score.p1} - ${GameLocalPage.gameRound3.score.p2}` });
       confetti();
-      p
-      GameLocalPage.finalWinner = winner;
+      if (winner === "p1") {
+        GameLocalPage.finalWinner = GameLocalPage.winner1; // Final winner is winner of round 1
+      } else {
+        GameLocalPage.finalWinner = GameLocalPage.winner2; // Final winner is winner of round 2
+      }
       winnerText.update({ text: `${GameLocalPage.finalWinner} Wins the Tournament!`, styles: { display: "block" } });
       pageContainer.update({
         styles: {
@@ -218,15 +229,15 @@ const GameLocalPage = {
         commonGameHandlers(GameLocalPage.gameRound1);
         commonGameHandlers(GameLocalPage.gameRound2);
         commonGameHandlers(GameLocalPage.gameRound3);
-        GameLocalPage.gameRound1.onGameEnd = GameLocalPage.gameRound1.onGameEnd; // reattach handlers
+        GameLocalPage.gameRound1.onGameEnd = GameLocalPage.gameRound1.onGameEnd;
         GameLocalPage.gameRound2.onGameEnd = GameLocalPage.gameRound2.onGameEnd;
         GameLocalPage.gameRound3.onGameEnd = GameLocalPage.gameRound3.onGameEnd;
 
 
         pageContainer.update({
           styles: {
-            backgroundColor: "rgba(0, 0, 0, 0.8)", // Revert to initial background for input
-            position: "relative", // Reset position to relative for input display
+            backgroundColor: "rgba(0, 0, 0, 0.8)",
+            position: "relative",
             top: "auto",
             transform: "none",
             justifyContent: "center"
