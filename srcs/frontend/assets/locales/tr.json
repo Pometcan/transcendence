@@ -8,12 +8,57 @@
     "email": "E-posta",
     "loginSubmitButton": "Giriş Yap",
     "registerSubmitButton": "Kaydol"
+
   },
+  "homePage":{
+    "tournament":"Turnuva",
+    "back":"Geri",
+    "single":"Tek Oyunculu",
+    "multiplayer":"Çok Oyunculu"
+
+  },
+  "verifyPage":{
+    "verify":"Doğrula",
+    "kod":"2FA Kodu"
+  },
+
+  "friendPage": {
+    "friendListTitle":"Arkadaş Listesi",
+    "friendRequestsTitle":"Arkadaşlık İstekleri",
+    "friendBlockTitle":"Engellenen Kullanıcılar",
+    "usersTitle":"Kullanıcılar",
+    "sendFriend":"Arkadaşlık İsteği Gönder",
+    "deleteFriend":"Arkadaşı Sil",
+    "accept":"Arkadaşlık İsteğini Kabul Et",
+    "block":"Kullanıcıyı Engelle",
+    "unblock":"Engellemeyi Kaldır"
+  },
+  "profilePage":{
+    "email":"E-posta: Yükleniyor...",
+    "username":"Kullanıcı Adı: Yükleniyor...",
+    "email2":"E-posta:",
+    "user":"Kullanıcı Adı:",
+    "eposta":"E-posta: Hata oluştu.",
+    "usererror":"Kullanıcı Adı: Hata oluştu.",
+    "exitBtn":"Çıkış",
+    "deleteBtn":"Hesabı Sil",
+    "cPhotoBtn":"Fotoğrafı Değiştir",
+    "dPhotoBtn":"Fotoğrafı Sil",
+    "2Enable":"2FA'yı Etkinleştir",
+    "2Disable":"2FA'yı Devre Dışı Bırak"
+  },
+  "Layout":{
+    "Home":"Ana Sayfa",
+    "Profile":"Profil",
+    "Friends":"Arkadaşlar"
+
+  },
+
   "error": {
-    "LoginFailed": "Giriş başarısız oldu. Lütfen tekrar deneyin.",
+    "LoginFailed": "Giriş başarısız. Lütfen tekrar deneyin.",
     "serverError": "Sunucu hatası. Lütfen tekrar deneyin.",
-    "loginFailed": "Giriş başarısız oldu. Lütfen tekrar deneyin.",
-    "registerFailed": "Kayıt başarısız oldu. Lütfen tekrar deneyin.",
+    "loginFailed": "Giriş başarısız. Lütfen tekrar deneyin.",
+    "registerFailed": "Kayıt başarısız. Lütfen tekrar deneyin.",
     "passwordMismatch": "Şifreler eşleşmiyor."
   }
 }

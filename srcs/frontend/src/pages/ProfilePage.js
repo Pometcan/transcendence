@@ -1,7 +1,10 @@
 import { ButtonComponent, DivComponent, TextComponent, ImageComponent, withEventHandlers, InputComponent } from '../core/components/Type.Component.js';
 import {MenuElement, ProfilePhoto, SwitchBox} from '../core/elements/Type.Element.js';
 import {eraseCookie, getCookie, getCsrfToken} from '../core/Cookie.js';
+import { t } from '../i42n.js';
+
 import DashboardPage from './Dashboard.js';
+
 
 // TextComponent örneklerini saklamak için değişkenler
 let emailComponent;
@@ -13,10 +16,11 @@ const ProfilePage = {
     const getId = params.get("userId");
     const anotherProfile = getId ? true : false;
     const pageContainer = MenuElement("ProfilePage");
-    const exitBtn = new ButtonComponent("exitBtn", { label: "Çıkış", class: "btn btn-primary" });
-    const editBtn = new ButtonComponent("editButon", {isActive: true, label: "Düzenle", class: "btn btn-warning" });
 
-    const deleteBtn = new ButtonComponent("deleteBtn", { label: "Hesabı Sil", class: "btn btn-danger" });
+    const exitBtn = new ButtonComponent("exitBtn", { label: t("friendPage.exitBtn"), class: "btn btn-primary" });
+    const editBtn = new ButtonComponent("editButon", {isActive: true, label: t("friendPage.cPhotoBtn"), class: "btn btn-warning" });
+
+    const deleteBtn = new ButtonComponent("deleteBtn", { label: t("friendPage.deleteBtn"), class: "btn btn-danger" });
     const photo = ProfilePhoto("profilePhoto" );
     const changePhotoBtn = new ButtonComponent("changePhotoBtn", { label: "Fotoğrafı Değiştir", class: "btn btn-primary" });
     const deletePhotoBtn = new ButtonComponent("deletePhotoBtn", { label: "Fotoğrafı Sil", class: "btn btn-danger" });
@@ -34,11 +38,10 @@ const ProfilePage = {
     const emailLabel = new TextComponent("emailLabel", { text: "E-posta:", class: "form-label" });
     const emailInput = new InputComponent("emailInput");
     const saveFormBtn = new ButtonComponent("save", {label: "Save", class: "btn btn-warning"});
-
     //const SwitchBox2FA = SwitchBox("FA2","2FA Etkinlestir");
-    const fa2btnEnable = new ButtonComponent("fa2btnEnable", { label: "2FA Etkinleştir", class: "btn btn-primary" });
-    const fa2btnDisable = new ButtonComponent("fa2btnDisable", { label: "2FA Devre Dışı Bırak", class: "btn btn-danger" });
-    
+    const fa2btnEnable = new ButtonComponent("fa2btnEnable", { label: t("friendPage.2Enable"), class: "btn btn-primary" });
+    const fa2btnDisable = new ButtonComponent("fa2btnDisable", { label: t("friendPage.2Disable"), class: "btn btn-danger" });
+
     const status = new TextComponent("DashboardPageStatus", {text: "agla"});
     const websocket = new WebSocket(`wss://` + window.location.host + `/api/auth/${getId}/`); // Sunucu adresinizi ve portunuzu güncelleyin
     console.log("id: " + getId);
@@ -74,8 +77,8 @@ const ProfilePage = {
      getUser(anotherProfile ? getId  : getCookie("userId"))
       .then(user => {
         console.log(user);
-        emailComponent.update({ text: `E-posta: ${user.email}` });
-        usernameComponent.update({ text: `Kullanıcı Adı: ${user.username}` });
+        emailComponent.update({ text: `${t("ProfilePage.email2")} ${user.email}` });
+        usernameComponent.update({ text: `${t("ProfilePage.user")} ${user.username}` });
         usernameInput.update({value : user.username});
         emailInput.update({value: user.email});
         photo.elements[0].update({ src: user.avatar });
@@ -85,8 +88,8 @@ const ProfilePage = {
 
       }).catch(error => {
         console.error("Veri çekme hatası:", error);
-        emailComponent.update({ text: `E-posta: Hata oluştu.` });
-        usernameComponent.update({ text: `Kullanıcı Adı: Hata oluştu.` });
+        emailComponent.update({ text: `${t("ProfilePage.eposta")}` });
+        usernameComponent.update({ text: `${t("ProfilePage.usererror")}` });
       });
 
     pageContainer.elements[0].elements = [

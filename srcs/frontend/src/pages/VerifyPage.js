@@ -4,6 +4,7 @@ import MenuElement from '../core/elements/Element.Menu.js';
 import {getCookie,setCookie} from '../core/Cookie.js';
 import InputElement from '../core/elements/Element.Input.js';
 import SubmitButton from '../core/elements/Element.SubmitButton.js';
+import { t } from "../i42n";
 const errorDiv = new DivComponent("veriftError", { styles: { color: 'red', marginTop: '10px', display: 'none' } });
 
 const VerifyPage = {
@@ -16,8 +17,8 @@ const VerifyPage = {
       return;
     }
     const qrImage = new ImageComponent("qrImage", {src: `data:image/png;base64,${qrCode}`, alt: "qrImage"});
-    const input = InputElement("input", "2FA Kodu", "text");
-    const submitButton = SubmitButton("submitButton", "Verify");
+    const input = InputElement("input", t("verifyPage.kod"), "text");
+    const submitButton = SubmitButton("submitButton", t("verifyPage.verify"));
 
 
     pageContainer.elements[0].elements = [
