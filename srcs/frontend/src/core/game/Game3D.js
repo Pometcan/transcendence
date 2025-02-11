@@ -103,6 +103,9 @@ class Game3D {
     }
 
     this.score = { p1: 0, p2: 0 };
+    if (this.gameType === "local-4p") {
+      this.score = { p1: 0, p2: 0, p3: 0, p4: 0 }; // 4 oyuncu için skor eklendi
+    }
     this.onScoreChange = (score) => { };
     this.onGameEnd = (winner) => { };
     this._gameState = GameState.IDLE;
@@ -158,7 +161,7 @@ class Game3D {
       case GameState.PAUSED:
         return newState === GameState.RUNNING;
       case GameState.ENDED:
-        return newState === GameState.DESTROYED;
+        return newState === GameState.DESTROYED || newState === GameState.RUNNING; // ENDED'den RUNNING'e geçiş eklendi
       case GameState.DESTROYED:
         return false;
       default:
@@ -169,15 +172,22 @@ class Game3D {
   gameStart() {
     if (this.gameState === GameState.IDLE || this.gameState === GameState.ENDED) {
       this.gameState = GameState.RUNNING;
-      this.score = { p1: 0, p2: 0 }; // Skorlar resetlendi
+      this.ball.reset(); // Topu başlangıç pozisyonuna al
+      if (this.gameType === "local-4p") {
+        this.score = { p1: 0, p2: 0, p3: 0, p4: 0 }; // 4 oyuncu için skorlar resetlendi
+      } else {
+        this.score = { p1: 0, p2: 0 }; // Skorlar resetlendi
+      }
+      console.log(this.score);
       this.onScoreChange(this.score);
+      this.gameEnded = false; // gameEnded bayrağını sıfırla
     } else {
       console.warn("Cannot start game from current state: " + this.gameState);
     }
   }
 
   gameRestart() {
-    if (this.gameState === GameState.ENDED || this.gameState === GameState.PAUSED)
+    if (this.gameState === GameState.ENDED || this.gameState === GameState.PAUSED || this.gameState === GameState.RUNNING) // RUNNING state'inden de restart yapabilmek için eklendi
       this.gameStart();
   }
 
@@ -226,7 +236,7 @@ class Game3D {
 
       console.log("Oyun başarıyla silindi.");
     } else
-      console.warn("Game is already destroyed.");
+      console.warn("Game is already destroyed.");"Game started."
   }
 
   setBallPosition(x, y) {
@@ -311,12 +321,23 @@ class Game3D {
     let winner = null;
 
     this.onScoreChange(this.score);
-    if (this.score.p1 >= 5) { // p1p2 skoru kontrolü
-      winner = "p1";
-      this.gameEnd(winner)
-    } else if (this.score.p2 >= 5) { // p3p4 skoru kontrolü
-      winner = "p2";
-      this.gameEnd(winner)
+    if (this.gameType === "local-4p") {
+      if (this.score.p1 >= 5 || this.score.p2 >= 5 || this.score.p3 >= 5 || this.score.p4 >= 5) {
+          if (this.score.p1 >= 5) winner = "p1";
+          else if (this.score.p2 >= 5) winner = "p2";
+          else if (this.score.p3 >= 5) winner = "p3";
+          else if (this.score.p4 >= 5) winner = "p4";
+          this.gameEnd(winner);
+      }
+    }
+    else {
+      if (this.score.p1 >= 5) { // p1p2 skoru kontrolü
+        winner = "p1";
+        this.gameEnd(winner)
+      } else if (this.score.p2 >= 5) { // p3p4 skoru kontrolü
+        winner = "p2";
+        this.gameEnd(winner)
+      }
     }
     console.log("Scored by", player, this.score);
     return this.score;
