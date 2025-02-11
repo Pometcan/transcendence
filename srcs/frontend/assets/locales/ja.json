@@ -5,13 +5,58 @@
     "username": "ユーザー名",
     "password": "パスワード",
     "password2": "パスワードを認証",
-    "email": "Eメール",
+    "email": "メールアドレス",
     "loginSubmitButton": "ログイン",
     "registerSubmitButton": "登録"
+
   },
+  "homePage":{
+    "tournament":"トーナメント",
+    "back":"戻る",
+    "single":"シングルプレイ",
+    "multiplayer":"マルチプレイ"
+
+  },
+  "verifyPage":{
+    "verify":"認証",
+    "kod":"2段階認証コード"
+  },
+
+  "friendPage": {
+    "friendListTitle":"フレンドリスト",
+    "friendRequestsTitle":"フレンドリクエスト",
+    "friendBlockTitle":"ブロック中のユーザー",
+    "usersTitle":"ユーザー",
+    "sendFriend":"フレンドリクエストを送信",
+    "deleteFriend":"フレンドを削除",
+    "accept":"フレンドリクエストを承認",
+    "block":"ユーザーをブロック",
+    "unblock":"ブロックを解除"
+  },
+  "profilePage":{
+    "email":"メールアドレス: 読み込み中...",
+    "username":"ユーザー名: 読み込み中...",
+    "email2":"メールアドレス:",
+    "user":"ユーザー名:",
+    "eposta":"メールアドレス: エラーが発生しました。",
+    "usererror":"ユーザー名: エラーが発生しました。",
+    "exitBtn":"ログアウト",
+    "deleteBtn":"アカウントを削除",
+    "cPhotoBtn":"写真を変更",
+    "dPhotoBtn":"写真を削除",
+    "2Enable":"2段階認証を有効にする",
+    "2Disable":"2段階認証を無効にする"
+  },
+  "Layout":{
+    "Home":"ホーム",
+    "Profile":"プロフィール",
+    "Friends":"フレンド"
+
+  },
+
   "error": {
     "LoginFailed": "ログインに失敗しました。もう一度お試しください。",
-    "serverError": "サーバーエラー。もう一度お試しください。",
+    "serverError": "サーバーエラーが発生しました。もう一度お試しください。",
     "loginFailed": "ログインに失敗しました。もう一度お試しください。",
     "registerFailed": "登録に失敗しました。もう一度お試しください。",
     "passwordMismatch": "パスワードが一致しません。"

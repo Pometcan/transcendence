@@ -1,7 +1,8 @@
 import { MenuElement, SearchInput } from "../core/elements/Type.Element";
 import { DivComponent, TextComponent, ImageComponent, ButtonComponent, withEventHandlers } from "../core/components/Type.Component";
 import UserManager from "../core/managers/UserManager";
-
+import { getCookie, setCookie } from "../core/Cookie";
+import { t } from "../i42n";
 const pageContainer = MenuElement("FriendPage");
 
 const FriendPage = {
@@ -36,7 +37,6 @@ const FriendPage = {
 
       // Sayfa içeriğini güncelle
       pageContainer.update(pageContainer.elements[0].elements = [
-        // searchInput,
         friendRequestsDiv,
         friendListDiv,
         usersDiv,
@@ -61,13 +61,10 @@ function createSection(title) {
   });
 }
 
-/**
- * ✅ Arkadaş Listesi için Eleman Oluşturur
- */
 function createFriendRow(user, userManager) {
   const userDiv = createUserBaseRow(user.friend);
-  const deleteFriend = new ButtonComponent(`delete-friend-${user.id}`, { label: "Delete" });
-  const blockUser = new ButtonComponent(`block-user-${user.id}`, { label: "Block" });
+  const deleteFriend = new ButtonComponent(`delete-friend-${user.id}`, { label: t("friendPage.deleteFriend" });
+  const blockUser = new ButtonComponent(`block-user-${user.id}`, { label: t("friendPage.block") });
 
   userDiv.elements.push(deleteFriend, blockUser);
 
@@ -86,7 +83,7 @@ function createFriendRow(user, userManager) {
  */
 function createFriendRequestRow(user, userManager) {
   const userDiv = createUserBaseRow(user.sender);
-  const acceptFriendRequest = new ButtonComponent(`accept-friend-request-${user.sender.id}`, { label: "Accept" });
+  const acceptFriendRequest = new ButtonComponent(`accept-friend-request-${user.sender.id}`, { label: t("friendPage.accept") });
   const rejectFriendRequest = new ButtonComponent(`reject-friend-request-${user.sender.id}`, { label: "Reject" });
 
   userDiv.elements.push(acceptFriendRequest, rejectFriendRequest);
@@ -102,7 +99,7 @@ function createFriendRequestRow(user, userManager) {
 */
 function createBlockedUserRow(user, userManager) {
   const userDiv = createUserBaseRow(user.blocked_user);
-  const unblockUser = new ButtonComponent(`unblock-user-${user.blocked_userid}`, { label: "Unblock" });
+  const unblockUser = new ButtonComponent(`unblock-user-${user.blocked_userid}`, { label: t("friendPage.unblock") });
 
   userDiv.elements.push(unblockUser);
   withEventHandlers(unblockUser, { onClick: async () => {
@@ -119,7 +116,7 @@ function createBlockedUserRow(user, userManager) {
  */
 function createUserRow(user, userManager) {
   const userDiv = createUserBaseRow(user);
-  const sendFriendRequest = new ButtonComponent(`send-friend-request-${user.id}`, { label: "Add Friend" });
+  const sendFriendRequest = new ButtonComponent(`send-friend-request-${user.id}`, { label: t("friendPage.sendFriend") });
   const blockUser = new ButtonComponent(`block-user-${user.id}`, { label: "Block" });
 
   userDiv.elements.push(sendFriendRequest, blockUser);
