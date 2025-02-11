@@ -1,6 +1,6 @@
 import { ButtonComponent, DivComponent, TextComponent, ImageComponent, withEventHandlers, InputComponent } from '../core/components/Type.Component.js';
 import {MenuElement, ProfilePhoto, SwitchBox} from '../core/elements/Type.Element.js';
-import {eraseCookie, getCookie, getCsrfToken} from '../core/Cookie.js';
+import {eraseCookie, getCookie, getCsrfToken, setCookie} from '../core/Cookie.js';
 import DashboardPage from './Dashboard.js';
 
 // TextComponent örneklerini saklamak için değişkenler
@@ -38,7 +38,9 @@ const ProfilePage = {
     //const SwitchBox2FA = SwitchBox("FA2","2FA Etkinlestir");
     const fa2btnEnable = new ButtonComponent("fa2btnEnable", { label: "2FA Etkinleştir", class: "btn btn-primary" });
     const fa2btnDisable = new ButtonComponent("fa2btnDisable", { label: "2FA Devre Dışı Bırak", class: "btn btn-danger" });
-    
+    const qrDiv = new DivComponent({label: "QR"});
+    const qrBtn = new ButtonComponent("qrBtn", { is_active: true, label: "Show QR", class: "btn btn-danger" });
+
     const status = new TextComponent("DashboardPageStatus", {text: "agla"});
     const websocket = new WebSocket(`wss://` + window.location.host + `/api/auth/${getId}/`); // Sunucu adresinizi ve portunuzu güncelleyin
     console.log("id: " + getId);
@@ -67,10 +69,13 @@ const ProfilePage = {
       fa2btnEnable.styles = { display: "none" };
       fa2btnDisable.styles = { display: "none" };
       editBtn.styles = { display: "none"};
+      qrBtn.styles = {display : "none"};
     }
+
     let rank;
     let is_active;
     let id;
+    let mfa_enabled;
      getUser(anotherProfile ? getId  : getCookie("userId"))
       .then(user => {
         console.log(user);
@@ -81,7 +86,11 @@ const ProfilePage = {
         photo.elements[0].update({ src: user.avatar });
         rank = user.rank;
         is_active = user.is_active;
+        mfa_enabled = user.mfa_enabled;
         id = user.id;
+        console.log("2fa" + user.mfa_enabled);
+        if (mfa_enabled)
+          pageContainer.elements[0].elements.push(qrBtn);
 
       }).catch(error => {
         console.error("Veri çekme hatası:", error);
@@ -97,7 +106,7 @@ const ProfilePage = {
       usernameComponent,
       status,
       photo,
-      dashboardBtnDiv
+      dashboardBtnDiv,
     ];
 
    
@@ -111,6 +120,7 @@ const ProfilePage = {
         dashboardBtnDiv.update({elements : []})
         pageContainer.elements[0].update({elements: pageContainer.elements[0].elements});
         editBtn.props.isActive = false;
+        dashboardBtnDiv.elements = [dashboardBtn];
       }
       else if (editBtn.props.isActive == false)
       {
@@ -133,7 +143,8 @@ const ProfilePage = {
         "email": emailInput.value,
         "avatar": photo.elements[0].src,
         "rank": rank,
-        "is_active": is_active
+        "is_active": is_active,
+        "mfa_enabled": mfa_enabled
       };
       const formData = new FormData();
       formData.append("id", updatedData.id);
@@ -158,7 +169,8 @@ const ProfilePage = {
           pageContainer.elements[0].update({elements: pageContainer.elements[0].elements});
           editForm.update({elements : []})
           editFormBtns.update({elements : []});
-          
+          dashboardBtnDiv.elements = [dashboardBtn];
+          pageContainer.elements[0].update({elements: pageContainer.elements[0].elements});
           editBtn.props.isActive = true;
 
         });
@@ -182,7 +194,6 @@ const ProfilePage = {
     });
 
 
-
     withEventHandlers(fa2btnEnable, { onClick: async() => {
       await fetch(`https://${window.location.host}/api/auth/2fa-enable`, {
         method: "GET",
@@ -190,9 +201,27 @@ const ProfilePage = {
         headers: {
           "Authorization": `Bearer ${getCookie('accessToken')}`
         }
+        }).then(response => response.json()).then(data => {
+          setCookie("qrCode", data.qr_code, 1);
         });
+        }});
+        
+    const qrImage = new ImageComponent("qrImage", {src: `data:image/png;base64`, alt: "qrImage"});
+    withEventHandlers(qrBtn, {onClick: async() => {
+      const qrCode = getCookie("qrCode");
+      qrImage.update({src:  `data:image/png;base64,${qrCode}`, alt: "qrImage"});
+      pageContainer.elements[0].elements.push(qrImage);
+      pageContainer.elements[0].update({elements: pageContainer.elements[0].elements});
+      if (qrBtn.props.is_active)
+        {
+          qrImage.update({styles: {display:"block"}})
+        qrBtn.props.is_active = false;
       }
-    });
+      else{
+
+      qrImage.update({styles: {display:"block"}})  
+           qrBtn.props.is_active = true;}
+    }})
 
     withEventHandlers(fa2btnDisable, { onClick: async() => {
       await fetch(`https://${window.location.host}/api/auth/2fa-disable`, {
@@ -200,7 +229,9 @@ const ProfilePage = {
         credentials: "include",
         headers: {
           "Authorization": `Bearer ${getCookie('accessToken')}`
-        }});
+        }}).then(response => response.json()).then(data => {
+          setCookie("qrCode", "", 1);
+        });
     }});
 
     withEventHandlers(changePhotoBtn, { onClick: async() => {

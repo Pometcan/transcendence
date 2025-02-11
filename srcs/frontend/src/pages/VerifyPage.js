@@ -10,18 +10,18 @@ const VerifyPage = {
   layoutVisibility: false,
   render: () => {
     const pageContainer = MenuElement("homePage");
-    const qrCode = getCookie("qrCode");
-    if (!qrCode) {
-      window.router.navigate("/auth");
-      return;
-    }
-    const qrImage = new ImageComponent("qrImage", {src: `data:image/png;base64,${qrCode}`, alt: "qrImage"});
+    // const qrCode = getCookie("qrCode");
+    // if (!qrCode) {
+    //   window.router.navigate("/auth");
+    //   return;
+    // }
+    // const qrImage = new ImageComponent("qrImage", {src: `data:image/png;base64,${qrCode}`, alt: "qrImage"});
     const input = InputElement("input", "2FA Kodu", "text");
     const submitButton = SubmitButton("submitButton", "Verify");
 
 
     pageContainer.elements[0].elements = [
-      qrImage,
+ 
       input,
       submitButton,
       errorDiv
