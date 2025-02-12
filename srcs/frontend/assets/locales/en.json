@@ -8,7 +8,52 @@
     "email": "E-mail",
     "loginSubmitButton": "Login",
     "registerSubmitButton": "Register"
+
   },
+  "homePage":{
+    "tournament":"Tournament",
+    "back":"Back",
+    "single":"Single Player",
+    "multiplayer":"Multiplayer"
+
+  },
+  "verifyPage":{
+    "verify":"Verify",
+    "kod":"2FA Kodu"
+  },
+
+  "friendPage": {
+    "friendListTitle":"Friend List",
+    "friendRequestsTitle":"Friend Requests",
+    "friendBlockTitle":"Blocked Users",
+    "usersTitle":"Users",
+    "sendFriend":"Send Friend Request",
+    "deleteFriend":"Delete Friend",
+    "accept":"Accept Friend Request",
+    "block":"Block User",
+    "unblock":"Unblock User"
+  },
+  "profilePage":{
+    "email":"E-posta: Yükleniyor...",
+    "username":"Kullanıcı Adı: Yükleniyor...",
+    "email2":"Email:",
+    "user":"Kullanıcı Adı:",
+    "eposta":"E-posta: Hata oluştu.",
+    "usererror":"Kullanıcı Adı: Hata oluştu.",
+    "exitBtn":"Çıkış",
+    "deleteBtn":"Hesabı Sil",
+    "cPhotoBtn":"Fotoğrafı Değiştir",
+    "dPhotoBtn":"Fotoğrafı Sil",
+    "2Enable":"2FA Etkinleştir",
+    "2Disable":"2FA Devre Dışı Bırak"
+  },
+  "Layout":{
+    "Home":"Home",
+    "Profile":"Profile",
+    "Friends":"Friends"
+
+  },
+
   "error": {
     "LoginFailed": "Login failed. Please try again.",
     "serverError": "Server error. Please try again.",

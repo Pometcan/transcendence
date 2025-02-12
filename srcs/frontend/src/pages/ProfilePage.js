@@ -1,6 +1,10 @@
 import { ButtonComponent, DivComponent, TextComponent, ImageComponent, withEventHandlers, InputComponent } from '../core/components/Type.Component.js';
 import {MenuElement, ProfilePhoto, SwitchBox} from '../core/elements/Type.Element.js';
-import {eraseCookie, getCookie, getCsrfToken} from '../core/Cookie.js';
+import {eraseCookie, getCookie, getCsrfToken, setCookie} from '../core/Cookie.js';
+import { t } from '../i42n.js';
+
+import DashboardPage from './Dashboard.js';
+
 
 // TextComponent örneklerini saklamak için değişkenler
 let emailComponent;
@@ -9,29 +13,57 @@ let usernameComponent;
 const ProfilePage = {
   layoutVisibility: true,
   render: (params) => {
-    const getId = params.get("id");
+    const getId = params.get("userId");
     const anotherProfile = getId ? true : false;
     const pageContainer = MenuElement("ProfilePage");
-    const exitBtn = new ButtonComponent("exitBtn", { label: "Çıkış", class: "btn btn-primary" });
-    const editBtn = new ButtonComponent("editButon", {isActive: true, label: "Düzenle", class: "btn btn-warning" });
 
-    const deleteBtn = new ButtonComponent("deleteBtn", { label: "Hesabı Sil", class: "btn btn-danger" });
+    const exitBtn = new ButtonComponent("exitBtn", { label: t("friendPage.exitBtn"), class: "btn btn-primary" });
+    const editBtn = new ButtonComponent("editButon", {isActive: true, label: t("friendPage.cPhotoBtn"), class: "btn btn-warning" });
+
+    const deleteBtn = new ButtonComponent("deleteBtn", { label: t("friendPage.deleteBtn"), class: "btn btn-danger" });
     const photo = ProfilePhoto("profilePhoto" );
     const changePhotoBtn = new ButtonComponent("changePhotoBtn", { label: "Fotoğrafı Değiştir", class: "btn btn-primary" });
     const deletePhotoBtn = new ButtonComponent("deletePhotoBtn", { label: "Fotoğrafı Sil", class: "btn btn-danger" });
+    const dashboardBtn =  new ButtonComponent("dashboardBtn", {isActive: true, label: "Dashboard", class: "btn btn-primary" });
     emailComponent = new TextComponent("email", { text: "E-posta: Yükleniyor..." });
     usernameComponent = new TextComponent("username", { text: "Kullanıcı Adı: Yükleniyor..." });
     
     const editForm = new DivComponent("Edit");
+    const editFormBtns = new DivComponent("EditBtns");
+    const dashboardBtnDiv = new DivComponent("dashboard");
+    const dashboardDiv = new DivComponent("dashboard");
+    dashboardBtnDiv.elements = [dashboardBtn];
     const usernameLabel = new TextComponent("userNameLabel", { text: "Kullanıcı Adı:", class: "form-label" });
     const usernameInput = new InputComponent("usernameInput");
     const emailLabel = new TextComponent("emailLabel", { text: "E-posta:", class: "form-label" });
     const emailInput = new InputComponent("emailInput");
     const saveFormBtn = new ButtonComponent("save", {label: "Save", class: "btn btn-warning"});
-
     //const SwitchBox2FA = SwitchBox("FA2","2FA Etkinlestir");
-    const fa2btnEnable = new ButtonComponent("fa2btnEnable", { label: "2FA Etkinleştir", class: "btn btn-primary" });
-    const fa2btnDisable = new ButtonComponent("fa2btnDisable", { label: "2FA Devre Dışı Bırak", class: "btn btn-danger" });
+    const qrDiv = new DivComponent({label: "QR"});
+    const qrBtn = new ButtonComponent("qrBtn", { is_active: true, label: "Show QR", class: "btn btn-danger" });
+    const fa2btnEnable = new ButtonComponent("fa2btnEnable", { label: t("friendPage.2Enable"), class: "btn btn-primary" });
+    const fa2btnDisable = new ButtonComponent("fa2btnDisable", { label: t("friendPage.2Disable"), class: "btn btn-danger" });
+
+    const status = new TextComponent("DashboardPageStatus", {text: "agla"});
+    const websocket = new WebSocket(`wss://` + window.location.host + `/api/auth/${getId}/`); // Sunucu adresinizi ve portunuzu güncelleyin
+    console.log("id: " + getId);
+    if (websocket && websocket.readyState === WebSocket.OPEN) {
+        return;
+    }
+
+    websocket.onopen = function() {
+        status.update({text: "Connected"})
+    };
+
+    websocket.onclose = function() {
+        status.update({text: "Disconnected"})
+    };
+
+    websocket.onerror = function(error) {
+        console.error("WebSocket error:", error);
+        status.update({text: error})
+    };
+
     if (anotherProfile) {
       exitBtn.styles = { display: "none" };
       deleteBtn.styles = { display: "none" };
@@ -39,26 +71,34 @@ const ProfilePage = {
       deletePhotoBtn.styles = { display: "none" };
       fa2btnEnable.styles = { display: "none" };
       fa2btnDisable.styles = { display: "none" };
+      editBtn.styles = { display: "none"};
+      qrBtn.styles = {display : "none"};
     }
+
     let rank;
     let is_active;
     let id;
+    let mfa_enabled;
      getUser(anotherProfile ? getId  : getCookie("userId"))
       .then(user => {
         console.log(user);
-        emailComponent.update({ text: `E-posta: ${user.email}` });
-        usernameComponent.update({ text: `Kullanıcı Adı: ${user.username}` });
+        emailComponent.update({ text: `${t("ProfilePage.email2")} ${user.email}` });
+        usernameComponent.update({ text: `${t("ProfilePage.user")} ${user.username}` });
         usernameInput.update({value : user.username});
         emailInput.update({value: user.email});
         photo.elements[0].update({ src: user.avatar });
         rank = user.rank;
         is_active = user.is_active;
+        mfa_enabled = user.mfa_enabled;
         id = user.id;
+        console.log("2fa" + user.mfa_enabled);
+        if (mfa_enabled)
+          pageContainer.elements[0].elements.push(qrBtn);
 
       }).catch(error => {
         console.error("Veri çekme hatası:", error);
-        emailComponent.update({ text: `E-posta: Hata oluştu.` });
-        usernameComponent.update({ text: `Kullanıcı Adı: Hata oluştu.` });
+        emailComponent.update({ text: `${t("ProfilePage.eposta")}` });
+        usernameComponent.update({ text: `${t("ProfilePage.usererror")}` });
       });
 
     pageContainer.elements[0].elements = [
@@ -67,11 +107,9 @@ const ProfilePage = {
       editBtn,
       emailComponent,
       usernameComponent,
+      status,
       photo,
-      changePhotoBtn,
-      deletePhotoBtn,
-      fa2btnEnable,
-      fa2btnDisable,
+      dashboardBtnDiv,
     ];
 
    
@@ -80,13 +118,19 @@ const ProfilePage = {
       console.log(editBtn);
       if (editBtn.props.isActive == true){
         editForm.elements = [usernameLabel, usernameInput, emailLabel, emailInput, saveFormBtn];
-        pageContainer.elements[0].elements.push(editForm);
+        editFormBtns.elements = [changePhotoBtn, deletePhotoBtn, fa2btnEnable, fa2btnDisable];
+        pageContainer.elements[0].elements.push(editForm, editFormBtns);
+        dashboardBtnDiv.update({elements : []})
         pageContainer.elements[0].update({elements: pageContainer.elements[0].elements});
         editBtn.props.isActive = false;
+        dashboardBtnDiv.elements = [dashboardBtn];
       }
       else if (editBtn.props.isActive == false)
       {
         editForm.update({elements : []})
+        editFormBtns.update({elements : []});
+        dashboardBtnDiv.elements = [dashboardBtn];
+        pageContainer.elements[0].update({elements: pageContainer.elements[0].elements});
         editBtn.props.isActive = true;
       }} 
     });
@@ -102,7 +146,8 @@ const ProfilePage = {
         "email": emailInput.value,
         "avatar": photo.elements[0].src,
         "rank": rank,
-        "is_active": is_active
+        "is_active": is_active,
+        "mfa_enabled": mfa_enabled
       };
       const formData = new FormData();
       formData.append("id", updatedData.id);
@@ -126,6 +171,9 @@ const ProfilePage = {
           console.log(usernameComponent);
           pageContainer.elements[0].update({elements: pageContainer.elements[0].elements});
           editForm.update({elements : []})
+          editFormBtns.update({elements : []});
+          dashboardBtnDiv.elements = [dashboardBtn];
+          pageContainer.elements[0].update({elements: pageContainer.elements[0].elements});
           editBtn.props.isActive = true;
 
         });
@@ -133,7 +181,20 @@ const ProfilePage = {
 
     });
 
-
+        
+    withEventHandlers(dashboardBtn, { onClick: async() => {
+      if (dashboardBtn.props.isActive == true){
+        dashboardDiv.elements = [DashboardPage];
+        pageContainer.elements[0].elements.push(dashboardDiv);
+        pageContainer.elements[0].update({elements: pageContainer.elements[0].elements});
+        dashboardBtn.props.isActive = false;
+      }
+      else if (dashboardBtn.props.isActive == false)
+      {
+        dashboardDiv.update({elements : []})
+        dashboardBtn.props.isActive = true;
+      }} 
+    });
 
 
     withEventHandlers(fa2btnEnable, { onClick: async() => {
@@ -143,9 +204,27 @@ const ProfilePage = {
         headers: {
           "Authorization": `Bearer ${getCookie('accessToken')}`
         }
+        }).then(response => response.json()).then(data => {
+          setCookie("qrCode", data.qr_code, 1);
         });
+        }});
+        
+    const qrImage = new ImageComponent("qrImage", {src: `data:image/png;base64`, alt: "qrImage"});
+    withEventHandlers(qrBtn, {onClick: async() => {
+      const qrCode = getCookie("qrCode");
+      qrImage.update({src:  `data:image/png;base64,${qrCode}`, alt: "qrImage"});
+      pageContainer.elements[0].elements.push(qrImage);
+      pageContainer.elements[0].update({elements: pageContainer.elements[0].elements});
+      if (qrBtn.props.is_active)
+        {
+          qrImage.update({styles: {display:"block"}})
+        qrBtn.props.is_active = false;
       }
-    });
+      else{
+
+      qrImage.update({styles: {display:"block"}})  
+           qrBtn.props.is_active = true;}
+    }})
 
     withEventHandlers(fa2btnDisable, { onClick: async() => {
       await fetch(`https://${window.location.host}/api/auth/2fa-disable`, {
@@ -153,7 +232,9 @@ const ProfilePage = {
         credentials: "include",
         headers: {
           "Authorization": `Bearer ${getCookie('accessToken')}`
-        }});
+        }}).then(response => response.json()).then(data => {
+          setCookie("qrCode", "", 1);
+        });
     }});
 
     withEventHandlers(changePhotoBtn, { onClick: async() => {

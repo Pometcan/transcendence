@@ -49,11 +49,9 @@ class AuthViewSet(GenericViewSet, mixins.CreateModelMixin):
 
             if user.mfa_enabled :
                 try:
-                    qr_code = user.generate_qr_code()
                     refresh = RefreshToken.for_user(user)
                     return Response({"mfa_enabled":user.mfa_enabled,
                                     "otp_secret": user.mfa_secret,
-                                    "qr_code": qr_code,
                                     'refresh': str(refresh),
                                     'access': str(refresh.access_token),
                                     'user_id' : user.id,}, status=status.HTTP_200_OK)
@@ -111,9 +109,10 @@ class Enable2FAViewSet(GenericViewSet):
         user = request.user
         try:
             user.generate_otp_secret()
+            qr_code = user.generate_qr_code()
             user.mfa_enabled = True
             user.save()
-            return Response({"otp_secret": user.mfa_secret}, status=status.HTTP_200_OK)
+            return Response({"otp_secret": user.mfa_secret, "qr_code": qr_code}, status=status.HTTP_200_OK)
         except Exception as e:
             return Response({"error": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
